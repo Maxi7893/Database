@@ -7,8 +7,15 @@ b = 4
 StarttermineDOD4 = pd.read_excel('Dateien\Starttermine DOD-4_07.07.2022.xlsx')
 StarttermineDOD4 = StarttermineDOD4[StarttermineDOD4['Mat.-Nr.'].notna()] #Sobald eine Zeile in diesem Bereich Leer ist, wird diese gelöscht
 StarttermineDOD4['Mat.-Nr.'] = StarttermineDOD4['Mat.-Nr.'].str.replace('.' , '').str[:-b]
+StarttermineDOD4['Menge'] = StarttermineDOD4['Menge'].str.replace(',' , '')
+Spliting = StarttermineDOD4['Menge'].str.split(expand=True)
+StarttermineDOD4.drop(columns='Menge',inplace=True)
+#Hier noch
+#StarttermineDOD4['Menge'] = StarttermineDOD4['Menge'].str.replace(',' , '')
+#StarttermineDOD4['Menge'] = StarttermineDOD4['Menge'].str.replace('.' , ',')
 StarttermineDOD4['Mat.-Nr.'].astype(float)
-StarttermineDOD4.set_index(['Mat.-Nr.','Start', 'Menge'], inplace=True)
+#StarttermineDOD4['Menge'].astype(float)
+StarttermineDOD4.set_index(['Mat.-Nr.','Start'], inplace=True)
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -44,8 +51,6 @@ Stueli['Material'] = Stueli['Material'].str[:-b] #hier werden die Materialnummer
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus der Basismenge entfernen
 Stueli['Material'].astype(float) #Datentyp verändern
 Stueli.set_index(['Material','Kurztext', 'Basismenge'], inplace=True)  #hier wird die Materialnummer der Index
-
-
 
 
 print(StarttermineDOD4)
