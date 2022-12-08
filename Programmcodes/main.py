@@ -1,4 +1,4 @@
 from Programmcodes import Dateneinlesen
 
 
-print('test vollzogen')
+print('!!!Testlauf erfolgreich!!!')

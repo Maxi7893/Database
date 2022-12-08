@@ -2,20 +2,25 @@
 import pandas as pd
 
 #Produktionstermine werden eingelesen
-a = 10
-b = 4
-StarttermineDOD4 = pd.read_excel('Dateien\Starttermine DOD-4_07.07.2022.xlsx')
-StarttermineDOD4 = StarttermineDOD4[StarttermineDOD4['Mat.-Nr.'].notna()] #Sobald eine Zeile in diesem Bereich Leer ist, wird diese gelöscht
-StarttermineDOD4['Mat.-Nr.'] = StarttermineDOD4['Mat.-Nr.'].str.replace('.' , '').str[:-b]
-StarttermineDOD4['Menge'] = StarttermineDOD4['Menge'].str.replace(',' , '')
-Spliting = StarttermineDOD4['Menge'].str.split(expand=True)
-StarttermineDOD4.drop(columns='Menge',inplace=True)
-#Hier noch
-#StarttermineDOD4['Menge'] = StarttermineDOD4['Menge'].str.replace(',' , '')
-#StarttermineDOD4['Menge'] = StarttermineDOD4['Menge'].str.replace('.' , ',')
-StarttermineDOD4['Mat.-Nr.'].astype(float)
-#StarttermineDOD4['Menge'].astype(float)
-StarttermineDOD4.set_index(['Mat.-Nr.','Start'], inplace=True)
+a = 10 #KLänge der Materialnummern
+b = 4 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
+c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
+ST = pd.read_excel('Dateien\Starttermine DOD-4_07.07.2022.xlsx')
+ST = ST[ST['Mat.-Nr.'].notna()] #Sobald eine Zeile in diesem Bereich Leer ist, wird diese gelöscht
+ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str.replace('.' , '')
+ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str[:-b] #die letzten Ziffern werden entfernt
+ST['Menge'] = ST['Menge'].str.replace(',' , '') #Kommas werden entfernt
+ST['Menge'] = ST['Menge'].str.replace('.' , ',') #Dezimaltrennung ändern
+ST['Mat.-Nr.'].astype(float) #Materialnummer zu einem Float
+Spliting = ST['Menge'].str.split(expand=True) #Datenbank aufsplitten
+Spliting.rename(columns={0 : 'Menge', 1: 'Einheit'}, inplace=True) #Datenstrukturen Namen geben
+ST.drop(columns='Menge',inplace=True) #Die gesplitteten Spalten aus dem ursprünglichem entfernen
+Start = pd.merge(ST,Spliting,left_index=True,right_index=True) #Datenbanken zusammenfügen
+Start['Menge'] = Start['Menge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
+Start['Menge'] = Start['Menge'].str[:-c] #Hier werden die Nachkommastellen entfernt ACHTUNG: Es wird immmer nur von einer ausgegangen
+Start['Menge'].astype(float) #Datentyp Float erstellen
+Start.set_index(['Mat.-Nr.', 'Start','Menge'], inplace=True)
+
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -50,10 +55,25 @@ Stueli.drop(columns=['Werk',
 Stueli['Material'] = Stueli['Material'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus der Basismenge entfernen
 Stueli['Material'].astype(float) #Datentyp verändern
-Stueli.set_index(['Material','Kurztext', 'Basismenge'], inplace=True)  #hier wird die Materialnummer der Index
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
+#Stueli['Komponentenmng.'].astype((float))
+Stueli.set_index(['Material', 'Basismenge','Kurztext', 'Komponentenmng.'], inplace=True)  #hier wird die Materialnummer der Index
+#print(Stueli)
+#print(Stueli.dtypes)
+newSt ='-1,3'
+#newFl = float(newSt)
+print(newSt)
 
+#for i in Stueli.index:
+#    if (Stueli['Me'].str.contains(['ST'])):
 
-print(StarttermineDOD4)
-print('test')
-print(Stueli)
+#for-Schleife
+Behälter = Stueli[Stueli['Me2'].str.contains('ST')]
+Abfall = Stueli[Stueli['Me2'].str.contains('ST')]
 
+#print(DelList)
+defNew1 = Stueli[Stueli['Me2'].str.contains('L')]
+dfNew = pd.merge(Stueli[Stueli['Me2'].str.contains('ST')], Stueli[Stueli['Me2'].str.contains('L')], left_index=True,right_index=True)
+
+print(dfNew)
