@@ -70,7 +70,7 @@ print(Stueli)
 #Abfall = Stueli[Stueli['Komponentenmng.'].str.contains('-')]
 
 #print(DelList)
-defNew1 = Stueli[Stueli['Me2'].str.contains('L')]
-dfNew = pd.merge(Stueli[Stueli['Me2'].str.contains('ST')], Stueli[Stueli['Me2'].str.contains('L')], left_index=True,right_index=True)
+#defNew1 = Stueli[Stueli['Me2'].str.contains('L')]
+#dfNew = pd.merge(Stueli[Stueli['Me2'].str.contains('ST')], Stueli[Stueli['Me2'].str.contains('L')], left_index=True,right_index=True)
 
-print(dfNew)
+#print(dfNew)'
