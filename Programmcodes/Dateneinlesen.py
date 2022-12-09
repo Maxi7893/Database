@@ -57,16 +57,22 @@ Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus de
 Stueli['Material'].astype(float) #Datentyp verändern
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
-#Stueli['Komponentenmng.'].astype((float))
-Stueli.set_index(['Material', 'Basismenge','Kurztext', 'Komponentenmng.'], inplace=True)  #hier wird die Materialnummer der Index
-#print(Stueli)
-#print(Stueli.dtypes)
-newSt ='-1,3'
-#newFl = float(newSt)
-print(newSt)
+Stueli['Negativ'] = 1
+Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '')
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float)
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ']
+Stueli.set_index(['Material', 'Basismenge', 'Komponentenmng.'], inplace=True)  #hier wird die Materialnummer der Index
+print(Stueli)
+
+
+
+#Negative Mengen aus der Datenbank rauslesen
 
 #for i in Stueli.index:
-#    if (Stueli['Me'].str.contains(['ST'])):
+#    if Stueli.loc[Stueli[i],Stueli['Komponentenmng.']]:
+#       print('Test erfolgreich!')
+
 
 #for-Schleife
 Behälter = Stueli[Stueli['Me2'].str.contains('ST')]
