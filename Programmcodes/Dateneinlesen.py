@@ -20,7 +20,7 @@ Start['Menge'] = Start['Menge'].str.replace(',', '') #Hier werden die Kommas aus
 Start['Menge'] = Start['Menge'].str[:-c] #Hier werden die Nachkommastellen entfernt ACHTUNG: Es wird immmer nur von einer ausgegangen
 Start['Menge'].astype(float) #Datentyp Float erstellen
 Start.set_index(['Mat.-Nr.', 'Start','Menge'], inplace=True)
-
+print(Start)
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
