@@ -19,8 +19,7 @@ Start = pd.merge(ST,Spliting,left_index=True,right_index=True) #Datenbanken zusa
 Start['Menge'] = Start['Menge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
 Start['Menge'] = Start['Menge'].str[:-c] #Hier werden die Nachkommastellen entfernt ACHTUNG: Es wird immmer nur von einer ausgegangen
 Start['Menge'].astype(float) #Datentyp Float erstellen
-Start.set_index(['Mat.-Nr.', 'Start','Menge'], inplace=True)
-print(Start)
+Start.set_index(['Mat.-Nr.', 'Start','Menge'], inplace=True) #Hier wird der Index gesetzt
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -59,24 +58,16 @@ Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
 Stueli['Negativ'] = 1
 Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1
+#Hier muss der Abfall noch in eine andere Tabelle geschrieben wird
+#Hier müssen noch die ST in eine andere Tabelle geschrieben werden
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float)
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ']
 Stueli.set_index(['Material', 'Basismenge', 'Komponentenmng.'], inplace=True)  #hier wird die Materialnummer der Index
 print(Stueli)
 
-
-
-#Negative Mengen aus der Datenbank rauslesen
-
-#for i in Stueli.index:
-#    if Stueli.loc[Stueli[i],Stueli['Komponentenmng.']]:
-#       print('Test erfolgreich!')
-
-
-#for-Schleife
-Behälter = Stueli[Stueli['Me2'].str.contains('ST')]
-Abfall = Stueli[Stueli['Me2'].str.contains('ST')]
+#Behälter = Stueli[Stueli['Me2'].str.contains('ST')]
+#Abfall = Stueli[Stueli['Komponentenmng.'].str.contains('-')]
 
 #print(DelList)
 defNew1 = Stueli[Stueli['Me2'].str.contains('L')]
