@@ -11,14 +11,14 @@ ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str.replace('.' , '')
 ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str[:-b] #die letzten Ziffern werden entfernt
 ST['Menge'] = ST['Menge'].str.replace(',' , '') #Kommas werden entfernt
 ST['Menge'] = ST['Menge'].str.replace('.' , ',') #Dezimaltrennung ändern
-ST['Mat.-Nr.'].astype(float) #Materialnummer zu einem Float
+ST['Mat.-Nr.'] = ST['Mat.-Nr.'].astype(int) #Materialnummer zu einem Float
 Spliting = ST['Menge'].str.split(expand=True) #Datenbank aufsplitten
 Spliting.rename(columns={0 : 'Menge', 1: 'Einheit'}, inplace=True) #Datenstrukturen Namen geben
 ST.drop(columns='Menge',inplace=True) #Die gesplitteten Spalten aus dem ursprünglichem entfernen
 Start = pd.merge(ST,Spliting,left_index=True,right_index=True) #Datenbanken zusammenfügen
 Start['Menge'] = Start['Menge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
 Start['Menge'] = Start['Menge'].str[:-c] #Hier werden die Nachkommastellen entfernt ACHTUNG: Es wird immmer nur von einer ausgegangen
-Start['Menge'].astype(float) #Datentyp Float erstellen
+Start['Menge'] = Start['Menge'].astype(float) #Datentyp Float erstellen
 Start.set_index(['Mat.-Nr.', 'Start','Menge'], inplace=True) #Hier wird der Index gesetzt
 
 #Stücklisten werden eingelesen
@@ -53,7 +53,7 @@ Stueli.drop(columns=['Werk',
                     'Lab'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 Stueli['Material'] = Stueli['Material'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus der Basismenge entfernen
-Stueli['Material'].astype(float) #Datentyp verändern
+Stueli['Material'] = Stueli['Material'].astype(int) #Datentyp verändern
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
 Stueli['Negativ'] = 1
@@ -63,14 +63,27 @@ Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float)
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ']
+Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
 Stueli.set_index(['Material', 'Basismenge', 'Komponentenmng.'], inplace=True)  #hier wird die Materialnummer der Index
-print(Stueli)
-
+#Es müssen noch die negativen und die ST aussoritert werden
 #Behälter = Stueli[Stueli['Me2'].str.contains('ST')]
 #Abfall = Stueli[Stueli['Komponentenmng.'].str.contains('-')]
-
 #print(DelList)
 #defNew1 = Stueli[Stueli['Me2'].str.contains('L')]
 #dfNew = pd.merge(Stueli[Stueli['Me2'].str.contains('ST')], Stueli[Stueli['Me2'].str.contains('L')], left_index=True,right_index=True)
 
-#print(dfNew)'
+
+#Abpacker werden eingelesen
+Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1)
+Abpacker.drop(columns=['auch GMP-Abpackungen?',
+                       'PSA K16',
+                       'Gruppen-BA',
+                       'PSA-Schutzstufe nach GloveBox',
+                       'PSA-Schutzstufe nach GloveBag',
+                       'Kommentar ',
+                       'SADT'],inplace=True)
+Abpacker['APN'] = Abpacker['APN'].astype(str)
+Abpacker['APN'] = Abpacker['APN'].str[:-b]
+Abpacker['APN'] = Abpacker['APN'].astype(int)
+Abpacker.set_index(['APN'],inplace=True)
+print(Abpacker)
