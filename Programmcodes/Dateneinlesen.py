@@ -1,4 +1,4 @@
-#import numpy
+import numpy as np
 import pandas as pd
 from datetime import date, timedelta
 
@@ -65,20 +65,18 @@ Stueli['Material'] = Stueli['Material'].astype(int) #Datentyp verändern
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
 Stueli['Negativ'] = 1
-Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1
-#Hier muss der Abfall noch in eine andere Tabelle geschrieben wird
-#Hier müssen noch die ST in eine andere Tabelle geschrieben werden
-Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '')
-Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float)
-Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ']
+Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese mit gekennzeichnet
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '') #Die Bindestriche (negativ-Zeichen) werden entfernt
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werden zu einem Float
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ'] #Negative Mengen sind jetzt kein String mehr
 Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
-Stueli.set_index(['Material', 'Basismenge', 'Komponentenmng.'], inplace=True)  #hier wird die Materialnummer der Index
-#Es müssen noch die negativen und die ST aussoritert werden
-#Behälter = Stueli[Stueli['Me2'].str.contains('ST')]
-#Abfall = Stueli[Stueli['Komponentenmng.'].str.contains('-')]
-#print(DelList)
-#defNew1 = Stueli[Stueli['Me2'].str.contains('L')]
-#dfNew = pd.merge(Stueli[Stueli['Me2'].str.contains('ST')], Stueli[Stueli['Me2'].str.contains('L')], left_index=True,right_index=True)
+#Stueli['Rohstoff'] = (Stueli['Komponentenmng.'] > 0) & (Stueli['Me2'].str.contains('KG'))
+indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
+FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
+FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
+#FS.set_index(['Material'], inplace=True)
+
+#NextStep:  Die Rezepte filtern!
 
 
 #Abpacker werden eingelesen
