@@ -1,10 +1,15 @@
 #import numpy
 import pandas as pd
+from datetime import date, timedelta
 
 #Produktionstermine werden eingelesen
 a = 10 #KLänge der Materialnummern
 b = 4 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
+Date = '2022-08-14' #Für den Test hier nur ein beispielhafter Tag
+Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
+#Date = date.today() #Aktueller Tag wird gespeichert
+NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
 ST = pd.read_excel('Dateien\Starttermine DOD-4_07.07.2022.xlsx')
 ST = ST[ST['Mat.-Nr.'].notna()] #Sobald eine Zeile in diesem Bereich Leer ist, wird diese gelöscht
 ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str.replace('.' , '')
@@ -19,7 +24,12 @@ Start = pd.merge(ST,Spliting,left_index=True,right_index=True) #Datenbanken zusa
 Start['Menge'] = Start['Menge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
 Start['Menge'] = Start['Menge'].str[:-c] #Hier werden die Nachkommastellen entfernt ACHTUNG: Es wird immmer nur von einer ausgegangen
 Start['Menge'] = Start['Menge'].astype(float) #Datentyp Float erstellen
-Start.set_index(['Mat.-Nr.', 'Start','Menge'], inplace=True) #Hier wird der Index gesetzt
+Start['Start'] = pd.to_datetime(Start['Start'])
+Start.set_index(['Start'], inplace=True) #Hier wird der Index gesetzt
+Start = Start.sort_values(by='Start') #Hier wird die Liste noch nach den Startdaten geordnet
+#Hier die Aufträge der nächsten Zwei Wochen auslesen
+Next = Start[Date:NextDate]
+print(Next)
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -86,4 +96,3 @@ Abpacker['APN'] = Abpacker['APN'].astype(str)
 Abpacker['APN'] = Abpacker['APN'].str[:-b]
 Abpacker['APN'] = Abpacker['APN'].astype(int)
 Abpacker.set_index(['APN'],inplace=True)
-print(Abpacker)
