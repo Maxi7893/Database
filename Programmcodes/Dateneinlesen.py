@@ -27,9 +27,7 @@ Start['Menge'] = Start['Menge'].astype(float) #Datentyp Float erstellen
 Start['Start'] = pd.to_datetime(Start['Start'])
 Start.set_index(['Start'], inplace=True) #Hier wird der Index gesetzt
 Start = Start.sort_values(by='Start') #Hier wird die Liste noch nach den Startdaten geordnet
-#Hier die Aufträge der nächsten Zwei Wochen auslesen
-Next = Start[Date:NextDate]
-print(Next)
+Next = Start[Date:NextDate] #Hier werden die Aufträge der nächsten zwei Wochen ausgelesen
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
