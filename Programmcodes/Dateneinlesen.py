@@ -71,7 +71,11 @@ Stueli['Negativ'] = 1
 Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese mit gekennzeichnet
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '') #Die Bindestriche (negativ-Zeichen) werden entfernt
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werden zu einem Float
-Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ'] #Negative Mengen sind jetzt kein String mehr
+Stueli['Basismenge'] = Stueli['Basismenge'].str[-3]
+Stueli['Basismenge'] = Stueli['Basismenge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
+#print(Stueli['Basismenge'])
+#Stueli['Basismenge'] = Stueli['Basismenge'].astype(float)
+#Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ'] #Negative Mengen sind jetzt kein String mehr
 Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
 #Stueli['Rohstoff'] = (Stueli['Komponentenmng.'] > 0) & (Stueli['Me2'].str.contains('KG'))
 indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
@@ -101,14 +105,15 @@ indexNexts = Next.index #Diese Materialnummer werden in nächster Zeit produzier
 #Abfagen, welche Produkte gefertigt werden und Zeile in der Stückliste auf True setzen
 #For-Schleife, die die Länge
 Aufträge = len(Next)
-print(Aufträge)
 i = 0
 FS['Benötigt'] = 0
 Auftragsnummer = Next['Mat.-Nr.'][i]
+Menge = Next['Menge'][i]
 while i < (Aufträge-1):
-    FS.loc[(FS['Material'] == Auftragsnummer), 'Benötigt'] = 1
+    FS.loc[(FS['Material'] == Auftragsnummer) & FS['Basismenge'] == Menge, 'Benötigt'] = 999
     i = i+1
     Auftragsnummer = Next['Mat.-Nr.'][i]
+    Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
     print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 
 
