@@ -28,6 +28,8 @@ Start['Start'] = pd.to_datetime(Start['Start'])
 Start.set_index(['Start'], inplace=True) #Hier wird der Index gesetzt
 Start = Start.sort_values(by='Start') #Hier wird die Liste noch nach den Startdaten geordnet
 Next = Start[Date:NextDate] #Hier werden die Aufträge der nächsten zwei Wochen ausgelesen
+#Next.set_index(['Mat.-Nr.'],inplace=True) #Hier werden die Materialnummern zu einem Index
+
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -76,9 +78,6 @@ FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
 #FS.set_index(['Material'], inplace=True)
 
-#NextStep:  Die Rezepte filtern!
-
-
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1)
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
@@ -92,3 +91,26 @@ Abpacker['APN'] = Abpacker['APN'].astype(str)
 Abpacker['APN'] = Abpacker['APN'].str[:-b]
 Abpacker['APN'] = Abpacker['APN'].astype(int)
 Abpacker.set_index(['APN'],inplace=True)
+
+#Hier werden die Abzupackenden Rohstoffe ausgelesen
+print(FS) #Das sind alle Rohstoffe für den G20
+print(Next) #Das sind alle Aufträge in den nächsten zwei Wochen
+indexNexts = Next.index #Diese Materialnummer werden in nächster Zeit produziert
+#Abfagen, welche Produkte gefertigt werden und Zeile in der Stückliste auf True setzen
+#For-Schleife, die die Länge
+Aufträge = len(Next)
+print(Aufträge)
+i = 0
+FS['Benötigt'] = 0
+Auftragsnummer = Next['Mat.-Nr.'][i]
+while i < (Aufträge-1):
+    FS.loc[(FS['Material'] == Auftragsnummer), 'Benötigt'] = 1
+    i = i+1
+    Auftragsnummer = Next['Mat.-Nr.'][i]
+    print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
+
+
+
+
+#NextStep:  Die Rezepte filtern!
+#2NextStep: Die benötigten Rohstoffe rausfiltern!
