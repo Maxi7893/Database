@@ -110,7 +110,10 @@ while i < (Aufträge-1):
     print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 
 
+FS.to_csv('Test.csv')
+
 
 
 #NextStep:  Die Rezepte filtern!
-#2NextStep: Die benötigten Rohstoffe rausfiltern!
+#2NextStep: Die benötigten Rohstoffe rausfiltern! Done
+#3NextStep: Die nicht benötgiten Rohstoffe aus der Liste entfernen!
