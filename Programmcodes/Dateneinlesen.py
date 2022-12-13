@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 #Produktionstermine werden eingelesen
 a = 10 #KLänge der Materialnummern
-b = 4 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
+b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
 Date = '2022-08-14' #Für den Test hier nur ein beispielhafter Tag
 Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
@@ -13,10 +13,11 @@ NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, w
 ST = pd.read_excel('Dateien\Starttermine DOD-4_07.07.2022.xlsx')
 ST = ST[ST['Mat.-Nr.'].notna()] #Sobald eine Zeile in diesem Bereich Leer ist, wird diese gelöscht
 ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str.replace('.' , '')
-ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str[:-b] #die letzten Ziffern werden entfernt
+if b>0:
+    ST['Mat.-Nr.'] = ST['Mat.-Nr.'].str[:-b] #die letzten Ziffern werden entfernt
 ST['Menge'] = ST['Menge'].str.replace(',' , '') #Kommas werden entfernt
 ST['Menge'] = ST['Menge'].str.replace('.' , ',') #Dezimaltrennung ändern
-ST['Mat.-Nr.'] = ST['Mat.-Nr.'].astype(int) #Materialnummer zu einem Float
+#ST['Mat.-Nr.'] = ST['Mat.-Nr.'].astype(int) #Materialnummer zu einem Float
 Spliting = ST['Menge'].str.split(expand=True) #Datenbank aufsplitten
 Spliting.rename(columns={0 : 'Menge', 1: 'Einheit'}, inplace=True) #Datenstrukturen Namen geben
 ST.drop(columns='Menge',inplace=True) #Die gesplitteten Spalten aus dem ursprünglichem entfernen
@@ -29,7 +30,6 @@ Start.set_index(['Start'], inplace=True) #Hier wird der Index gesetzt
 Start = Start.sort_values(by='Start') #Hier wird die Liste noch nach den Startdaten geordnet
 Next = Start[Date:NextDate] #Hier werden die Aufträge der nächsten zwei Wochen ausgelesen
 #Next.set_index(['Mat.-Nr.'],inplace=True) #Hier werden die Materialnummern zu einem Index
-
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -61,9 +61,10 @@ Stueli.drop(columns=['Werk',
                     'Losgr.bis',
                     'Dis',
                     'Lab'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
-Stueli['Material'] = Stueli['Material'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
+if b>0:
+    Stueli['Material'] = Stueli['Material'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus der Basismenge entfernen
-Stueli['Material'] = Stueli['Material'].astype(int) #Datentyp verändern
+#Stueli['Material'] = Stueli['Material'].astype(int) #Datentyp verändern
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
 Stueli['Negativ'] = 1
@@ -88,8 +89,9 @@ Abpacker.drop(columns=['auch GMP-Abpackungen?',
                        'Kommentar ',
                        'SADT'],inplace=True)
 Abpacker['APN'] = Abpacker['APN'].astype(str)
-Abpacker['APN'] = Abpacker['APN'].str[:-b]
-Abpacker['APN'] = Abpacker['APN'].astype(int)
+if b>0:
+    Abpacker['APN'] = Abpacker['APN'].str[:-b]
+#Abpacker['APN'] = Abpacker['APN'].astype(int)
 Abpacker.set_index(['APN'],inplace=True)
 
 #Hier werden die Abzupackenden Rohstoffe ausgelesen
@@ -111,8 +113,6 @@ while i < (Aufträge-1):
 
 
 FS.to_csv('Test.csv')
-
-
 
 #NextStep:  Die Rezepte filtern!
 #2NextStep: Die benötigten Rohstoffe rausfiltern! Done
