@@ -102,12 +102,13 @@ FS['Materialübereinstimmung'] = 0
 FS['Mengenübereinstimmung'] = 0
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
-while i < (Aufträge-1):
+while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benötigt werden
     FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 999
     FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 999
     i = i+1
     Auftragsnummer = Next['Mat.-Nr.'][i]
     Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
+    # Es gilt jedoch noch zu berücksichtigen, wenn Auträge sich doppeln, müssen die Mengen ebenfalls verdoppelt werden
     print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 
 BR = FS.loc[(FS['Materialübereinstimmung'] == 999) & (FS['Mengenübereinstimmung'] == 999)]
