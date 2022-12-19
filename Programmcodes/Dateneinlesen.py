@@ -93,12 +93,9 @@ Abpacker.drop(columns=['auch GMP-Abpackungen?',
 Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden
 if b>0:
     Abpacker['APN'] = Abpacker['APN'].str[:-b]
-#Abpacker['APN'] = Abpacker['APN'].astype(int)
-Abpacker.set_index(['APN'],inplace=True)
+Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
 
 #Hier werden die abzupackenden Rohstoffe ausgelesen
-#Abfagen, welche Produkte gefertigt werden und Zeile in der Stückliste auf True setzen
-
 Aufträge = len(Next)
 i = 0
 FS['Materialübereinstimmung'] = 0
@@ -113,10 +110,14 @@ while i < (Aufträge-1):
     Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
     print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 
+BR = FS.loc[(FS['Materialübereinstimmung'] == 999) & (FS['Mengenübereinstimmung'] == 999)]
+BR.drop(columns=['Al',
+                 'Mart',
+                 'Pos.',
+                 'Fev',
+                 'Kurztext2',
+                 'Materialübereinstimmung',
+                 'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
+BR.to_excel('Benötigten_Rohstoffe.xlsx')
 
-
-FS.to_excel('Test.xlsx')
-
-#NextStep:  Die Rezepte filtern!
-#2NextStep: Die benötigten Rohstoffe rausfiltern! Done
-#3NextStep: Die nicht benötgiten Rohstoffe aus der Liste entfernen!
+#Jetzt noch schauen, welche Rohstoffe häufiger benötigt werden und ein Abgleich mit den Abpackern
