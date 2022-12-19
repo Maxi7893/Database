@@ -71,9 +71,9 @@ Stueli['Negativ'] = 1
 Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese mit gekennzeichnet
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '') #Die Bindestriche (negativ-Zeichen) werden entfernt
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werden zu einem Float
-Stueli['Basismenge'] = Stueli['Basismenge'].str[:-4]
+Stueli['Basismenge'] = Stueli['Basismenge'].str[:-4] #Hier werden die Basismengen bis zu dem Komma gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
-Stueli['Basismenge'] = Stueli['Basismenge'].astype(float)
+Stueli['Basismenge'] = Stueli['Basismenge'].astype(float) #Basismengen werden zu einem Float umgewandelt
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ'] #Negative Mengen sind jetzt kein String mehr
 Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
 #Stueli['Rohstoff'] = (Stueli['Komponentenmng.'] > 0) & (Stueli['Me2'].str.contains('KG'))
@@ -82,30 +82,22 @@ FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
 
 #Abpacker werden eingelesen
-Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1)
+Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
                        'PSA K16',
                        'Gruppen-BA',
                        'PSA-Schutzstufe nach GloveBox',
                        'PSA-Schutzstufe nach GloveBag',
                        'Kommentar ',
-                       'SADT'],inplace=True)
-Abpacker['APN'] = Abpacker['APN'].astype(str)
+                       'SADT'],inplace=True) #Unwichtige Spalten werden gelöscht
+Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden
 if b>0:
     Abpacker['APN'] = Abpacker['APN'].str[:-b]
 #Abpacker['APN'] = Abpacker['APN'].astype(int)
 Abpacker.set_index(['APN'],inplace=True)
 
-#Hier werden die Abzupackenden Rohstoffe ausgelesen
-print(FS) #Das sind alle Rohstoffe für den G20
-print(Next) #Das sind alle Aufträge in den nächsten zwei Wochen
-indexNexts = Next.index #Diese Materialnummer werden in nächster Zeit produziert
+#Hier werden die abzupackenden Rohstoffe ausgelesen
 #Abfagen, welche Produkte gefertigt werden und Zeile in der Stückliste auf True setzen
-#For-Schleife, die die Länge
-#Start.to_excel('TestStart.xlsx')
-#FS.to_excel('TestFS.xlsx')
-#Next.to_excel('TestNext.xlsx')
-
 
 Aufträge = len(Next)
 i = 0
@@ -113,7 +105,6 @@ FS['Materialübereinstimmung'] = 0
 FS['Mengenübereinstimmung'] = 0
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
-
 while i < (Aufträge-1):
     FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 999
     FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 999
@@ -121,6 +112,7 @@ while i < (Aufträge-1):
     Auftragsnummer = Next['Mat.-Nr.'][i]
     Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
     print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
+
 
 
 FS.to_excel('Test.xlsx')
