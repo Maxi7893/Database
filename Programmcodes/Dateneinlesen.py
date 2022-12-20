@@ -120,5 +120,7 @@ BR.drop(columns=['Al',
                  'Materialübereinstimmung',
                  'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
+print(BR)
+print(Stueli)
 
 #Jetzt noch schauen, welche Rohstoffe häufiger benötigt werden und ein Abgleich mit den Abpackern
