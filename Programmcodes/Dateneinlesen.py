@@ -68,7 +68,7 @@ Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus de
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
 Stueli['Negativ'] = 1
-Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese mit gekennzeichnet
+Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese gekennzeichnet
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '') #Die Bindestriche (negativ-Zeichen) werden entfernt
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werden zu einem Float
 Stueli['Basismenge'] = Stueli['Basismenge'].str[:-4] #Hier werden die Basismengen bis zu dem Komma gekürzt
@@ -90,10 +90,11 @@ Abpacker.drop(columns=['auch GMP-Abpackungen?',
                        'PSA-Schutzstufe nach GloveBag',
                        'Kommentar ',
                        'SADT'],inplace=True) #Unwichtige Spalten werden gelöscht
-Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden
+Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden zu einem String
 if b>0:
-    Abpacker['APN'] = Abpacker['APN'].str[:-b]
+    Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
 Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
+
 
 #Hier werden die abzupackenden Rohstoffe ausgelesen
 Aufträge = len(Next)
@@ -103,15 +104,15 @@ FS['Mengenübereinstimmung'] = 0
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
 while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benötigt werden
-    FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 999
-    FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 999
+    FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 1 #Idee: Wenn es schon 1 ist, dann die Zahl addieren!
+    FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 1
     i = i+1
     Auftragsnummer = Next['Mat.-Nr.'][i]
     Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
     # Es gilt jedoch noch zu berücksichtigen, wenn Auträge sich doppeln, müssen die Mengen ebenfalls verdoppelt werden
-    print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
+   # print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 
-BR = FS.loc[(FS['Materialübereinstimmung'] == 999) & (FS['Mengenübereinstimmung'] == 999)]
+BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
@@ -120,7 +121,40 @@ BR.drop(columns=['Al',
                  'Materialübereinstimmung',
                  'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
-print(BR)
-print(Stueli)
+
+#Hier wird berechnet wie oft die Rohstoffe benötigt werden
+
+Häufigkeit = Next
+Häufigkeit.set_index(['Mat.-Nr.'], inplace=True)
+Häufigkeit.drop(columns=['Material',
+                         'Planungsrezept',
+                         'Fertigungsversion',
+                         'Status',
+                         'Auftragsnummer',
+                         'Ansatznummer',
+                         'Menge',
+                         'Einheit',
+                         'Zulässig',
+                         'Ende ORS',
+                         'Ursprüngliches Ende',
+                         'Langtext',
+                         'ATP (dynamisch)',
+                         'ATP Hauptkomponente (ATP-Relevanz,!ND) (dynamisch)',
+                         'ATP Restliche Materialien (dynamisch)',
+                         'FMAT',
+                         'MABS',
+                         'Disponent Mat.stamm',
+                         'Fertigungssteuerer Mat.stamm',
+                         'Fertigungssteuerer PR-AUF',
+                         'Kampagnen-ID',
+                         'Kommentar',
+                         'Ausnahme',
+                         'Hersteller Mat.stamm',
+                         'Hersteller Mat.stamm.1',
+                         'Hersteller  PR-AUF'], inplace=True)
+
+
+print(Häufigkeit)
+
 
 #Jetzt noch schauen, welche Rohstoffe häufiger benötigt werden und ein Abgleich mit den Abpackern
