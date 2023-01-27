@@ -124,37 +124,10 @@ BR.to_excel('Benötigten_Rohstoffe.xlsx')
 
 #Hier wird berechnet wie oft die Rohstoffe benötigt werden
 
-Häufigkeit = Next
-Häufigkeit.set_index(['Mat.-Nr.'], inplace=True)
-Häufigkeit.drop(columns=['Material',
-                         'Planungsrezept',
-                         'Fertigungsversion',
-                         'Status',
-                         'Auftragsnummer',
-                         'Ansatznummer',
-                         'Menge',
-                         'Einheit',
-                         'Zulässig',
-                         'Ende ORS',
-                         'Ursprüngliches Ende',
-                         'Langtext',
-                         'ATP (dynamisch)',
-                         'ATP Hauptkomponente (ATP-Relevanz,!ND) (dynamisch)',
-                         'ATP Restliche Materialien (dynamisch)',
-                         'FMAT',
-                         'MABS',
-                         'Disponent Mat.stamm',
-                         'Fertigungssteuerer Mat.stamm',
-                         'Fertigungssteuerer PR-AUF',
-                         'Kampagnen-ID',
-                         'Kommentar',
-                         'Ausnahme',
-                         'Hersteller Mat.stamm',
-                         'Hersteller Mat.stamm.1',
-                         'Hersteller  PR-AUF'], inplace=True)
-
-
-print(Häufigkeit)
-
+Häufigkeit = pd.crosstab(index= Next['Mat.-Nr.'], columns='Anzahl')
+#Häufigkeit.drop(Häufigkeit.index[[0]])
+#Häufigkeit.set_index(['Mat.-Nr.'], inplace=True)
+print(Häufigkeit.iloc[[0]])
+#Hier soll anhand der Häufigkeit die gefilterte Liste angepasst werden
 
 #Jetzt noch schauen, welche Rohstoffe häufiger benötigt werden und ein Abgleich mit den Abpackern
