@@ -140,18 +140,23 @@ Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
 
 #Abpackgebinde werden eingelesen
 Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
-Abpackergebinde.set_index(['Materialnummer'], inplace=True)
 Abpackergebinde = Abpackergebinde.iloc[1:]
-print(Abpackergebinde)
-
-
+Abpackergebinde.drop(columns=['E-Material'], inplace=True)
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
-AnzahlPro = len(Abpackergebinde)
-i=0
-Auftragsnummer = Abpackergebinde['Materialnummer'][i]
+Abpackergebinde.set_index(['Materialnummer'], inplace=True)
+BR.set_index(['Material'], inplace=True)
+print(BR)
+print(Abpackergebinde)
+#Hier müssen noch die beiden DataFrames kombiniert werden
+Test = BR.merge(Abpackergebinde,how='left')
+#print(Test)
 
-#FS['Häufigkeit'] = 0
-#while i < (AnzahlPro-1): #Hier wird die Häufigkeit der Produkte in den nächsten zwei Wochen in die Liste eingepflegt
+
+#AnzahlPro = len(Abpackergebinde)
+#i=0
+#Auftragsnummer = Abpackergebinde['Materialnummer'][i]
+
+#while i < (AnzahlPro-1): #Hier werden die Tabellen zusammengefügt
 #    FS.loc[(FS['Material'] == Auftragsnummer), 'Häufigkeit'] = Häufigkeit
 #    i = i+1
 #    Auftragsnummer = data['Mat.-Nr.'][i]
