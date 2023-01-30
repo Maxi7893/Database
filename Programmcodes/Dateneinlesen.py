@@ -81,27 +81,7 @@ indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contai
 FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
 
-#Abpacker werden eingelesen
-Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
-Abpacker.drop(columns=['auch GMP-Abpackungen?',
-                       'PSA K16',
-                       'Gruppen-BA',
-                       'PSA-Schutzstufe nach GloveBox',
-                       'PSA-Schutzstufe nach GloveBag',
-                       'Kommentar ',
-                       'SADT'],inplace=True) #Unwichtige Spalten werden gelöscht
-Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden zu einem String
-if b>0:
-    Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
-Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
-
-#Häufigkeit = pd.crosstab(index= Next['Mat.-Nr.'], columns='Anzahl')
-Durchläufe=0
-#print(Häufigkeit)
-#print(Häufigkeit.iat[0,0])
-#Mat = Häufigkeit['col_0'][Durchläufe]
-#while Durchläufe < (AnzahlPro-1)
-
+#Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
 data = data.reset_index()
 data.drop(columns='Start',inplace=True)
@@ -110,7 +90,6 @@ Häufigkeit = Häufigkeit.value_counts(sort=False)  #Hier wird berechnet, wie of
 data = Häufigkeit.to_frame()
 data = Häufigkeit.reset_index()
 data.columns = ['Mat.-Nr.', 'Häufigkeit']
-print(data)
 AnzahlPro = len(data)
 i=0
 Auftragsnummer = data['Mat.-Nr.'][i]
@@ -135,21 +114,50 @@ while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benöti
     i = i+1
     Auftragsnummer = Next['Mat.-Nr.'][i]
     Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
-    # Es gilt jedoch noch zu berücksichtigen, wenn Auträge sich doppeln, müssen die Mengen ebenfalls verdoppelt werden
+    #Es gilt jedoch noch zu berücksichtigen, wenn Auträge sich doppeln, müssen die Mengen ebenfalls verdoppelt werden
    # print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
-
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
                  'Fev',
-                 'Kurztext2',
                  'Materialübereinstimmung',
                  'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
+
+#Abpacker werden eingelesen
+Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
+Abpacker.drop(columns=['auch GMP-Abpackungen?',
+                       'PSA K16',
+                       'Gruppen-BA',
+                       'PSA-Schutzstufe nach GloveBox',
+                       'PSA-Schutzstufe nach GloveBag',
+                       'Kommentar ',
+                       'SADT'],inplace=True) #Unwichtige Spalten werden gelöscht
+Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden zu einem String
+if b>0:
+    Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
+Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
+
+#Abpackgebinde werden eingelesen
+Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
+Abpackergebinde.set_index(['Materialnummer'], inplace=True)
+Abpackergebinde = Abpackergebinde.iloc[1:]
+print(Abpackergebinde)
+
+
+#Abpacker und Gebinde werden in ein DataFrame zusammengefügt
+AnzahlPro = len(Abpackergebinde)
+i=0
+Auftragsnummer = Abpackergebinde['Materialnummer'][i]
+
+#FS['Häufigkeit'] = 0
+#while i < (AnzahlPro-1): #Hier wird die Häufigkeit der Produkte in den nächsten zwei Wochen in die Liste eingepflegt
+#    FS.loc[(FS['Material'] == Auftragsnummer), 'Häufigkeit'] = Häufigkeit
+#    i = i+1
+#    Auftragsnummer = data['Mat.-Nr.'][i]
+#    Häufigkeit = data['Häufigkeit'][i]'
+
+
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
 
-
-
-
-
-#Jetzt noch schauen, welche Rohstoffe häufiger benötigt werden und ein Abgleich mit den Abpackern
+#Jetzt noch ein Abgleich mit den Abpackern
