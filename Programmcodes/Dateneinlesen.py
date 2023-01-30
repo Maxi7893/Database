@@ -95,6 +95,32 @@ if b>0:
     Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
 Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
 
+#Häufigkeit = pd.crosstab(index= Next['Mat.-Nr.'], columns='Anzahl')
+Durchläufe=0
+#print(Häufigkeit)
+#print(Häufigkeit.iat[0,0])
+#Mat = Häufigkeit['col_0'][Durchläufe]
+#while Durchläufe < (AnzahlPro-1)
+
+data = Next['Mat.-Nr.']
+data = data.reset_index()
+data.drop(columns='Start',inplace=True)
+Häufigkeit = pd.Series(data['Mat.-Nr.'])
+Häufigkeit = Häufigkeit.value_counts(sort=False)  #Hier wird berechnet, wie oft die Rohstoffe benötigt werden
+data = Häufigkeit.to_frame()
+data = Häufigkeit.reset_index()
+data.columns = ['Mat.-Nr.', 'Häufigkeit']
+print(data)
+AnzahlPro = len(data)
+i=0
+Auftragsnummer = data['Mat.-Nr.'][i]
+Häufigkeit = data['Häufigkeit'][i]
+FS['Häufigkeit'] = 0
+while i < (AnzahlPro-1): #Hier wird die Häufigkeit der Produkte in den nächsten zwei Wochen in die Liste eingepflegt
+    FS.loc[(FS['Material'] == Auftragsnummer), 'Häufigkeit'] = Häufigkeit
+    i = i+1
+    Auftragsnummer = data['Mat.-Nr.'][i]
+    Häufigkeit = data['Häufigkeit'][i]
 
 #Hier werden die abzupackenden Rohstoffe ausgelesen
 Aufträge = len(Next)
@@ -104,7 +130,7 @@ FS['Mengenübereinstimmung'] = 0
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
 while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benötigt werden
-    FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 1 #Idee: Wenn es schon 1 ist, dann die Zahl addieren!
+    FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 1
     FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 1
     i = i+1
     Auftragsnummer = Next['Mat.-Nr.'][i]
@@ -122,12 +148,8 @@ BR.drop(columns=['Al',
                  'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
 
-#Hier wird berechnet wie oft die Rohstoffe benötigt werden
 
-Häufigkeit = pd.crosstab(index= Next['Mat.-Nr.'], columns='Anzahl')
-#Häufigkeit.drop(Häufigkeit.index[[0]])
-#Häufigkeit.set_index(['Mat.-Nr.'], inplace=True)
-print(Häufigkeit.iloc[[0]])
-#Hier soll anhand der Häufigkeit die gefilterte Liste angepasst werden
+
+
 
 #Jetzt noch schauen, welche Rohstoffe häufiger benötigt werden und ein Abgleich mit den Abpackern
