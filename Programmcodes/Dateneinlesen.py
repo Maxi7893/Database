@@ -142,14 +142,14 @@ Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
 Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
 Abpackergebinde.drop(columns=['E-Material'], inplace=True)
+Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
+if b>0:
+    Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
-Abpackergebinde.set_index(['Materialnummer'], inplace=True)
-BR.set_index(['Material'], inplace=True)
 print(BR)
 print(Abpackergebinde)
-#Hier müssen noch die beiden DataFrames kombiniert werden
-Test = BR.merge(Abpackergebinde,how='left')
-#print(Test)
+BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer')
+print(BR)
 
 
 #AnzahlPro = len(Abpackergebinde)
