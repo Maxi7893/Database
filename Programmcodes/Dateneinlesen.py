@@ -62,7 +62,8 @@ Stueli.drop(columns=['Werk',
                     'Dis',
                     'Lab'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 if b>0:
-    Stueli['Material'] = Stueli['Material'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
+    Stueli['Material'] = Stueli['Material'].str[:-b]#hier werden die Materialnummern um die letzten Ziffern gekürzt
+    Stueli['E-Material'] = Stueli['E-Material'].str[:-b]
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace('.' , '') #Punkte aus der Basismenge entfernen
 #Stueli['Material'] = Stueli['Material'].astype(int) #Datentyp verändern
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('.' , '')
