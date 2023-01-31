@@ -136,7 +136,19 @@ Abpacker.drop(columns=['auch GMP-Abpackungen?',
 Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden zu einem String
 if b>0:
     Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
-Abpacker.set_index(['APN'],inplace=True) #Index der Materialnummer wird gesetzt
+#Liste wird auf Abpacker reduziert
+i=0
+Abpacknummer = Abpacker['APN'][i]
+BR['Abpacker'] = False
+len = len(Abpacker)
+while i<(len-1):
+    BR.loc[(BR['E-Material'] == Abpacknummer), 'Abpacker'] = True
+    i=i+1
+    Abpacknummer = Abpacker['APN'][i]
+BR = BR[BR.Abpacker == True]
+BR.drop(columns=['Abpacker'],inplace=True)
+#BR = Benötigten Rohstoffe
+#Abpacker = alle abzupackenden Rohstoffe
 
 #Abpackgebinde werden eingelesen
 Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
@@ -146,23 +158,9 @@ Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replac
 if b>0:
     Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
-print(BR)
-print(Abpackergebinde)
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer')
-print(BR)
-
-
-#AnzahlPro = len(Abpackergebinde)
-#i=0
-#Auftragsnummer = Abpackergebinde['Materialnummer'][i]
-
-#while i < (AnzahlPro-1): #Hier werden die Tabellen zusammengefügt
-#    FS.loc[(FS['Material'] == Auftragsnummer), 'Häufigkeit'] = Häufigkeit
-#    i = i+1
-#    Auftragsnummer = data['Mat.-Nr.'][i]
-#    Häufigkeit = data['Häufigkeit'][i]'
-
-
+BR.rename(columns={'Base UOM':'Einheit Gebindegröße'})
+BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
+BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME'])*BR['Häufigkeit'])
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
-
 #Jetzt noch ein Abgleich mit den Abpackern
