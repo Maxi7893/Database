@@ -160,8 +160,8 @@ if b>0:
     Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer')
-BR.rename(columns={'Base UOM':'Einheit Gebindegröße'})
+BR.drop(columns=['Materialnummer'],inplace=True)
+#BR.rename(columns={'Base UOM':'Einheit Gebindegröße'})
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
-BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME'])*BR['Häufigkeit'])
+BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
-#Jetzt noch ein Abgleich mit den Abpackern
