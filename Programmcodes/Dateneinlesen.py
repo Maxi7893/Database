@@ -6,22 +6,57 @@ from datetime import date, timedelta
 a = 10 #KLänge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-Date = '2023-01-14' #Für den Test hier nur ein beispielhafter Tag
-Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
-#Date = date.today() #Aktueller Tag wird gespeichert
+#Date = '2023-01-14' #Für den Test hier nur ein beispielhafter Tag
+#Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
+Date = date.today() #Aktueller Tag wird gespeichert
 NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
 
 #Starttermine Produktionsaufträge G20
-Starttermine = pd.read_excel('Dateien\Starttermine G20 - 2023.xlsx')
-Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.' , '')
+Starttermine = pd.read_excel('Dateien\Starttermine G20 - 2023.xlsx') #Einlesen der Excel Liste für die Produktionstermine
+Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.' , '')  #Punkte aus der Materialnummer entfernen
 if b>0:
-    Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[:-b]
-Starttermine.rename(columns={'Offene Menge':'Menge', 'Beginn (terminiert)':'Start','Ende (terminiert)':'Ende' }, inplace=True)
-Starttermine.set_index(['Start'], inplace=True)
+    Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
+Starttermine.rename(columns={'Offene Menge':'Menge', 'Beginn (terminiert)':'Start','Ende (terminiert)':'Ende', 'Produktionsmengeneinheit':'Me' }, inplace=True)
+Starttermine.set_index(['Start'], inplace=True) #Index setzen
+#Hier noch alle löschen, die Zulässig eingeplant FALSE haben
+Starttermine.drop(columns=['Ansatznummer',
+                           'Status',
+                           'Farbe',
+                           'Rezept',
+                           'Fertigungsversion',
+                           'Zulässig eingeplant',
+                           'Ursprüngliches Ende',
+                           'Material Verfügbar',
+                           'Langtext'],inplace=True)
+Starttermine=Starttermine.sort_values(by='Start') #Index nach Datum sortieren
+Next=Starttermine[Date:NextDate] #Filtern des Betrachtungszeitraums!
+#Starttermine Produktionsaufträge G1
+Starttermine=pd.read_excel('Dateien\Produktion_G1.xlsx', header=1) #Einlesen der Excel-Liste G1'
+Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.' , '') #Punkte aus der Materialnummer entfernen
+if b>0:
+    Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
+Starttermine.rename(columns={'Anfo':'Auftrags-Nr.','EH':'Me'}, inplace=True)
+Starttermine.drop(columns=['Status',
+                           'Dispo',
+                           'FS',
+                           'Hersteller'],inplace=True)
+Starttermine.set_index(['Start'], inplace=True) #Index setzen
 Starttermine=Starttermine.sort_values(by='Start')
-Next=Starttermine[Date:NextDate]
-print(Next)
+Next2=Starttermine[Date:NextDate]
 
+#Startlisten zusammenführen
+#Next=Next.reset_index()
+#Columnames aufeinander anpassen....!!!
+
+
+Next.set_index(['Auftrags-Nr.'], inplace=True)
+Next2.set_index(['Auftrags-Nr.'], inplace=True)
+
+
+print(Next)
+print(Next2)
+#Next=pd.merge(Next,Next2, left_index=False, right_index=False)
+#print(Next)
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Material',
@@ -43,6 +78,26 @@ List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Fev',
                         'Dis',
                         'Lab'],sep='#',encoding='windows-1252') #Einlseen der txt und encoding
+#List2=pd.read_csv('Dateien\Stückliste G1.TXT', names=['Werk',
+#                    'Material-Nr.',
+#                    'Al',
+#                    'Kurztext',
+#                    'Basismenge',
+#                    'ME',
+#                    'MTART',
+#                    'SB',
+#                  'Pos',
+#                  'Komponente',
+#                  'Prodh.',
+#                  'K',
+#                  'Einsatzmenge',
+#                  'ME',
+#                  'Kurztext',
+#                  'Losgr. von',
+#                  'Losgr. bis',
+#                  'Fev',
+#                 'Dis',
+#                 'Lab'], sep='#',encoding='windows-1252')
 Stueli = pd.DataFrame(List1)
 Stueli.drop(labels=0, axis=0, inplace =True) #hier wird die erste Zeile gedropt
 Stueli.drop(columns=['Werk',
@@ -72,6 +127,10 @@ Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
 indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
 FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
+
+
+
+
 
 #Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
