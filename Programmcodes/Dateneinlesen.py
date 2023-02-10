@@ -27,7 +27,28 @@ Starttermine.drop(columns=['Ansatznummer',
                            'Zulässig eingeplant',
                            'Ursprüngliches Ende',
                            'Material Verfügbar',
-                           'Langtext'],inplace=True)
+                           'Langtext',
+                           'Kampagnen-ID',
+                            'ATP einstufig (%)',
+                           'ATP Hauptkomponente (dynamisch)',
+                           'ATP Restliche Materialien (dynamisch)',
+                           'FMAT',
+                           'MABS',
+                           'Disponent',
+                           'Fertigungssteuerer Mat.stamm',
+                           'Fertigungssteuerer Pr-Auf',
+                           'Hersteller',
+                           'Hersteller Pr-Auf',
+                           'Hersteller Mat.stamm',
+                           'Kommentar',
+                           'Tage - Reichweite',
+                           'Auftragsart',
+                           'Werk',
+                           'Lagerort',
+                           'Erstellungsdatum im ERP-System',
+                           'Erstellt von',
+                           'Änderungsdatum im ERP-System',
+                           'Geändert von'],inplace=True)
 Starttermine=Starttermine.sort_values(by='Start') #Index nach Datum sortieren
 Next=Starttermine[Date:NextDate] #Filtern des Betrachtungszeitraums!
 #Starttermine Produktionsaufträge G1
@@ -45,18 +66,11 @@ Starttermine=Starttermine.sort_values(by='Start')
 Next2=Starttermine[Date:NextDate]
 
 #Startlisten zusammenführen
-#Next=Next.reset_index()
-#Columnames aufeinander anpassen....!!!
+Next = Next.reset_index()
+Next2 = Next2.reset_index()
+Next = pd.merge(Next,Next2, how='outer')
+#Next.set_index(['Auftrags-Nr.'], inplace=True)
 
-
-Next.set_index(['Auftrags-Nr.'], inplace=True)
-Next2.set_index(['Auftrags-Nr.'], inplace=True)
-
-
-print(Next)
-print(Next2)
-#Next=pd.merge(Next,Next2, left_index=False, right_index=False)
-#print(Next)
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Material',
@@ -128,14 +142,11 @@ indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contai
 FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
 
-
-
-
-
 #Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
 data = data.reset_index()
-data.drop(columns='Start',inplace=True)
+#data.drop(columns='Start',inplace=True)
+data.drop(columns='index',inplace=True)
 Häufigkeit = pd.Series(data['Mat.-Nr.'])
 Häufigkeit = Häufigkeit.value_counts(sort=False)  #Hier wird berechnet, wie oft die Rohstoffe benötigt werden
 data = Häufigkeit.to_frame()
@@ -157,6 +168,7 @@ Aufträge = len(Next)
 i = 0
 FS['Materialübereinstimmung'] = 0
 FS['Mengenübereinstimmung'] = 0
+print(Next)
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
 while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benötigt werden
