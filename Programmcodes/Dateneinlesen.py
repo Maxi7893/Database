@@ -189,7 +189,7 @@ BR.drop(columns=['Al',
                  'Fev',
                  'Materialübereinstimmung',
                  'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
-BR.to_excel('Benötigten_Rohstoffe.xlsx')
+
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
@@ -212,8 +212,8 @@ while i<(len-1):
     i=i+1
     Abpacknummer = Abpacker['APN'][i]
 BR = BR[BR.Abpacker == True]
+BR.to_excel('Benötigten_Rohstoffe.xlsx')
 BR.drop(columns=['Abpacker'],inplace=True)
-
 
 #Abpackgebinde werden eingelesen
 Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
