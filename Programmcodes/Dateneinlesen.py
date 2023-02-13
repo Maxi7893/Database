@@ -167,6 +167,7 @@ while i < (AnzahlPro-1): #Hier wird die Häufigkeit der Produkte in den nächste
     Auftragsnummer = data['Mat.-Nr.'][i]
     Häufigkeit = data['Häufigkeit'][i]
 
+
 #Hier werden die benötigten Rohstoffe ausgelesen
 Aufträge = len(Next)
 i = 0
