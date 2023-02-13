@@ -6,9 +6,9 @@ from datetime import date, timedelta
 a = 10 #KLänge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-#Date = '2023-01-14' #Für den Test hier nur ein beispielhafter Tag
-#Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
-Date = date.today() #Aktueller Tag wird gespeichert
+Date = '2023-05-23' #Für den Test hier nur ein beispielhafter Tag
+Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
+#Date = date.today() #Aktueller Tag wird gespeichert
 NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
 
 #Starttermine Produktionsaufträge G20
@@ -112,7 +112,8 @@ List2 = pd.read_csv('Dateien\Stückliste G1.TXT',names=['Werk',
                         'Fev',
                         'Dis',
                         'Lab'],sep='#',encoding='windows-1252') #Einlseen der txt und encoding
-List = pd.merge(List1, List2, how='outer')
+List2 = List2.dropna(subset=['Kurztext']) #Hier werden die deleted entfernt
+List = pd.merge(List1, List2, how='outer') #Die beiden Stücklisten werden zusammengefügt
 Stueli = pd.DataFrame(List)
 Stueli.drop(labels=0, axis=0, inplace =True) #hier wird die erste Zeile gedropt
 Stueli.drop(columns=['Werk',
@@ -133,8 +134,7 @@ Stueli['Negativ'] = 1
 Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese gekennzeichnet
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '') #Die Bindestriche (negativ-Zeichen) werden entfernt
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(' ', '')
-print(Stueli.dtypes)
-print(Stueli['Komponentenmng.'])
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('null', '0')
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werden zu einem Float
 Stueli['Basismenge'] = Stueli['Basismenge'].str[:-4] #Hier werden die Basismengen bis zu dem Komma gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
@@ -167,12 +167,11 @@ while i < (AnzahlPro-1): #Hier wird die Häufigkeit der Produkte in den nächste
     Auftragsnummer = data['Mat.-Nr.'][i]
     Häufigkeit = data['Häufigkeit'][i]
 
-#Hier werden die abzupackenden Rohstoffe ausgelesen
+#Hier werden die benötigten Rohstoffe ausgelesen
 Aufträge = len(Next)
 i = 0
 FS['Materialübereinstimmung'] = 0
 FS['Mengenübereinstimmung'] = 0
-print(Next)
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
 while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benötigt werden
@@ -190,7 +189,7 @@ BR.drop(columns=['Al',
                  'Fev',
                  'Materialübereinstimmung',
                  'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
-
+BR.to_excel('Benötigten_Rohstoffe.xlsx')
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
@@ -214,8 +213,7 @@ while i<(len-1):
     Abpacknummer = Abpacker['APN'][i]
 BR = BR[BR.Abpacker == True]
 BR.drop(columns=['Abpacker'],inplace=True)
-#BR = Benötigten Rohstoffe
-#Abpacker = alle abzupackenden Rohstoffe
+
 
 #Abpackgebinde werden eingelesen
 Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
@@ -229,4 +227,5 @@ BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer
 BR.drop(columns=['Materialnummer'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
-BR.to_excel('Benötigten_Rohstoffe.xlsx')
+print(BR)
+#BR.to_excel('Benötigten_Rohstoffe.xlsx')
