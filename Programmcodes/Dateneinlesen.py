@@ -92,27 +92,28 @@ List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Fev',
                         'Dis',
                         'Lab'],sep='#',encoding='windows-1252') #Einlseen der txt und encoding
-#List2=pd.read_csv('Dateien\Stückliste G1.TXT', names=['Werk',
-#                    'Material-Nr.',
-#                    'Al',
-#                    'Kurztext',
-#                    'Basismenge',
-#                    'ME',
-#                    'MTART',
-#                    'SB',
-#                  'Pos',
-#                  'Komponente',
-#                  'Prodh.',
-#                  'K',
-#                  'Einsatzmenge',
-#                  'ME',
-#                  'Kurztext',
-#                  'Losgr. von',
-#                  'Losgr. bis',
-#                  'Fev',
-#                 'Dis',
-#                 'Lab'], sep='#',encoding='windows-1252')
-Stueli = pd.DataFrame(List1)
+List2 = pd.read_csv('Dateien\Stückliste G1.TXT',names=['Werk',
+                        'Material',
+                        'Al',
+                        'Kurztext',
+                        'Basismenge',
+                        'Me',
+                        'Mart',
+                        'Ss',
+                        'Pos.',
+                        'E-Material',
+                        'Prodh.',
+                        'P',
+                        'Komponentenmng.',
+                        'Me2',
+                        'Kurztext2',
+                        'Losgr.von',
+                        'Losgr.bis',
+                        'Fev',
+                        'Dis',
+                        'Lab'],sep='#',encoding='windows-1252') #Einlseen der txt und encoding
+List = pd.merge(List1, List2, how='outer')
+Stueli = pd.DataFrame(List)
 Stueli.drop(labels=0, axis=0, inplace =True) #hier wird die erste Zeile gedropt
 Stueli.drop(columns=['Werk',
                     'Ss',
@@ -131,6 +132,9 @@ Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(',' , '.')
 Stueli['Negativ'] = 1
 Stueli.loc[Stueli['Komponentenmng.'].str.contains('-'), 'Negativ'] = -1 #Sobald negative Werte vorliegen werden diese gekennzeichnet
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace('-', '') #Die Bindestriche (negativ-Zeichen) werden entfernt
+Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].str.replace(' ', '')
+print(Stueli.dtypes)
+print(Stueli['Komponentenmng.'])
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werden zu einem Float
 Stueli['Basismenge'] = Stueli['Basismenge'].str[:-4] #Hier werden die Basismengen bis zu dem Komma gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
