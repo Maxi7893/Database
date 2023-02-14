@@ -6,7 +6,7 @@ from datetime import date, timedelta
 a = 10 #Länge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-Date = '2023-05-23' #Für den Test hier nur ein beispielhafter Tag
+Date = '2023-05-19' #Für den Test hier nur ein beispielhafter Tag
 Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
 #Date = date.today() #Aktueller Tag wird gespeichert
 NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
@@ -170,7 +170,6 @@ while i < AnzahlPro: #Hier wird die Häufigkeit der Produkte in den nächsten zw
         Auftragsnummer = data['Mat.-Nr.'][i]
         Häufigkeit = data['Häufigkeit'][i]
 
-
 #Hier werden die benötigten Rohstoffe ausgelesen
 Aufträge = len(Next)
 i = 0
@@ -212,26 +211,28 @@ i=0
 Abpacknummer = Abpacker['APN'][i]
 BR['Abpacker'] = False
 len = len(Abpacker)
-while i<(len):
+
+while i< len:
     BR.loc[(BR['E-Material'] == Abpacknummer), 'Abpacker'] = True
     i=i+1
     if i < len:
         Abpacknummer = Abpacker['APN'][i]
 BR = BR[BR.Abpacker == True]
-BR.to_excel('Benötigten_Rohstoffe.xlsx')
 BR.drop(columns=['Abpacker'],inplace=True)
 
 #Abpackgebinde werden eingelesen
-Abpackergebinde = pd.read_excel('Dateien\MARA_G20 Materialien_incl.E-Mat.xlsx')
+Abpackergebinde = pd.read_excel('Dateien\MARA_G1_g20_Gebinde.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
-Abpackergebinde.drop(columns=['E-Material'], inplace=True)
+Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
 Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
 if b>0:
     Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
+
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
-BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer')
+BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
+
 BR.drop(columns=['Materialnummer'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
 print(BR)
-#BR.to_excel('Benötigten_Rohstoffe.xlsx')
+BR.to_excel('Benötigten_Rohstoffe.xlsx')
