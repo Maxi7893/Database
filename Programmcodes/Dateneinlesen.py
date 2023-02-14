@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import date, timedelta
 
 #Produktionstermine werden eingelesen
-a = 10 #KLänge der Materialnummern
+a = 10 #Länge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
 Date = '2023-05-23' #Für den Test hier nur ein beispielhafter Tag
