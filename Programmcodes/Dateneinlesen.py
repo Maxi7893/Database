@@ -69,7 +69,6 @@ Next2=Starttermine[Date:NextDate]
 Next = Next.reset_index()
 Next2 = Next2.reset_index()
 Next = pd.merge(Next,Next2, how='outer')
-#Next.set_index(['Auftrags-Nr.'], inplace=True)
 
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
@@ -169,7 +168,6 @@ while i < AnzahlPro: #Hier wird die Häufigkeit der Produkte in den nächsten zw
     if i < AnzahlPro:
         Auftragsnummer = data['Mat.-Nr.'][i]
         Häufigkeit = data['Häufigkeit'][i]
-
 #Hier werden die benötigten Rohstoffe ausgelesen
 Aufträge = len(Next)
 i = 0
@@ -184,7 +182,7 @@ while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt
     if i < Aufträge:
         Auftragsnummer = Next['Mat.-Nr.'][i]
         Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
-    #Es gilt jedoch noch zu berücksichtigen, wenn Auträge sich doppeln, müssen die Mengen ebenfalls verdoppelt werden
+
    # print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
 BR.drop(columns=['Al',
