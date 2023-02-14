@@ -149,6 +149,7 @@ FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entf
 #Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
 data = data.reset_index()
+print(data)
 #data.drop(columns='Start',inplace=True)
 data.drop(columns='index',inplace=True)
 Häufigkeit = pd.Series(data['Mat.-Nr.'])
@@ -161,11 +162,13 @@ i=0
 Auftragsnummer = data['Mat.-Nr.'][i]
 Häufigkeit = data['Häufigkeit'][i]
 FS['Häufigkeit'] = 0
-while i < (AnzahlPro-1): #Hier wird die Häufigkeit der Produkte in den nächsten zwei Wochen in die Liste eingepflegt
+
+while i < AnzahlPro: #Hier wird die Häufigkeit der Produkte in den nächsten zwei Wochen in die Liste eingepflegt
     FS.loc[(FS['Material'] == Auftragsnummer), 'Häufigkeit'] = Häufigkeit
     i = i+1
-    Auftragsnummer = data['Mat.-Nr.'][i]
-    Häufigkeit = data['Häufigkeit'][i]
+    if i < AnzahlPro:
+        Auftragsnummer = data['Mat.-Nr.'][i]
+        Häufigkeit = data['Häufigkeit'][i]
 
 
 #Hier werden die benötigten Rohstoffe ausgelesen
@@ -175,12 +178,13 @@ FS['Materialübereinstimmung'] = 0
 FS['Mengenübereinstimmung'] = 0
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
-while i < (Aufträge-1): #Hier werden die Materialien ausgelesen, welche benötigt werden
+while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt werden
     FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 1
     FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 1
     i = i+1
-    Auftragsnummer = Next['Mat.-Nr.'][i]
-    Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
+    if i < Aufträge:
+        Auftragsnummer = Next['Mat.-Nr.'][i]
+        Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
     #Es gilt jedoch noch zu berücksichtigen, wenn Auträge sich doppeln, müssen die Mengen ebenfalls verdoppelt werden
    # print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
@@ -208,10 +212,11 @@ i=0
 Abpacknummer = Abpacker['APN'][i]
 BR['Abpacker'] = False
 len = len(Abpacker)
-while i<(len-1):
+while i<(len):
     BR.loc[(BR['E-Material'] == Abpacknummer), 'Abpacker'] = True
     i=i+1
-    Abpacknummer = Abpacker['APN'][i]
+    if i < len:
+        Abpacknummer = Abpacker['APN'][i]
 BR = BR[BR.Abpacker == True]
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
 BR.drop(columns=['Abpacker'],inplace=True)
