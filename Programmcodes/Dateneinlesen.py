@@ -187,7 +187,7 @@ while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt
         Auftragsnummer = Next['Mat.-Nr.'][i]
         Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
 
-#Was ist, wenn es kein Rezept gibt, bei welchem die Menge übereinstimmt
+#Ebenfalls Rezepte hinzufügen, bei dem Menge nicht übereinstimmt!
 Test = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengen- und Materialübereinstimmung'] ==False)]
 Test.to_excel('Benötigten_Rohstoff.xlsx')
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
