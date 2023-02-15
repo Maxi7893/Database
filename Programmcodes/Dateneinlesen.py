@@ -191,6 +191,8 @@ while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt
 Test = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengen- und Materialübereinstimmung'] ==False)]
 Test.to_excel('Benötigten_Rohstoff.xlsx')
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
+#Hier gilt es noch Materialien in BR zu übertragen, bei denen nicht Menge nicht übereinstimmt
+
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
