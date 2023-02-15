@@ -69,7 +69,7 @@ Next2=Starttermine[Date:NextDate]
 Next = Next.reset_index()
 Next2 = Next2.reset_index()
 Next = pd.merge(Next,Next2, how='outer')
-
+Next.to_excel('Nächsten Produktionstermine.xlsx')
 #Stücklisten werden eingelesen
 List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Material',
@@ -148,7 +148,6 @@ FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entf
 #Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
 data = data.reset_index()
-print(data)
 #data.drop(columns='Start',inplace=True)
 data.drop(columns='index',inplace=True)
 Häufigkeit = pd.Series(data['Mat.-Nr.'])
@@ -156,6 +155,7 @@ Häufigkeit = Häufigkeit.value_counts(sort=False)  #Hier wird berechnet, wie of
 data = Häufigkeit.to_frame()
 data = Häufigkeit.reset_index()
 data.columns = ['Mat.-Nr.', 'Häufigkeit']
+print(data)
 AnzahlPro = len(data)
 i=0
 Auftragsnummer = data['Mat.-Nr.'][i]
@@ -168,22 +168,28 @@ while i < AnzahlPro: #Hier wird die Häufigkeit der Produkte in den nächsten zw
     if i < AnzahlPro:
         Auftragsnummer = data['Mat.-Nr.'][i]
         Häufigkeit = data['Häufigkeit'][i]
+
 #Hier werden die benötigten Rohstoffe ausgelesen
 Aufträge = len(Next)
 i = 0
+#Al 1 nehmen oder höher, falls nicht nur Materialübereinstimmung ist
 FS['Materialübereinstimmung'] = 0
 FS['Mengenübereinstimmung'] = 0
+FS['Mengen- und Materialübereinstimmung'] = False
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
 while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt werden
     FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 1
     FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 1
+    FS.loc[(FS['Materialübereinstimmung'] == 1) & FS['Mengenübereinstimmung']==1,'Mengen- und Materialübereinstimmung'] = True
     i = i+1
     if i < Aufträge:
         Auftragsnummer = Next['Mat.-Nr.'][i]
         Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
 
-   # print('Durlaufnr.', i, 'mit der Materialnummer', Auftragsnummer)
+#Was ist, wenn es kein Rezept gibt, bei welchem die Menge übereinstimmt
+Test = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengen- und Materialübereinstimmung'] ==False)]
+Test.to_excel('Benötigten_Rohstoff.xlsx')
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
 BR.drop(columns=['Al',
                  'Mart',
@@ -209,7 +215,6 @@ i=0
 Abpacknummer = Abpacker['APN'][i]
 BR['Abpacker'] = False
 len = len(Abpacker)
-
 while i< len:
     BR.loc[(BR['E-Material'] == Abpacknummer), 'Abpacker'] = True
     i=i+1
@@ -234,3 +239,5 @@ BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
 print(BR)
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
+
+#Es müssen noch kontrolliert werden, ob die Mengen übereinstimmen! Aktuell werden die Aufträge, bei denen die Mengen nicht stimmen nicht berücksichtigt

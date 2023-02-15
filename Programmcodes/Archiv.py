@@ -22,3 +22,19 @@ Start.set_index(['Start'], inplace=True) #Hier wird der Index gesetzt
 Start = Start.sort_values(by='Start') #Hier wird die Liste noch nach den Startdaten geordnet
 Next = Start[Date:NextDate] #Hier werden die Aufträge der nächsten zwei Wochen ausgelesen
 print(Next)
+
+
+
+#Hier wird überprüft, ob es Rezepte gibt, bei denen die Menge nicht übereinstimmt
+i=0
+Nummer=len(data)
+data['Mengen- und Materialübereinstimmung'] = False
+Materialnummer = data['Mat.-Nr.'][i]
+
+while i<Nummer:
+    FS.loc[(FS['Material'] == Materialnummer) & FS['Mengen- und Materialübereinstimmung'] == True, data['Mengen- und Materialübereinstimmung'][i]] = True
+    print(i)
+    print(Materialnummer)
+    i=i+1
+    if i<Nummer:
+        Materialnummer = data['Mat.-Nr.'][i]
