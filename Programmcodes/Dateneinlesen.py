@@ -151,7 +151,8 @@ data = data.reset_index()
 #data.drop(columns='Start',inplace=True)
 data.drop(columns='index',inplace=True)
 Häufigkeit = pd.Series(data['Mat.-Nr.'])
-Häufigkeit = Häufigkeit.value_counts(sort=False)  #Hier wird berechnet, wie oft die Rohstoffe benötigt werden
+Häufigkeit = Häufigkeit.value_counts(sort=False)
+#Hier wird berechnet, wie oft die Rohstoffe benötigt werden
 data = Häufigkeit.to_frame()
 data = Häufigkeit.reset_index()
 data.columns = ['Mat.-Nr.', 'Häufigkeit']
@@ -188,9 +189,23 @@ while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt
         Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
 
 #Ebenfalls Rezepte hinzufügen, bei dem Menge nicht übereinstimmt!
+BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
+Kontrolle=BR['Material']
+print(Kontrolle)
+#Kontrolle bereinigen auf die Materialien, welche rausgesucht wurden
+Kontrolle = pd.Series(Kontrolle)
+Kontrolle = Kontrolle.value_counts(sort=False)
+Kontrolle = Kontrolle.to_frame()
+Kontrolle = Kontrolle.reset_index()
+Kontrolle.columns = ['Mat.-Nr.', 'Häufigkeit']
+Kontrolle.drop(columns=['Häufigkeit'], inplace=True)
+#In dem DataFrame Kontrolle sind nun alle Materialien, welche mit der Menge aus der Stückliste ebenfalls übereinstimmen
+print(Kontrolle)
+
 Test = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengen- und Materialübereinstimmung'] ==False)]
 Test.to_excel('Benötigten_Rohstoff.xlsx')
-BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
+#Idee Vorgehen: 1. Kontrolle, ob Materialien bereits
+
 #Hier gilt es noch Materialien in BR zu übertragen, bei denen nicht Menge nicht übereinstimmt
 
 BR.drop(columns=['Al',
