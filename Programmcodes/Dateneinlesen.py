@@ -190,9 +190,7 @@ while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt
 
 #Ebenfalls Rezepte hinzufügen, bei dem Menge nicht übereinstimmt!
 BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
-Kontrolle=BR['Material']
-print(Kontrolle)
-#Kontrolle bereinigen auf die Materialien, welche rausgesucht wurden
+Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
 Kontrolle = Kontrolle.value_counts(sort=False)
 Kontrolle = Kontrolle.to_frame()
@@ -201,13 +199,17 @@ Kontrolle.columns = ['Mat.-Nr.', 'Häufigkeit']
 Kontrolle.drop(columns=['Häufigkeit'], inplace=True)
 #In dem DataFrame Kontrolle sind nun alle Materialien, welche mit der Menge aus der Stückliste ebenfalls übereinstimmen
 print(Kontrolle)
-
 Test = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengen- und Materialübereinstimmung'] ==False)]
 Test.to_excel('Benötigten_Rohstoff.xlsx')
-#Idee Vorgehen: 1. Kontrolle, ob Materialien bereits
+#Hier jetzt alle Materialien entfernen, die bereits in dem DataFrame Kontrolle aufkommen
+
+#Alle Materialien, die nicht in dem DataFraume vorkommen werden gefiltert, sodass jeweils nur noch ein Rezept übrig bleibt
+
+
+#Achtung! Stimmen die Mengen-Rezeptverhältnisse
+
 
 #Hier gilt es noch Materialien in BR zu übertragen, bei denen nicht Menge nicht übereinstimmt
-
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
@@ -241,7 +243,7 @@ BR = BR[BR.Abpacker == True]
 BR.drop(columns=['Abpacker'],inplace=True)
 
 #Abpackgebinde werden eingelesen
-Abpackergebinde = pd.read_excel('Dateien\MARA_G1_g20_Gebinde.xlsx')
+Abpackergebinde = pd.read_excel('Dateien\MARA_G1_G20_Gebinde.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
 Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
 Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
@@ -250,7 +252,6 @@ if b>0:
 
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
-
 BR.drop(columns=['Materialnummer'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
