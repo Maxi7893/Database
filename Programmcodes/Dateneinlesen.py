@@ -138,6 +138,7 @@ Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'].astype(float) #Mengen werd
 Stueli['Basismenge'] = Stueli['Basismenge'].str[:-4] #Hier werden die Basismengen bis zu dem Komma gekürzt
 Stueli['Basismenge'] = Stueli['Basismenge'].str.replace(',', '') #Hier werden die Kommas aus der Mengeneinheit entfernt
 Stueli['Basismenge'] = Stueli['Basismenge'].astype(float) #Basismengen werden zu einem Float umgewandelt
+Stueli['Al'] = Stueli['Al'].astype(float)
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ'] #Negative Mengen sind jetzt kein String mehr
 Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
 #Stueli['Rohstoff'] = (Stueli['Komponentenmng.'] > 0) & (Stueli['Me2'].str.contains('KG'))
@@ -174,22 +175,40 @@ while i < AnzahlPro: #Hier wird die Häufigkeit der Produkte in den nächsten zw
 Aufträge = len(Next)
 i = 0
 #Al 1 nehmen oder höher, falls nicht nur Materialübereinstimmung ist
-FS['Materialübereinstimmung'] = 0
-FS['Mengenübereinstimmung'] = 0
 FS['Mengen- und Materialübereinstimmung'] = False
+FS['Materialübereinstimmung'] = False
 Auftragsnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
-while i < (Aufträge): #Hier werden die Materialien ausgelesen, welche benötigt werden
-    FS.loc[(FS['Material'] == Auftragsnummer), 'Materialübereinstimmung'] = 1
-    FS.loc[(FS['Basismenge'] == Menge), 'Mengenübereinstimmung' ] = 1
-    FS.loc[(FS['Materialübereinstimmung'] == 1) & FS['Mengenübereinstimmung']==1,'Mengen- und Materialübereinstimmung'] = True
+df= pd.DataFrame
+
+while i < Aufträge:
+    FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] == Menge),'Mengen- und Materialübereinstimmung'] = True #Stimmen Mengen und Materialnummer überein
+    FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] != Menge),'Materialübereinstimmung'] = True  #Stimmen Mengen und Materialnummern nicht überein
     i = i+1
     if i < Aufträge:
         Auftragsnummer = Next['Mat.-Nr.'][i]
-        Menge = Next['Menge'][i] #wurde hinzugefüt, da Neben der Materialnummer ebenfalls die Menge stimmen muss!
-
+        Menge = Next['Menge'][i]
 #Ebenfalls Rezepte hinzufügen, bei dem Menge nicht übereinstimmt!
-BR = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengenübereinstimmung'] == 1)]
+BR = FS.loc[(FS['Mengen- und Materialübereinstimmung'] == True)]
+#Hier jetzt kontrollieren, ob es Aufträge gibt, die zwar gefertigt werden müssen aber noch nicht in BR sind!
+Test = FS.loc[(FS['Materialübereinstimmung'] == True)]
+Test['Vorhanden'] =False
+Test= Test.reset_index()
+Test.drop(columns=['index'], inplace=True)
+print(Test)
+Länge=len(Test)
+i = 0
+Nummer = Test['Material'][i]
+while i < Länge:
+    BR.loc[BR['Material']==Nummer, Test['Vorhanden'][i]]=False
+    i = i+1
+    if i<Länge:
+        Nummer = Test['Material'][i]
+Test.to_excel('Test.xlsx')
+BR.to_excel('Test2.xlsx')
+#Abschließend müssen noch Duplikate entfernt werden (bspw. Al1 und Al2 schaffen es in die Liste)
+
+#FS['Al'] == 1)]
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
 Kontrolle = Kontrolle.value_counts(sort=False)
@@ -199,8 +218,7 @@ Kontrolle.columns = ['Mat.-Nr.', 'Häufigkeit']
 Kontrolle.drop(columns=['Häufigkeit'], inplace=True)
 #In dem DataFrame Kontrolle sind nun alle Materialien, welche mit der Menge aus der Stückliste ebenfalls übereinstimmen
 print(Kontrolle)
-Test = FS.loc[(FS['Materialübereinstimmung'] == 1) & (FS['Mengen- und Materialübereinstimmung'] ==False)]
-Test.to_excel('Benötigten_Rohstoff.xlsx')
+
 #Hier jetzt alle Materialien entfernen, die bereits in dem DataFrame Kontrolle aufkommen
 
 #Alle Materialien, die nicht in dem DataFraume vorkommen werden gefiltert, sodass jeweils nur noch ein Rezept übrig bleibt
@@ -213,9 +231,7 @@ Test.to_excel('Benötigten_Rohstoff.xlsx')
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
-                 'Fev',
-                 'Materialübereinstimmung',
-                 'Mengenübereinstimmung'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
+                 'Fev'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
