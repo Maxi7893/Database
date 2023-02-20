@@ -183,6 +183,7 @@ df= pd.DataFrame
 
 while i < Aufträge:
     FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] == Menge),'Mengen- und Materialübereinstimmung'] = True #Stimmen Mengen und Materialnummer überein
+    FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] == Menge), 'Materialübereinstimmung'] = True
     FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] != Menge),'Materialübereinstimmung'] = True  #Stimmen Mengen und Materialnummern nicht überein
     i = i+1
     if i < Aufträge:
@@ -191,16 +192,15 @@ while i < Aufträge:
 #Ebenfalls Rezepte hinzufügen, bei dem Menge nicht übereinstimmt!
 BR = FS.loc[(FS['Mengen- und Materialübereinstimmung'] == True)]
 #Hier jetzt kontrollieren, ob es Aufträge gibt, die zwar gefertigt werden müssen aber noch nicht in BR sind!
-Test = FS.loc[(FS['Materialübereinstimmung'] == True)]
+Test = FS.loc[(FS['Materialübereinstimmung'] == True) & (FS['Mengen- und Materialübereinstimmung'] == False)]
 Test['Vorhanden'] =False
 Test= Test.reset_index()
 Test.drop(columns=['index'], inplace=True)
-print(Test)
 Länge=len(Test)
 i = 0
 Nummer = Test['Material'][i]
 while i < Länge:
-    BR.loc[BR['Material']==Nummer, Test['Vorhanden'][i]]=False
+    BR.loc[(BR['Material']==Nummer), Test['Vorhanden'][i]]=True
     i = i+1
     if i<Länge:
         Nummer = Test['Material'][i]
