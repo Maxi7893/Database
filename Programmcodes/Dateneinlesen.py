@@ -207,11 +207,12 @@ while i < Länge:
     i = i+1
     if i<Länge:
         Materialnummer = BR['Material'][i]
-Test.to_excel('Test.xlsx')
-BR.to_excel('Test2.xlsx')
+Test = Test[Test['Vorhanden'] ==False]
+BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
 #Abschließend müssen noch Duplikate entfernt werden (bspw. Al1 und Al2 schaffen es in die Liste)
+#Zuletzt muss noch die Menge bei den Materialien verändert werden, bei denen die Produktionsmenge nicht übereinstimmt
 
-#FS['Al'] == 1)]
+
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
 Kontrolle = Kontrolle.value_counts(sort=False)
