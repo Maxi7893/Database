@@ -157,7 +157,7 @@ Häufigkeit = Häufigkeit.value_counts(sort=False)
 data = Häufigkeit.to_frame()
 data = Häufigkeit.reset_index()
 data.columns = ['Mat.-Nr.', 'Häufigkeit']
-print(data)
+#print(data)
 AnzahlPro = len(data)
 i=0
 Auftragsnummer = data['Mat.-Nr.'][i]
@@ -193,8 +193,9 @@ while i < Aufträge:
 BR = FS.loc[(FS['Mengen- und Materialübereinstimmung'] == True)]
 #Hier jetzt kontrollieren, ob es Aufträge gibt, die zwar gefertigt werden müssen aber noch nicht in BR sind!
 Test = FS.loc[(FS['Materialübereinstimmung'] == True) & (FS['Mengen- und Materialübereinstimmung'] == False)]
-Test = Test.append({'Material':'1220','Al': 1235, 'Kurztext' : 'Test'}, ignore_index=True)
+Test = Test.append({'Material':'1220','Al': 1235, 'Kurztext' : 'Test', 'Basismenge': 1000, 'Me':'KG'}, ignore_index=True) #Testobjekt
 Test['Vorhanden'] =False
+Test.to_excel('Test1.xlsx')
 Test= Test.reset_index()
 Test.drop(columns=['index'], inplace=True)
 Länge=len(BR)
@@ -207,8 +208,10 @@ while i < Länge:
     i = i+1
     if i<Länge:
         Materialnummer = BR['Material'][i]
-Test = Test[Test['Vorhanden'] ==False]
+Test = Test[Test['Vorhanden']==False]
+Test.to_excel('Test2.xlsx')
 BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
+BR.to_excel('Test3.xlsx')
 #Abschließend müssen noch Duplikate entfernt werden (bspw. Al1 und Al2 schaffen es in die Liste)
 #Zuletzt muss noch die Menge bei den Materialien verändert werden, bei denen die Produktionsmenge nicht übereinstimmt
 
@@ -221,11 +224,27 @@ Kontrolle = Kontrolle.reset_index()
 Kontrolle.columns = ['Mat.-Nr.', 'Häufigkeit']
 Kontrolle.drop(columns=['Häufigkeit'], inplace=True)
 #In dem DataFrame Kontrolle sind nun alle Materialien, welche mit der Menge aus der Stückliste ebenfalls übereinstimmen
-print(Kontrolle)
-
-#Hier jetzt alle Materialien entfernen, die bereits in dem DataFrame Kontrolle aufkommen
-
 #Alle Materialien, die nicht in dem DataFraume vorkommen werden gefiltert, sodass jeweils nur noch ein Rezept übrig bleibt
+Länge = len(Kontrolle)
+BR['Duplikat'] = True
+i = 0
+BestAl = BR.set_index(['Material'])
+Materialnummer = Kontrolle['Mat.-Nr.'][i]
+while i < Länge:
+    Al = BestAl['Al'][Materialnummer]
+    #Al = Al.reset_index()
+   # Al= Al.drop(columns=['Material'], inplace=True)
+    Te = Al.min(axis=0)
+    print(Te)
+    BR.loc[(BR['Material']==Materialnummer) & (BR['Al'] == Te), 'Duplikat']=False
+    i = i + 1
+    if i < Länge:
+        Materialnummer = Kontrolle['Mat.-Nr.'][i]
+
+BR = BR[BR['Duplikat']==False]
+BR.to_excel('Test5.xlsx')
+
+
 
 
 #Achtung! Stimmen die Mengen-Rezeptverhältnisse
