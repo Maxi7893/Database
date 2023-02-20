@@ -242,15 +242,11 @@ while i < Länge:
         Materialnummer = Kontrolle['Mat.-Nr.'][i]
 
 BR = BR[BR['Duplikat']==False]
-BR.to_excel('Test5.xlsx')
 
 
-
-
-#Achtung! Stimmen die Mengen-Rezeptverhältnisse
-
-
+#Achtung! Stimmen die Mengen-Rezeptverhältnisse?
 #Hier gilt es noch Materialien in BR zu übertragen, bei denen nicht Menge nicht übereinstimmt
+
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
