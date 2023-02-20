@@ -193,17 +193,20 @@ while i < Aufträge:
 BR = FS.loc[(FS['Mengen- und Materialübereinstimmung'] == True)]
 #Hier jetzt kontrollieren, ob es Aufträge gibt, die zwar gefertigt werden müssen aber noch nicht in BR sind!
 Test = FS.loc[(FS['Materialübereinstimmung'] == True) & (FS['Mengen- und Materialübereinstimmung'] == False)]
+Test = Test.append({'Material':'1220','Al': 1235, 'Kurztext' : 'Test'}, ignore_index=True)
 Test['Vorhanden'] =False
 Test= Test.reset_index()
 Test.drop(columns=['index'], inplace=True)
-Länge=len(Test)
+Länge=len(BR)
 i = 0
-Nummer = Test['Material'][i]
+BR = BR.reset_index()
+BR.drop(columns=['index'], inplace=True)
+Materialnummer = BR['Material'][i]
 while i < Länge:
-    BR.loc[(BR['Material']==Nummer), Test['Vorhanden'][i]]=True
+    Test.loc[(Test['Material']==Materialnummer), 'Vorhanden']=True
     i = i+1
     if i<Länge:
-        Nummer = Test['Material'][i]
+        Materialnummer = BR['Material'][i]
 Test.to_excel('Test.xlsx')
 BR.to_excel('Test2.xlsx')
 #Abschließend müssen noch Duplikate entfernt werden (bspw. Al1 und Al2 schaffen es in die Liste)

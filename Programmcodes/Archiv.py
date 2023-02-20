@@ -38,3 +38,18 @@ while i<Nummer:
     i=i+1
     if i<Nummer:
         Materialnummer = data['Mat.-Nr.'][i]
+#Hier Test
+Test = FS.loc[(FS['Materialübereinstimmung'] == True) & (FS['Mengen- und Materialübereinstimmung'] == False)]
+Test['Vorhanden'] =False
+Test= Test.reset_index()
+Test.drop(columns=['index'], inplace=True)
+Länge=len(Test)
+i = 0
+Nummer = Test['Material'][i]
+while i < Länge:
+    BR.loc[(BR['Material']==Nummer), Test['Vorhanden'][i]]=True
+    i = i+1
+    if i<Länge:
+        Nummer = Test['Material'][i]
+Test.to_excel('Test.xlsx')
+BR.to_excel('Test2.xlsx')
