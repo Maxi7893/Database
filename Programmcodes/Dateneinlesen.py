@@ -225,7 +225,6 @@ Materialnummer = Kontrolle['Mat.-Nr.'][i]
 while i < Länge:
     Al = BestAl['Al'][Materialnummer] #Al 1 nehmen oder höher, falls nicht nur Materialübereinstimmung ist
     Te = Al.min(axis=0)
-    print(Te)
     BR.loc[(BR['Material']==Materialnummer) & (BR['Al'] == Te), 'Duplikat']=False
     i = i + 1
     if i < Länge:
@@ -240,6 +239,32 @@ BR = BR[BR['Duplikat']==False]
 #FS['Auftrags-Nr.'] = 0
 #FS.loc[(FS['Material'] == Materialnummer) & ((FS['Basismenge'] == Menge) | (FS['Basismenge'] != Menge)), 'Auftrags-Nr.'] = Auftragsnummer
 #Auftragsnummer = Next['Auftrags-Nr.'][i]
+Länge = len(Next)
+i=0
+Auftragsnummer = Next['Auftrags-Nr.'][i]
+Materialnummer = Next['Mat.-Nr.'][i]
+Start = Next['Start'][i]
+BR['Test'] = False
+BR['Start'] = pd.to_datetime('1900-01-01')
+BR['Auftragsnummer'] = 0
+#Forecast = pd.DataFrame()
+while i<Länge:
+    BR.loc[(BR['Material'] == Materialnummer),'Test']=True #Es werden alle Materialien des Auftrags gekennzeichnet
+    BR.loc[(BR['Material'] == Materialnummer), 'Start'] = Start
+    BR.loc[(BR['Material'] == Materialnummer), 'Auftragsnummer'] = Auftragsnummer
+    TempDB = BR[BR['Test']==True]
+    if i == 0:
+        Forecast = TempDB
+    else:
+        Forecast = pd.merge(Forecast, TempDB, how='outer')
+    i=i+1
+    BR['Test'] = False #Hier wird die Kontrollinstanz wieder auf False gesetzt
+    if i<Länge:
+        Materialnummer=Next['Mat.-Nr.'][i]
+        Auftragsnummer = Next['Auftrags-Nr.'][i]
+        Start = Next['Start'][i]
+
+BR=Forecast
 BR.to_excel('BR.xlsx')
 Next.to_excel('Next.xlsx')
 
@@ -286,9 +311,15 @@ if b>0:
 
 #Abpacker und Gebinde werden in ein DataFrame zusammengefügt
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
-BR.drop(columns=['Materialnummer'],inplace=True)
+BR.drop(columns=['Materialnummer',
+                 'Mengen- und Materialübereinstimmung',
+                 'Materialübereinstimmung',
+                 'Vorhanden',
+                 'Duplikat',
+                 'Test'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
+BR=BR.sort_values(by='Start')
 print(BR)
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
 
