@@ -157,45 +157,39 @@ Häufigkeit = Häufigkeit.value_counts(sort=False)
 data = Häufigkeit.to_frame()
 data = Häufigkeit.reset_index()
 data.columns = ['Mat.-Nr.', 'Häufigkeit']
-#print(data)
 AnzahlPro = len(data)
 i=0
 Auftragsnummer = data['Mat.-Nr.'][i]
 Häufigkeit = data['Häufigkeit'][i]
 FS['Häufigkeit'] = 0
-
 while i < AnzahlPro: #Hier wird die Häufigkeit der Produkte in den nächsten zwei Wochen in die Liste eingepflegt
     FS.loc[(FS['Material'] == Auftragsnummer), 'Häufigkeit'] = Häufigkeit
     i = i+1
     if i < AnzahlPro:
         Auftragsnummer = data['Mat.-Nr.'][i]
         Häufigkeit = data['Häufigkeit'][i]
-
 #Hier werden die benötigten Rohstoffe ausgelesen
 Aufträge = len(Next)
 i = 0
-#Al 1 nehmen oder höher, falls nicht nur Materialübereinstimmung ist
 FS['Mengen- und Materialübereinstimmung'] = False
 FS['Materialübereinstimmung'] = False
-Auftragsnummer = Next['Mat.-Nr.'][i]
+Materialnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
 df= pd.DataFrame
-
 while i < Aufträge:
-    FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] == Menge),'Mengen- und Materialübereinstimmung'] = True #Stimmen Mengen und Materialnummer überein
-    FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] == Menge), 'Materialübereinstimmung'] = True
-    FS.loc[(FS['Material'] == Auftragsnummer) & (FS['Basismenge'] != Menge),'Materialübereinstimmung'] = True  #Stimmen Mengen und Materialnummern nicht überein
+    FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] == Menge),'Mengen- und Materialübereinstimmung'] = True #Stimmen Mengen und Materialnummer überein
+    FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] == Menge), 'Materialübereinstimmung'] = True
+    FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] != Menge),'Materialübereinstimmung'] = True  #Stimmen Mengen und Materialnummern nicht überein
     i = i+1
     if i < Aufträge:
-        Auftragsnummer = Next['Mat.-Nr.'][i]
+        Materialnummer = Next['Mat.-Nr.'][i]
         Menge = Next['Menge'][i]
-#Ebenfalls Rezepte hinzufügen, bei dem Menge nicht übereinstimmt!
+        Auftragsnummer = Next['Auftrags-Nr.'][i]
 BR = FS.loc[(FS['Mengen- und Materialübereinstimmung'] == True)]
 #Hier jetzt kontrollieren, ob es Aufträge gibt, die zwar gefertigt werden müssen aber noch nicht in BR sind!
 Test = FS.loc[(FS['Materialübereinstimmung'] == True) & (FS['Mengen- und Materialübereinstimmung'] == False)]
 Test = Test.append({'Material':'1220','Al': 1235, 'Kurztext' : 'Test', 'Basismenge': 1000, 'Me':'KG'}, ignore_index=True) #Testobjekt
 Test['Vorhanden'] =False
-Test.to_excel('Test1.xlsx')
 Test= Test.reset_index()
 Test.drop(columns=['index'], inplace=True)
 Länge=len(BR)
@@ -209,13 +203,8 @@ while i < Länge:
     if i<Länge:
         Materialnummer = BR['Material'][i]
 Test = Test[Test['Vorhanden']==False]
-Test.to_excel('Test2.xlsx')
 BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
-BR.to_excel('Test3.xlsx')
-#Abschließend müssen noch Duplikate entfernt werden (bspw. Al1 und Al2 schaffen es in die Liste)
-#Zuletzt muss noch die Menge bei den Materialien verändert werden, bei denen die Produktionsmenge nicht übereinstimmt
-
-
+#Hier wird eine Kontroll-Liste erstellt
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
 Kontrolle = Kontrolle.value_counts(sort=False)
@@ -224,6 +213,9 @@ Kontrolle = Kontrolle.reset_index()
 Kontrolle.columns = ['Mat.-Nr.', 'Häufigkeit']
 Kontrolle.drop(columns=['Häufigkeit'], inplace=True)
 #In dem DataFrame Kontrolle sind nun alle Materialien, welche mit der Menge aus der Stückliste ebenfalls übereinstimmen
+
+
+
 #Alle Materialien, die nicht in dem DataFraume vorkommen werden gefiltert, sodass jeweils nur noch ein Rezept übrig bleibt
 Länge = len(Kontrolle)
 BR['Duplikat'] = True
@@ -231,9 +223,7 @@ i = 0
 BestAl = BR.set_index(['Material'])
 Materialnummer = Kontrolle['Mat.-Nr.'][i]
 while i < Länge:
-    Al = BestAl['Al'][Materialnummer]
-    #Al = Al.reset_index()
-   # Al= Al.drop(columns=['Material'], inplace=True)
+    Al = BestAl['Al'][Materialnummer] #Al 1 nehmen oder höher, falls nicht nur Materialübereinstimmung ist
     Te = Al.min(axis=0)
     print(Te)
     BR.loc[(BR['Material']==Materialnummer) & (BR['Al'] == Te), 'Duplikat']=False
@@ -242,11 +232,20 @@ while i < Länge:
         Materialnummer = Kontrolle['Mat.-Nr.'][i]
 
 BR = BR[BR['Duplikat']==False]
-
-
 #Achtung! Stimmen die Mengen-Rezeptverhältnisse?
-#Hier gilt es noch Materialien in BR zu übertragen, bei denen nicht Menge nicht übereinstimmt
 
+#Hier müssen noch die Rohstoffe pro Auftrag hinzugefügt werden
+#Idee pro Auftrag ein DataFrame erstellen und diese dann zusammenführen
+
+#FS['Auftrags-Nr.'] = 0
+#FS.loc[(FS['Material'] == Materialnummer) & ((FS['Basismenge'] == Menge) | (FS['Basismenge'] != Menge)), 'Auftrags-Nr.'] = Auftragsnummer
+#Auftragsnummer = Next['Auftrags-Nr.'][i]
+BR.to_excel('BR.xlsx')
+Next.to_excel('Next.xlsx')
+
+
+
+#Hier gilt es noch Materialien in BR zu übertragen, bei denen die Menge nicht übereinstimmt
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
@@ -292,5 +291,7 @@ BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
 print(BR)
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
+
+
 
 #Es müssen noch kontrolliert werden, ob die Mengen übereinstimmen! Aktuell werden die Aufträge, bei denen die Mengen nicht stimmen nicht berücksichtigt
