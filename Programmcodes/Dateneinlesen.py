@@ -268,8 +268,6 @@ BR=Forecast
 BR.to_excel('BR.xlsx')
 Next.to_excel('Next.xlsx')
 
-
-
 #Hier gilt es noch Materialien in BR zu übertragen, bei denen die Menge nicht übereinstimmt
 BR.drop(columns=['Al',
                  'Mart',
@@ -316,10 +314,12 @@ BR.drop(columns=['Materialnummer',
                  'Materialübereinstimmung',
                  'Vorhanden',
                  'Duplikat',
-                 'Test'],inplace=True)
+                 'Test',
+                 'Prodh.'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
 BR=BR.sort_values(by='Start')
+BR.set_index(['Start','Auftragsnummer'],inplace=True)
 print(BR)
 BR.to_excel('Benötigten_Rohstoffe.xlsx')
 
