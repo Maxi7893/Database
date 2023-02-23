@@ -142,7 +142,8 @@ Stueli['Al'] = Stueli['Al'].astype(float)
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.']*Stueli['Negativ'] #Negative Mengen sind jetzt kein String mehr
 Stueli.drop(columns='Negativ',inplace=True) #Die erstelte Spalte wieder entfernt
 #Stueli['Rohstoff'] = (Stueli['Komponentenmng.'] > 0) & (Stueli['Me2'].str.contains('KG'))
-indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
+indexNames=Stueli[(Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle der Einheit Stück angehören
+#indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
 FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
 
@@ -202,8 +203,10 @@ while i < Länge:
     i = i+1
     if i<Länge:
         Materialnummer = BR['Material'][i]
+Test.to_excel('Test2.xlsx')
 Test = Test[Test['Vorhanden']==False]
 BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
+BR.to_excel('Test.xlsx')
 #Hier wird eine Kontroll-Liste erstellt
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
