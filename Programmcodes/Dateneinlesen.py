@@ -6,11 +6,11 @@ from datetime import date, timedelta
 a = 10 #Länge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-Date = '2023-05-19' #Für den Test hier nur ein beispielhafter Tag
-Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
-#Date = date.today() #Aktueller Tag wird gespeichert
-NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
-
+#Date = '2023-05-19' #Für den Test hier nur ein beispielhafter Tag
+#Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
+Date = date.today() #Aktueller Tag wird gespeichert
+#NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
+NextDate = Date + timedelta(days=280)
 #Starttermine Produktionsaufträge G20
 Starttermine = pd.read_excel('Dateien\Starttermine G20 - 2023.xlsx') #Einlesen der Excel Liste für die Produktionstermine
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.' , '')  #Punkte aus der Materialnummer entfernen
@@ -229,16 +229,10 @@ while i < Länge:
     i = i + 1
     if i < Länge:
         Materialnummer = Kontrolle['Mat.-Nr.'][i]
-
+BR.to_excel('Test.xlsx')
 BR = BR[BR['Duplikat']==False]
+
 #Achtung! Stimmen die Mengen-Rezeptverhältnisse?
-
-#Hier müssen noch die Rohstoffe pro Auftrag hinzugefügt werden
-#Idee pro Auftrag ein DataFrame erstellen und diese dann zusammenführen
-
-#FS['Auftrags-Nr.'] = 0
-#FS.loc[(FS['Material'] == Materialnummer) & ((FS['Basismenge'] == Menge) | (FS['Basismenge'] != Menge)), 'Auftrags-Nr.'] = Auftragsnummer
-#Auftragsnummer = Next['Auftrags-Nr.'][i]
 Länge = len(Next)
 i=0
 Auftragsnummer = Next['Auftrags-Nr.'][i]
@@ -247,7 +241,6 @@ Start = Next['Start'][i]
 BR['Test'] = False
 BR['Start'] = pd.to_datetime('1900-01-01')
 BR['Auftragsnummer'] = 0
-#Forecast = pd.DataFrame()
 while i<Länge:
     BR.loc[(BR['Material'] == Materialnummer),'Test']=True #Es werden alle Materialien des Auftrags gekennzeichnet
     BR.loc[(BR['Material'] == Materialnummer), 'Start'] = Start
@@ -265,14 +258,12 @@ while i<Länge:
         Start = Next['Start'][i]
 
 BR=Forecast
-BR.to_excel('BR.xlsx')
-Next.to_excel('Next.xlsx')
-
 #Hier gilt es noch Materialien in BR zu übertragen, bei denen die Menge nicht übereinstimmt
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
                  'Fev'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
+
 
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
@@ -286,6 +277,30 @@ Abpacker.drop(columns=['auch GMP-Abpackungen?',
 Abpacker['APN'] = Abpacker['APN'].astype(str) #Materialnummern der Abpacker werden zu einem String
 if b>0:
     Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
+
+#Abpackgebinde werden eingelesen
+Abpackergebinde = pd.read_excel('Dateien\MARA_G1_G20_Gebinde.xlsx')
+Abpackergebinde = Abpackergebinde.iloc[1:]
+Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
+Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
+if b>0:
+    Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
+
+#Rohstoffe und Gebinde werden in ein DataFrame zusammengefügt
+BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
+BR.drop(columns=['Materialnummer',
+                 'Mengen- und Materialübereinstimmung',
+                 'Materialübereinstimmung',
+                 'Vorhanden',
+                 'Duplikat',
+                 'Test',
+                 'Prodh.'],inplace=True)
+BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
+BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
+Rohstoffe=BR.sort_values(by='Start')
+Rohstoffe.set_index(['Start','Auftragsnummer'],inplace=True)
+Rohstoffe.to_excel('Benötigten_Rohstoffe.xlsx')
+
 #Liste wird auf Abpacker reduziert
 i=0
 Abpacknummer = Abpacker['APN'][i]
@@ -299,29 +314,11 @@ while i< len:
 BR = BR[BR.Abpacker == True]
 BR.drop(columns=['Abpacker'],inplace=True)
 
-#Abpackgebinde werden eingelesen
-Abpackergebinde = pd.read_excel('Dateien\MARA_G1_G20_Gebinde.xlsx')
-Abpackergebinde = Abpackergebinde.iloc[1:]
-Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
-Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
-if b>0:
-    Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
-
-#Abpacker und Gebinde werden in ein DataFrame zusammengefügt
-BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
-BR.drop(columns=['Materialnummer',
-                 'Mengen- und Materialübereinstimmung',
-                 'Materialübereinstimmung',
-                 'Vorhanden',
-                 'Duplikat',
-                 'Test',
-                 'Prodh.'],inplace=True)
-BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
-BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
+#Abpacker werden ausgegeben in Liste
 BR=BR.sort_values(by='Start')
 BR.set_index(['Start','Auftragsnummer'],inplace=True)
 print(BR)
-BR.to_excel('Benötigten_Rohstoffe.xlsx')
+BR.to_excel('Geplante_Abpacker.xlsx')
 
 
 
