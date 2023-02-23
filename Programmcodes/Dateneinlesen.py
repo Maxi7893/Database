@@ -282,10 +282,20 @@ if b>0:
 Abpackergebinde = pd.read_excel('Dateien\MARA_G1_G20_Gebinde.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
 Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
+print(Abpackergebinde)
 Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
 if b>0:
     Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
-
+#Kosten für die Reinigung der Abpackgebinde werden eingelesen
+Reinigungskosten = pd.read_excel('Dateien\Kosten_Reinigung_Gebinde.xlsx')
+Reinigungskosten.drop(columns=['Materialnummer',
+                               'Base UOM',
+                               'Kennzeichen für Temperaturbedingung',
+                               'Kennzeichen Lose Menge',
+                               'Gebindegröße LOME',
+                               'Häufigkeit'],inplace=True)
+Abpackergebinde = pd.merge(Abpackergebinde, Reinigungskosten, left_on='Verpackungsmaterial',right_on='Verpackungsmaterial')
+Abpackergebinde.to_excel('Abpackgebinde.xlsx')
 #Rohstoffe und Gebinde werden in ein DataFrame zusammengefügt
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
 BR.drop(columns=['Materialnummer',
@@ -294,9 +304,11 @@ BR.drop(columns=['Materialnummer',
                  'Vorhanden',
                  'Duplikat',
                  'Test',
-                 'Prodh.'],inplace=True)
+                 'Prodh.',
+                 'Häufigkeit',
+                 'Mehrweg'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
-BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))*BR['Häufigkeit']
+BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))
 Rohstoffe=BR.sort_values(by='Start')
 Rohstoffe.set_index(['Start','Auftragsnummer'],inplace=True)
 Rohstoffe.to_excel('Benötigten_Rohstoffe.xlsx')
