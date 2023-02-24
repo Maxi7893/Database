@@ -191,7 +191,7 @@ BR = FS.loc[(FS['Mengen- und Materialübereinstimmung'] == True)]
 #Hier jetzt kontrollieren, ob es Aufträge gibt, die zwar gefertigt werden müssen aber noch nicht in BR sind!
 Test = FS.loc[(FS['Materialübereinstimmung'] == True) & (FS['Mengen- und Materialübereinstimmung'] == False)]
 Test = Test.append({'Material':'1220','Al': 1235, 'Kurztext' : 'Test', 'Basismenge': 1000, 'Me':'KG'}, ignore_index=True) #Testobjekt
-Test['Vorhanden'] =False
+Test['Vorhanden'] = False
 Test= Test.reset_index()
 Test.drop(columns=['index'], inplace=True)
 Länge=len(BR)
@@ -206,6 +206,8 @@ while i < Länge:
         Materialnummer = BR['Material'][i]
 Test = Test[Test['Vorhanden']==False]
 BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
+BR.to_excel('Test.xlsx')
+
 #Hier wird eine Kontroll-Liste erstellt
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
@@ -229,7 +231,7 @@ while i < Länge:
     i = i + 1
     if i < Länge:
         Materialnummer = Kontrolle['Mat.-Nr.'][i]
-BR.to_excel('Test.xlsx')
+BR.to_excel('Test1.xlsx')
 BR = BR[BR['Duplikat']==False]
 
 #Achtung! Stimmen die Mengen-Rezeptverhältnisse?
@@ -277,9 +279,52 @@ while i < Länge:
 BR['Hinweis']=''
 BR['Umrechnungsfaktor'] = (BR['Auftragsmenge']/BR['Basismenge'])
 BR.loc[(BR['Umrechnungsfaktor']!= 1), 'Hinweis'] = 'Achtung, die Mengen stimmten nicht mit der Stückliste überein'
-BR['Komponentenmng.'] = (BR['Komponentenmng.']*BR['Umrechnungsfaktor'])
+#Wenn Auftragsmenge und Umrechnungsfakotr nicht übereinstimmen noch mal eine Kontrolle, ob es auch wirklich kein Rezept gibt!
+Länge = len(BR)
+i=0
+Auftragsnummer = Next['Auftrags-Nr.'][i]
+Materialnummer = Next['Mat.-Nr.'][i]
+Materialmenge = Next['Menge'][i]
+Start = Next['Start'][i]
+BR['Vorhanden'] = BR['Vorhanden'] .astype(bool)
+BR['2nd_Check'] = False
+while i < Länge:
+    if ((BR['Hinweis'][i] != '') & (BR['Mengen- und Materialübereinstimmung'][i] == True)):
+        BR['2nd_Check'][i] = True
+    i=i+1
+Unstimmigkeiten = BR[BR['2nd_Check']==True] #Hier befinden sich alle Materialien, welchen ein falsches Rezept zugeordnet wurde
+Unstimmigkeiten.to_excel('Unstimmigkeiten.xlsx')
+BR = BR[BR['2nd_Check']==False]
+
+if(len(Unstimmigkeiten)>0):
+    print('Es muss angepackt werden!')
+    #Jetzt werden alle Auftragsnummern aus der Liste gezogen
+    Auftragsnummern = Unstimmigkeiten[['Auftragsnummer','Material', 'Auftragsmenge']]  #Beinhaltet die Auftragsnummern
+    Auftragsnummern.drop_duplicates(subset=['Auftragsnummer'], inplace=True)  # Hier noch Duplikate entfernen
+    Auftragsnummern = Auftragsnummern.reset_index(drop=True)
+    KL=FS
+    #Hier jetzt die Rohstoffe raussuchen und entfernen, falls es mir Al-Probleme gibt!
+    Länge = len(Auftragsnummern)
+    i=0
+    KL['Mengen- und Materialübereinstimmung'] =False
+    Materialnummer = Auftragsnummern['Material'][i]
+    Menge = Auftragsnummern['Auftragsmenge'][i]
+    while i<Länge:
+        KL.loc[(KL['Material'] == Materialnummer) & (KL['Basismenge'] == Menge), 'Mengen- und Materialübereinstimmung'] = True
+        i=i+1
+        if i<Länge:
+            Materialnummer = Auftragsnummern['Material'][i]
+            Menge = Auftragsnummern['Auftragsmenge'][i]
+
+    #Hier weiter machen und kontrolliern, ob alle Materialien ein TRUE bekommen haben!
+    KL.to_excel('TestLauf.xlsx')
+    print(Auftragsnummern)
+    print(Auftragsnummern.dtypes)
+
+
+#Hier ist der Testversuch vorbei!!
+BR['Komponentenmng.'] = (BR['Komponentenmng.'] * BR['Umrechnungsfaktor'])
 BR['Basismenge'] = BR['Auftragsmenge']
-#Hier gilt es noch Materialien in BR zu übertragen, bei denen die Menge nicht übereinstimmt
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
@@ -287,6 +332,12 @@ BR.drop(columns=['Al',
                  'Auftragsmenge',
                  'Umrechnungsfaktor'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 BR.to_excel('Kombiniert.xlsx')
+
+
+
+
+
+
 
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
