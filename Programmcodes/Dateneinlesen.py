@@ -146,7 +146,7 @@ indexNames=Stueli[(Stueli['Me2'].str.contains('ST'))].index #Hier wird die Index
 #indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
 FS = pd.DataFrame(Stueli) #Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True) #Es werden alle Abfälle und Stückmengen entfernt
-
+FS.to_excel('Stücklisten.xlsx')
 #Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
 data = data.reset_index()
@@ -176,10 +176,11 @@ FS['Mengen- und Materialübereinstimmung'] = False
 FS['Materialübereinstimmung'] = False
 Materialnummer = Next['Mat.-Nr.'][i]
 Menge = Next['Menge'][i]
+Auftragsnummer = Next['Auftrags-Nr.'][i]
 df= pd.DataFrame
 while i < Aufträge:
     FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] == Menge),'Mengen- und Materialübereinstimmung'] = True #Stimmen Mengen und Materialnummer überein
-    FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] == Menge), 'Materialübereinstimmung'] = True
+    FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] == Menge),'Materialübereinstimmung'] = True
     FS.loc[(FS['Material'] == Materialnummer) & (FS['Basismenge'] != Menge),'Materialübereinstimmung'] = True  #Stimmen Mengen und Materialnummern nicht überein
     i = i+1
     if i < Aufträge:
@@ -203,10 +204,8 @@ while i < Länge:
     i = i+1
     if i<Länge:
         Materialnummer = BR['Material'][i]
-Test.to_excel('Test2.xlsx')
 Test = Test[Test['Vorhanden']==False]
 BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
-BR.to_excel('Test.xlsx')
 #Hier wird eine Kontroll-Liste erstellt
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
 Kontrolle = pd.Series(Kontrolle)
@@ -216,8 +215,6 @@ Kontrolle = Kontrolle.reset_index()
 Kontrolle.columns = ['Mat.-Nr.', 'Häufigkeit']
 Kontrolle.drop(columns=['Häufigkeit'], inplace=True)
 #In dem DataFrame Kontrolle sind nun alle Materialien, welche mit der Menge aus der Stückliste ebenfalls übereinstimmen
-
-
 
 #Alle Materialien, die nicht in dem DataFraume vorkommen werden gefiltert, sodass jeweils nur noch ein Rezept übrig bleibt
 Länge = len(Kontrolle)
@@ -240,6 +237,7 @@ Länge = len(Next)
 i=0
 Auftragsnummer = Next['Auftrags-Nr.'][i]
 Materialnummer = Next['Mat.-Nr.'][i]
+Materialmenge = Next['Menge'][i]
 Start = Next['Start'][i]
 BR['Test'] = False
 BR['Start'] = pd.to_datetime('1900-01-01')
@@ -261,12 +259,34 @@ while i<Länge:
         Start = Next['Start'][i]
 
 BR=Forecast
+
+#Hier werden die Rezepte angepasst, bei denen die Menge nicht übereinstimmt
+Länge = len(Next)
+i=0
+Auftragsnummer = Next['Auftrags-Nr.'][i]
+Materialmenge = Next['Menge'][i]
+Start = Next['Start'][i]
+BR['Auftragsmenge'] = 0 #Nur Kontrolle, kann gelöscht werden
+while i < Länge:
+    BR.loc[(BR['Auftragsnummer'] == Auftragsnummer), 'Auftragsmenge'] = Materialmenge
+    i=i+1
+    if i<Länge:
+        Auftragsnummer = Next['Auftrags-Nr.'][i]
+        Materialmenge = Next['Menge'][i]
+#Hier wird der Umrechungsfaktor angewandt
+BR['Hinweis']=''
+BR['Umrechnungsfaktor'] = (BR['Auftragsmenge']/BR['Basismenge'])
+BR.loc[(BR['Umrechnungsfaktor']!= 1), 'Hinweis'] = 'Achtung, die Mengen stimmten nicht mit der Stückliste überein'
+BR['Komponentenmng.'] = (BR['Komponentenmng.']*BR['Umrechnungsfaktor'])
+BR['Basismenge'] = BR['Auftragsmenge']
 #Hier gilt es noch Materialien in BR zu übertragen, bei denen die Menge nicht übereinstimmt
 BR.drop(columns=['Al',
                  'Mart',
                  'Pos.',
-                 'Fev'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
-
+                 'Fev',
+                 'Auftragsmenge',
+                 'Umrechnungsfaktor'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
+BR.to_excel('Kombiniert.xlsx')
 
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
