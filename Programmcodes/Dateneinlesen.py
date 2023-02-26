@@ -440,7 +440,3 @@ BR=BR.sort_values(by='Start')
 BR.set_index(['Start','Auftragsnummer'],inplace=True)
 print(BR)
 BR.to_excel('Geplante_Abpacker.xlsx')
-
-
-
-#Es müssen noch kontrolliert werden, ob die Mengen übereinstimmen! Aktuell werden die Aufträge, bei denen die Mengen nicht stimmen nicht berücksichtigt
