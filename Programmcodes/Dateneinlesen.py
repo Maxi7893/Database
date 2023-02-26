@@ -206,7 +206,6 @@ while i < Länge:
         Materialnummer = BR['Material'][i]
 Test = Test[Test['Vorhanden']==False]
 BR = pd.merge(BR,Test, how='outer') #Hier werden die Materialien hinzugefügt, welche noch nicht in der Liste sind und wo die Menge nicht übereinstimmt!
-BR.to_excel('Test.xlsx')
 
 #Hier wird eine Kontroll-Liste erstellt
 Kontrolle=BR['Material'] #Beinhaltet die Materialnummer derer Aufträge, bei welcher die Menge mit der Stückliste übereinstimmt
@@ -231,7 +230,6 @@ while i < Länge:
     i = i + 1
     if i < Länge:
         Materialnummer = Kontrolle['Mat.-Nr.'][i]
-BR.to_excel('Test1.xlsx')
 BR = BR[BR['Duplikat']==False]
 
 #Achtung! Stimmen die Mengen-Rezeptverhältnisse?
@@ -293,16 +291,33 @@ while i < Länge:
         BR['2nd_Check'][i] = True
     i=i+1
 Unstimmigkeiten = BR[BR['2nd_Check']==True] #Hier befinden sich alle Materialien, welchen ein falsches Rezept zugeordnet wurde
-Unstimmigkeiten.to_excel('Unstimmigkeiten.xlsx')
 BR = BR[BR['2nd_Check']==False]
+FS=FS.reset_index(drop=True)
 
 if(len(Unstimmigkeiten)>0):
+    #Hier wird vorab geprüft, ob es diese Auftragsmenge in der Stückliste überhaupt gibt. Wenn nicht, dann werden diese mit dem Umrechungsfaktor wieder in die normale Liste hinzugefügt!
+    Länge = len(FS)
+    i=0 #Da der Index bei FS hier bei 1 erst anfängt! Bitte kontrollieren!
+    Materialnummer = FS['Material'][i]
+    Basismenge = FS['Basismenge'][i]
+    Unstimmigkeiten['3rd_Check'] = False
+    while i<Länge:
+        Unstimmigkeiten.loc[(Unstimmigkeiten['Material'] == Materialnummer) & (Unstimmigkeiten['Auftragsmenge'] == Basismenge), '3rd_Check'] = True #Wenn True, dann gibt es das Rezept ansonsten wieder in BR einfügen!
+        i=i+1
+        if i<Länge:
+            Materialnummer = FS['Material'][i]
+            Basismenge = FS['Basismenge'][i]
+    TestErfolglos = Unstimmigkeiten[Unstimmigkeiten['3rd_Check']==False]
+    TestErfolglos.drop(columns=['3rd_Check'], inplace=True)
+    BR = pd.merge(BR, TestErfolglos, how='outer') #Alle Aufträge inkl. Materalien, welche es mit der Baismenge nicht in der Stücklliste gibt wurden wieder hinzugefügt!
+    Unstimmigkeiten= Unstimmigkeiten[Unstimmigkeiten['3rd_Check']==True]
+    Unstimmigkeiten.drop(columns=['3rd_Check'], inplace=True)
     print('Es muss angepackt werden!')
     #Jetzt werden alle Auftragsnummern aus der Liste gezogen
-    Auftragsnummern = Unstimmigkeiten[['Auftragsnummer','Material', 'Auftragsmenge']]  #Beinhaltet die Auftragsnummern
+    Auftragsnummern = Unstimmigkeiten[['Auftragsnummer','Material', 'Auftragsmenge', 'Start']]  #Beinhaltet die Auftragsnummern, Materialnummern und die Auftragsmenge
     Auftragsnummern.drop_duplicates(subset=['Auftragsnummer'], inplace=True)  # Hier noch Duplikate entfernen
-    Auftragsnummern = Auftragsnummern.reset_index(drop=True)
-    KL=FS
+    Auftragsnummern = Auftragsnummern.reset_index(drop=True) #Der Index wird zurückgesetzt
+    KL=FS #Neues Dataframe für die Stückliste wird erstellt
     #Hier jetzt die Rohstoffe raussuchen und entfernen, falls es mir Al-Probleme gibt!
     Länge = len(Auftragsnummern)
     i=0
@@ -315,14 +330,41 @@ if(len(Unstimmigkeiten)>0):
         if i<Länge:
             Materialnummer = Auftragsnummern['Material'][i]
             Menge = Auftragsnummern['Auftragsmenge'][i]
+    #Hier müssen jetzt die Materialien aus der Liste gesucht werden!
+    Unstimmigkeiten= KL[KL['Mengen- und Materialübereinstimmung']==True] #Hier sind alle Rezepte enthalten. Nächster Schritt Al überprüfung!
+    #Hier werden jetzt die Aufträge und Rezepte miteinander kombiniert
+    Länge = len(Auftragsnummern)
+    i=0
+    Auftragsnummer = Auftragsnummern['Auftragsnummer'][i]
+    Materialnummer = Auftragsnummern['Material'][i]
+    Materialmenge = Auftragsnummern['Auftragsmenge'][i]
+    Start = Auftragsnummern['Start'][i]
+    Unstimmigkeiten['Test'] = False
+    Unstimmigkeiten['Start'] = pd.to_datetime('1900-01-01')
+    Unstimmigkeiten['Auftragsnummer'] = 0
+    Unstimmigkeiten['Auftragsmenge'] = 0
+    while i < Länge:
+        Unstimmigkeiten.loc[(Unstimmigkeiten['Material'] == Materialnummer), 'Test'] = True  # Es werden alle Materialien des Auftrags gekennzeichnet
+        Unstimmigkeiten.loc[(Unstimmigkeiten['Material'] == Materialnummer), 'Start'] = Start
+        Unstimmigkeiten.loc[(Unstimmigkeiten['Material'] == Materialnummer), 'Auftragsnummer'] = Auftragsnummer
+        Unstimmigkeiten.loc[(Unstimmigkeiten['Material'] == Materialnummer), 'Auftragsmenge'] = Materialmenge
+        TempDB = Unstimmigkeiten[Unstimmigkeiten['Test'] == True]
+        if i == 0:
+            Forecast = TempDB
+        else:
+            Forecast = pd.merge(Forecast, TempDB, how='outer')
+        i = i + 1
+        Unstimmigkeiten['Test'] = False  # Hier wird die Kontrollinstanz wieder auf False gesetzt
+        if i < Länge:
+            Auftragsnummer = Auftragsnummern['Auftragsnummer'][i]
+            Materialnummer = Auftragsnummern['Material'][i]
+            Materialmenge = Auftragsnummern['Auftragsmenge'][i]
+            Start = Auftragsnummern['Start'][i]
+    Forecast['Hinweis'] = ''
+    Forecast['Umrechnungsfaktor'] = (Forecast['Auftragsmenge'] / Forecast['Basismenge'])
+    Forecast.loc[(Forecast['Umrechnungsfaktor'] != 1), 'Hinweis'] = 'Achtung, die Mengen stimmten nicht mit der Stückliste überein'
+    BR = pd.merge(BR, Forecast, how='outer')
 
-    #Hier weiter machen und kontrolliern, ob alle Materialien ein TRUE bekommen haben!
-    KL.to_excel('TestLauf.xlsx')
-    print(Auftragsnummern)
-    print(Auftragsnummern.dtypes)
-
-
-#Hier ist der Testversuch vorbei!!
 BR['Komponentenmng.'] = (BR['Komponentenmng.'] * BR['Umrechnungsfaktor'])
 BR['Basismenge'] = BR['Auftragsmenge']
 BR.drop(columns=['Al',
@@ -330,15 +372,8 @@ BR.drop(columns=['Al',
                  'Pos.',
                  'Fev',
                  'Auftragsmenge',
-                 'Umrechnungsfaktor'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
-BR.to_excel('Kombiniert.xlsx')
-
-
-
-
-
-
-
+                 'Umrechnungsfaktor',
+                 '2nd_Check'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 #Abpacker werden eingelesen
 Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
