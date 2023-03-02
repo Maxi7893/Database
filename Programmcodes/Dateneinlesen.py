@@ -2,6 +2,31 @@ import numpy as np
 import pandas as pd
 from datetime import date, timedelta
 
+Tanklagermaterialien = pd.read_excel('Dateien\Belegung Tanklager.xlsx')
+Tanklagermaterialien.drop_duplicates(subset=['Artikelnummer'],inplace=True)#Hier noch Duplikate entfernen
+Tanklagermaterialien = Tanklagermaterialien.dropna(subset=['Artikelnummer'])
+Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(float)
+Tanklagermaterialien.drop(columns=['Neu',
+                                   'Tank-Nr.',
+                                   'Tankvolumen Vn  (m³)',
+                                   'WGK',
+                                   'LGK',
+                                   'Gefahrensymbol',
+                                   'R-Sätze',
+                                   'Gefahren-piktogramm',
+                                   'Schlagwort',
+                                   '2012/18/EU SEVESO III  StörfallV Nr.',
+                                   '96/82/EC StörfallV Nr.',
+                                   'H-Sätze lt. Kennzeichnungsverordnung 1272/2008',
+                                   'Stoffgruppe',
+                                   ' Schmelz-punkt °C',
+                                   'Siedepunkt  °C',
+                                   'Flammpunkt  °C',
+                                   'Wasserlöslichkeit (20°C)',
+                                   'Zündtemperatur °C'],inplace=True)
+Tanklagermaterialien.reset_index(drop=True,inplace=True)
+print(Tanklagermaterialien)
+
 #Produktionstermine werden eingelesen
 a = 10 #Länge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
@@ -421,7 +446,7 @@ BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße L
 Rohstoffe=BR.sort_values(by='Start')
 Rohstoffe.set_index(['Start','Auftragsnummer'],inplace=True)
 Rohstoffe.to_excel('Benötigten_Rohstoffe.xlsx')
-
+TanklagerMaterialien = Rohstoffe
 #Liste wird auf Abpacker reduziert
 i=0
 Abpacknummer = Abpacker['APN'][i]
@@ -440,3 +465,5 @@ BR=BR.sort_values(by='Start')
 BR.set_index(['Start','Auftragsnummer'],inplace=True)
 print(BR)
 BR.to_excel('Geplante_Abpacker.xlsx')
+#Hier werden die Stücklisten nach den Materialien für das Tanklager gefiltert
+#Zuerst Tanklager einlesen
