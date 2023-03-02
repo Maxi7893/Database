@@ -473,21 +473,17 @@ Tanklagermaterialien=Tanklagermaterialien[Tanklagermaterialien['Lösemittel'].st
 Tanklagermaterialien.reset_index(drop=True,inplace=True)
 #Jetzt BenötigtenRohstoffeTanklager mit der Tanklagermaterialien abgleichen
 Länge = len(Tanklagermaterialien)
-print(Tanklagermaterialien)
-print(BenötigtenRohstoffeTanklager['E-Material'])
-BenötigtenRohstoffeTanklager['ImTanklager'] = False
-print(BenötigtenRohstoffeTanklager['E-Material'])
+BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] = False
 i = 0
 Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
-print(Materialnummer)
 while i < Länge:
-    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'ImTanklager'] = True
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'ImTanklagerZukunft'] = True
     i = i + 1
     if i < Länge:
         Materialnummer= Tanklagermaterialien['Artikelnummer'][i]
-Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True]
+Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True]
 Tanklager.drop(columns=['Abpacker',
-                       'ImTanklager',
+                       'ImTanklagerZukunft',
                        'Base UOM',
                        'Kennzeichen für Temperaturbedingung',
                        'Kennzeichen Lose Menge',
@@ -498,5 +494,4 @@ Tanklager.drop(columns=['Abpacker',
                        'Benötigte Einheiten'], inplace=True)
 Tanklager.sort_values(by='Start', inplace=True)
 Tanklager.set_index(['Start','Auftragsnummer'],inplace=True)
-print(Tanklager)
-Tanklager.to_excel('Rohstoffverbrauch des Tanklagers.xlsx')
+Tanklager.to_excel('Rohstoffverbrauch des Tanklagers Ausblick.xlsx')
