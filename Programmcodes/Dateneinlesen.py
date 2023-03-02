@@ -444,13 +444,18 @@ BR.to_excel('Geplante_Abpacker.xlsx')
 #Hier werden die Stücklisten nach den Materialien für das Tanklager gefiltert
 #Zuerst Tanklager einlesen und die Materialnummer um die letzten 4-Ziffern entfernen
 Kürzen = 0 #Anzahl der Nummern die von der Materialnummer enfernt werden
-Tanklagermaterialien = pd.read_excel('Dateien\Belegung Tanklager.xlsx')
+Tanklagermaterialien = pd.read_excel('Dateien\Belegung Tanklager.xlsx') #Hier ist die zukünftige Tanklagerbelegung
+TanklagermaterialienAkt = pd.read_excel('Dateien\Belegung Tanklager.xlsx', sheet_name=2) #Hier ist die aktuelle Tanklagerbelegung
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(str)
+TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].astype(str)
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-2] #Da die Materialnummern bei dieser Liste als Float eingelesen werden
+TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].str[:-2]
 if Kürzen>0:
     Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-Kürzen]
+    TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].str[:-Kürzen]
     BenötigtenRohstoffeTanklager['E-Material'] = BenötigtenRohstoffeTanklager['E-Material'].str[:-Kürzen]
 Tanklagermaterialien.drop_duplicates(subset=['Artikelnummer'],inplace=True)#Hier noch Duplikate entfernen
+TanklagermaterialienAkt.drop_duplicates(subset=['Artikelnummer'],inplace=True)
 Tanklagermaterialien.drop(columns=['Neu',
                                    'Tank-Nr.',
                                    'Tankvolumen Vn  (m³)',
@@ -469,11 +474,33 @@ Tanklagermaterialien.drop(columns=['Neu',
                                    'Flammpunkt  °C',
                                    'Wasserlöslichkeit (20°C)',
                                    'Zündtemperatur °C'],inplace=True)
+TanklagermaterialienAkt.drop(columns=['Tank-Nr.',
+                                   'Tankvolumen Vn  (m³)',
+                                   'WGK',
+                                   'LGK',
+                                   'Gefahrensymbol',
+                                   'R-Sätze',
+                                   'Gefahren-piktogramm',
+                                   'Schlagwort',
+                                   '2012/18/EU SEVESO III  StörfallV Nr.',
+                                   '96/82/EC StörfallV Nr.',
+                                   'H-Sätze lt. Kennzeichnungsverordnung 1272/2008',
+                                   'Stoffgruppe',
+                                   ' Schmelz-punkt °C',
+                                   'Siedepunkt  °C',
+                                   'Flammpunkt  °C',
+                                   'Wasserlöslichkeit (20°C)',
+                                   'Zündtemperatur °C'],inplace=True)
 Tanklagermaterialien=Tanklagermaterialien[Tanklagermaterialien['Lösemittel'].str.contains('Leer')==False] #Alle leeren bzw. Reservetanks werden aus der Liste entfernt!
+TanklagermaterialienAkt=TanklagermaterialienAkt[TanklagermaterialienAkt['Lösemittel'].str.contains('Leer')==False]
 Tanklagermaterialien.reset_index(drop=True,inplace=True)
+TanklagermaterialienAkt.reset_index(drop=True,inplace=True)
+print(TanklagermaterialienAkt['Artikelnummer'])
+print(Tanklagermaterialien['Artikelnummer'])
 #Jetzt BenötigtenRohstoffeTanklager mit der Tanklagermaterialien abgleichen
 Länge = len(Tanklagermaterialien)
 BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] = False
+BenötigtenRohstoffeTanklager['ImTanklager'] = False
 i = 0
 Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
 while i < Länge:
@@ -481,7 +508,27 @@ while i < Länge:
     i = i + 1
     if i < Länge:
         Materialnummer= Tanklagermaterialien['Artikelnummer'][i]
-Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True]
+Länge = len(TanklagermaterialienAkt)
+i = 0
+Materialnummer = TanklagermaterialienAkt['Artikelnummer'][i]
+while i < Länge:
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'ImTanklager'] = True
+    i = i + 1
+    if i < Länge:
+        Materialnummer= TanklagermaterialienAkt['Artikelnummer'][i]
+
+TanklagerZukunft=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True]
+Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True]
+TanklagerZukunft.drop(columns=['Abpacker',
+                       'ImTanklagerZukunft',
+                       'Base UOM',
+                       'Kennzeichen für Temperaturbedingung',
+                       'Kennzeichen Lose Menge',
+                       'Verpackungsmaterial',
+                       'Gebindegröße LOME',
+                       'Preis pro Gebinde',
+                       'Stück pro Schicht',
+                       'Benötigte Einheiten'], inplace=True)
 Tanklager.drop(columns=['Abpacker',
                        'ImTanklagerZukunft',
                        'Base UOM',
@@ -492,6 +539,9 @@ Tanklager.drop(columns=['Abpacker',
                        'Preis pro Gebinde',
                        'Stück pro Schicht',
                        'Benötigte Einheiten'], inplace=True)
+TanklagerZukunft.sort_values(by='Start', inplace=True)
 Tanklager.sort_values(by='Start', inplace=True)
+TanklagerZukunft.set_index(['Start','Auftragsnummer'],inplace=True)
 Tanklager.set_index(['Start','Auftragsnummer'],inplace=True)
-Tanklager.to_excel('Rohstoffverbrauch des Tanklagers Ausblick.xlsx')
+TanklagerZukunft.to_excel('Rohstoffverbrauch des Tanklagers Ausblick.xlsx')
+Tanklager.to_excel('Rohstoffverbrauch des Tanklagers.xlsx')
