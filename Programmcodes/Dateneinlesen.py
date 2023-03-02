@@ -417,19 +417,20 @@ BR.drop(columns=['Materialnummer',
                  'Mehrweg'],inplace=True)
 BR['Gebindegröße LOME']=BR['Gebindegröße LOME'].astype(float)
 BR['Benötigte Einheiten'] = np.ceil((BR['Komponentenmng.']/BR['Gebindegröße LOME']))
+BenötigtenRohstoffeTanklager = BR #Hier werden die Rohstoffe für die Tanklagersimulation ausgelesen
 Rohstoffe=BR.sort_values(by='Start')
 Rohstoffe.set_index(['Start','Auftragsnummer'],inplace=True)
 Rohstoffe.to_excel('Benötigten_Rohstoffe.xlsx')
-BenötigtenRohstoffeTanklager = Rohstoffe
+
 #Liste wird auf Abpacker reduziert
 i=0
 Abpacknummer = Abpacker['APN'][i]
 BR['Abpacker'] = False
-len = len(Abpacker)
-while i< len:
+leng = len(Abpacker)
+while i < leng:
     BR.loc[(BR['E-Material'] == Abpacknummer), 'Abpacker'] = True
     i=i+1
-    if i < len:
+    if i < leng:
         Abpacknummer = Abpacker['APN'][i]
 BR = BR[BR.Abpacker == True]
 BR.drop(columns=['Abpacker'],inplace=True)
@@ -439,12 +440,17 @@ BR=BR.sort_values(by='Start')
 BR.set_index(['Start','Auftragsnummer'],inplace=True)
 print(BR)
 BR.to_excel('Geplante_Abpacker.xlsx')
+
 #Hier werden die Stücklisten nach den Materialien für das Tanklager gefiltert
-#Zuerst Tanklager einlesen
+#Zuerst Tanklager einlesen und die Materialnummer um die letzten 4-Ziffern entfernen
+Kürzen = 0 #Anzahl der Nummern die von der Materialnummer enfernt werden
 Tanklagermaterialien = pd.read_excel('Dateien\Belegung Tanklager.xlsx')
+Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(str)
+Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-2] #Da die Materialnummern bei dieser Liste als Float eingelesen werden
+if Kürzen>0:
+    Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-Kürzen]
+    BenötigtenRohstoffeTanklager['E-Material'] = BenötigtenRohstoffeTanklager['E-Material'].str[:-Kürzen]
 Tanklagermaterialien.drop_duplicates(subset=['Artikelnummer'],inplace=True)#Hier noch Duplikate entfernen
-Tanklagermaterialien = Tanklagermaterialien.dropna(subset=['Artikelnummer'])
-Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(float)
 Tanklagermaterialien.drop(columns=['Neu',
                                    'Tank-Nr.',
                                    'Tankvolumen Vn  (m³)',
@@ -463,6 +469,34 @@ Tanklagermaterialien.drop(columns=['Neu',
                                    'Flammpunkt  °C',
                                    'Wasserlöslichkeit (20°C)',
                                    'Zündtemperatur °C'],inplace=True)
+Tanklagermaterialien=Tanklagermaterialien[Tanklagermaterialien['Lösemittel'].str.contains('Leer')==False] #Alle leeren bzw. Reservetanks werden aus der Liste entfernt!
 Tanklagermaterialien.reset_index(drop=True,inplace=True)
-print(Tanklagermaterialien)
 #Jetzt BenötigtenRohstoffeTanklager mit der Tanklagermaterialien abgleichen
+Länge = len(Tanklagermaterialien)
+print(Tanklagermaterialien)
+print(BenötigtenRohstoffeTanklager['E-Material'])
+BenötigtenRohstoffeTanklager['ImTanklager'] = False
+print(BenötigtenRohstoffeTanklager['E-Material'])
+i = 0
+Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
+print(Materialnummer)
+while i < Länge:
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'ImTanklager'] = True
+    i = i + 1
+    if i < Länge:
+        Materialnummer= Tanklagermaterialien['Artikelnummer'][i]
+Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True]
+Tanklager.drop(columns=['Abpacker',
+                       'ImTanklager',
+                       'Base UOM',
+                       'Kennzeichen für Temperaturbedingung',
+                       'Kennzeichen Lose Menge',
+                       'Verpackungsmaterial',
+                       'Gebindegröße LOME',
+                       'Preis pro Gebinde',
+                       'Stück pro Schicht',
+                       'Benötigte Einheiten'], inplace=True)
+Tanklager.sort_values(by='Start', inplace=True)
+Tanklager.set_index(['Start','Auftragsnummer'],inplace=True)
+print(Tanklager)
+Tanklager.to_excel('Rohstoffverbrauch des Tanklagers.xlsx')
