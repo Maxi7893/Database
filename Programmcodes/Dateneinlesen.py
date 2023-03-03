@@ -5,9 +5,9 @@ from datetime import date, timedelta
 a = 10 #Länge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1 #Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-Date = '2023-02-18' #Für den Test hier nur ein beispielhafter Tag
-Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
-#Date = date.today() #Aktueller Tag wird gespeichert
+#Date = '2023-02-18' #Für den Test hier nur ein beispielhafter Tag
+#Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
+Date = date.today() #Aktueller Tag wird gespeichert
 #NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
 NextDate = Date + timedelta(days=280)
 #Starttermine Produktionsaufträge G20
@@ -519,7 +519,8 @@ while i < Länge:
 
 TanklagerZukunft=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True]
 Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True]
-TanklagerZukunft.drop(columns=['Abpacker',
+TanklagerZukunft.drop(columns=['ImTanklager',
+                               'Abpacker',
                        'ImTanklagerZukunft',
                        'Base UOM',
                        'Kennzeichen für Temperaturbedingung',
@@ -529,7 +530,8 @@ TanklagerZukunft.drop(columns=['Abpacker',
                        'Preis pro Gebinde',
                        'Stück pro Schicht',
                        'Benötigte Einheiten'], inplace=True)
-Tanklager.drop(columns=['Abpacker',
+Tanklager.drop(columns=['ImTanklager',
+                        'Abpacker',
                        'ImTanklagerZukunft',
                        'Base UOM',
                        'Kennzeichen für Temperaturbedingung',
