@@ -517,8 +517,11 @@ while i < Länge:
     if i < Länge:
         Materialnummer= TanklagermaterialienAkt['Artikelnummer'][i]
 
-TanklagerZukunft=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True]
-Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True]
+TanklagerZukunft=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True] #Hier weden alle Tanklagerprodukte gefiltert für den Forecast
+RohstoffeZukunft = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == False] #Hier sind alle Rohstoffe ohne Tanklager für den Forecast
+Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True] #Hier sind alle Tanklagerprodukte mit der aktuellen Tanklagerbelegung
+RohstoffeAktuell=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == False] #Hier sind alle Rohstoffe mit der aktuellen Tanklagerbelegung
+
 TanklagerZukunft.drop(columns=['ImTanklager',
                                'Abpacker',
                        'ImTanklagerZukunft',
@@ -530,6 +533,9 @@ TanklagerZukunft.drop(columns=['ImTanklager',
                        'Preis pro Gebinde',
                        'Stück pro Schicht',
                        'Benötigte Einheiten'], inplace=True)
+RohstoffeZukunft.drop(columns=['ImTanklager',
+                       'ImTanklagerZukunft',
+                       'Kennzeichen Lose Menge'], inplace=True)
 Tanklager.drop(columns=['ImTanklager',
                         'Abpacker',
                        'ImTanklagerZukunft',
@@ -541,9 +547,22 @@ Tanklager.drop(columns=['ImTanklager',
                        'Preis pro Gebinde',
                        'Stück pro Schicht',
                        'Benötigte Einheiten'], inplace=True)
+RohstoffeAktuell.drop(columns=['ImTanklager',
+                       'ImTanklagerZukunft',
+                       'Kennzeichen Lose Menge'], inplace=True)
+
 TanklagerZukunft.sort_values(by='Start', inplace=True)
+RohstoffeZukunft.sort_values(by='Start', inplace=True)
 Tanklager.sort_values(by='Start', inplace=True)
-TanklagerZukunft.set_index(['Start','Auftragsnummer'],inplace=True)
-Tanklager.set_index(['Start','Auftragsnummer'],inplace=True)
-TanklagerZukunft.to_excel('Rohstoffverbrauch des Tanklagers Ausblick.xlsx')
-Tanklager.to_excel('Rohstoffverbrauch des Tanklagers.xlsx')
+RohstoffeAktuell.sort_values(by='Start', inplace=True)
+
+TanklagerZukunft.set_index(['Auftragsnummer'],inplace=True)
+RohstoffeZukunft.set_index(['Auftragsnummer'],inplace=True)
+Tanklager.set_index(['Auftragsnummer'],inplace=True)
+RohstoffeAktuell.set_index(['Auftragsnummer'],inplace=True)
+
+
+TanklagerZukunft.to_excel('Tanklagerverbrauch mit neuer Belegung.xlsx')
+RohstoffeZukunft.to_excel('Rohstoffverbrauch ohne Tanklager mit neuer Belegung (Sim).xlsx')
+Tanklager.to_excel('Tanklagerverbrauch mit aktueller Belegung.xlsx')
+RohstoffeAktuell.to_excel('Rohstoffverbrauch ohne Tanklager mit aktueller Belegung (Sim).xlsx')
