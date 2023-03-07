@@ -390,7 +390,6 @@ if b>0:
 Abpackergebinde = pd.read_excel('Dateien\MARA_G1_G20_Gebinde.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
 Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
-print(Abpackergebinde)
 Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
 if b>0:
     Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
@@ -404,7 +403,20 @@ Reinigungskosten.drop(columns=['Materialnummer',
                                'Häufigkeit'],inplace=True)
 Abpackergebinde = pd.merge(Abpackergebinde, Reinigungskosten, left_on='Verpackungsmaterial',right_on='Verpackungsmaterial')
 Abpackergebinde.to_excel('Abpackgebinde.xlsx')
+AbpackgebindeSim = pd.DataFrame(Abpackergebinde)
+AbpackgebindeSim.drop_duplicates(subset=['Verpackungsmaterial'],inplace=True)#Hier noch Duplikate entfernen
+AbpackgebindeSim['Test'] =False
+AbpackgebindeSim.loc[(AbpackgebindeSim['Preis pro Gebinde'] == 'wurde aufgelöst'), 'Test'] = True
+AbpackgebindeSim = AbpackgebindeSim[AbpackgebindeSim.Test == False]
+AbpackgebindeSim.drop(columns=['Materialnummer',
+                               'Kennzeichen für Temperaturbedingung',
+                               'Kennzeichen Lose Menge',
+                               'Mehrweg',
+                               'Test'], inplace=True)
+AbpackgebindeSim.dropna(subset=['Verpackungsmaterial'], inplace=True)
+AbpackgebindeSim.to_excel('AbpackgebindeSim.xlsx')
 #Rohstoffe und Gebinde werden in ein DataFrame zusammengefügt
+
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
 BR.drop(columns=['Materialnummer',
                  'Mengen- und Materialübereinstimmung',
@@ -562,6 +574,7 @@ Tanklager.set_index(['Auftragsnummer'],inplace=True)
 RohstoffeAktuell.set_index(['Auftragsnummer'],inplace=True)
 
 
+RohstoffeZukunft.loc[(RohstoffeZukunft['Verpackungsmaterial'] == ''), 'Verpackungsmaterial'] = 0 #Da in der Simulation
 TanklagerZukunft.to_excel('Tanklagerverbrauch mit neuer Belegung.xlsx')
 RohstoffeZukunft.to_excel('Rohstoffverbrauch ohne Tanklager mit neuer Belegung (Sim).xlsx')
 Tanklager.to_excel('Tanklagerverbrauch mit aktueller Belegung.xlsx')
