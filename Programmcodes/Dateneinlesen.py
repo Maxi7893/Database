@@ -533,6 +533,23 @@ TanklagerZukunft=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['Im
 RohstoffeZukunft = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == False] #Hier sind alle Rohstoffe ohne Tanklager für den Forecast
 Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True] #Hier sind alle Tanklagerprodukte mit der aktuellen Tanklagerbelegung
 RohstoffeAktuell=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == False] #Hier sind alle Rohstoffe mit der aktuellen Tanklagerbelegung
+#Hier werden noch jeweils alle Materialnummern der neuen Materialien zusammengefasst.
+#Bspw. für Methyl-THF 821093 und 202781
+SammlungMaterialnummern = pd.read_excel('Dateien\Belegung Tanklager.xlsx', sheet_name=1)
+#TanklagerZukunft['E-Material']=TanklagerZukunft['E-Material'].astype(str)
+SammlungMaterialnummern['Basisnummer'] = SammlungMaterialnummern['Basisnummer'].astype(str)
+SammlungMaterialnummern['Alternativen'] = SammlungMaterialnummern['Alternativen'].astype(str)
+Länge = len(SammlungMaterialnummern)
+i=0
+Basisnummer = SammlungMaterialnummern['Basisnummer'][i]
+Alternativnummer = SammlungMaterialnummern['Alternativen'][i]
+while i < Länge:
+    TanklagerZukunft.loc[(TanklagerZukunft['E-Material'] == Alternativnummer), 'E-Material'] = Basisnummer
+    i=i+1
+    if i<Länge:
+        Basisnummer = SammlungMaterialnummern['Basisnummer'][i]
+        Alternativnummer = SammlungMaterialnummern['Alternativen'][i]
+#Ende des Auslesevorgangs der Alternativen
 
 TanklagerZukunft.drop(columns=['ImTanklager',
                                'Abpacker',
