@@ -549,7 +549,7 @@ while i < Länge:
     if i<Länge:
         Basisnummer = SammlungMaterialnummern['Basisnummer'][i]
         Alternativnummer = SammlungMaterialnummern['Alternativen'][i]
-#Ende des Auslesevorgangs der Alternativen
+#Ende des Auslesevorgangs der alternativen Materialnummern
 
 TanklagerZukunft.drop(columns=['ImTanklager',
                                'Abpacker',
