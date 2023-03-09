@@ -417,7 +417,7 @@ AbpackgebindeSim.dropna(subset=['Verpackungsmaterial'], inplace=True)
 AbpackgebindeSim.to_excel('AbpackgebindeSim.xlsx')
 #Rohstoffe und Gebinde werden in ein DataFrame zusammengefügt
 
-BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer') #Hier gehen noch einige Sachen verloren!
+BR = pd.merge(BR, Abpackergebinde, left_on='E-Material',right_on='Materialnummer')
 BR.drop(columns=['Materialnummer',
                  'Mengen- und Materialübereinstimmung',
                  'Materialübereinstimmung',
@@ -507,8 +507,56 @@ Tanklagermaterialien=Tanklagermaterialien[Tanklagermaterialien['Lösemittel'].st
 TanklagermaterialienAkt=TanklagermaterialienAkt[TanklagermaterialienAkt['Lösemittel'].str.contains('Leer')==False]
 Tanklagermaterialien.reset_index(drop=True,inplace=True)
 TanklagermaterialienAkt.reset_index(drop=True,inplace=True)
-print(TanklagermaterialienAkt['Artikelnummer'])
-print(Tanklagermaterialien['Artikelnummer'])
+#Hier werden den Tanklagermaterialien die richtigen Alternativverpackungen zugeordnet
+#Jeweils die Gebinde raussuchen und anschließend der Stückliste zuordnen
+Tanklagermaterialien = pd.merge(Tanklagermaterialien, AbpackgebindeSim, left_on='Alternative Mehrwegverpackungen',right_on='Verpackungsmaterial')
+Tanklagermaterialien.drop(columns=['Alternative Mehrwegverpackungen'],inplace=True)
+TanklagermaterialienAkt = pd.merge(TanklagermaterialienAkt, AbpackgebindeSim, left_on='Alternative Mehrwegverpackungen',right_on='Verpackungsmaterial')
+TanklagermaterialienAkt.drop(columns=['Alternative Mehrwegverpackungen'],inplace=True)
+
+Länge = len(TanklagermaterialienAkt)
+i = 0
+Materialnummer = TanklagermaterialienAkt['Artikelnummer'][i]
+Verpackungsmaterial = TanklagermaterialienAkt['Verpackungsmaterial'][i]
+Gebindegröße = TanklagermaterialienAkt['Gebindegröße LOME'][i]
+Preis = TanklagermaterialienAkt['Preis pro Gebinde'][i]
+Stück = TanklagermaterialienAkt['Stück pro Schicht'][i]
+while i<Länge:
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Verpackungsmaterial'] = Verpackungsmaterial
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Gebindegröße LOME'] = Gebindegröße
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Preis pro Gebinde'] = Preis
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Stück pro Schicht'] = Stück
+    i=i+1
+    if i<Länge:
+        Materialnummer = TanklagermaterialienAkt['Artikelnummer'][i]
+        Verpackungsmaterial = TanklagermaterialienAkt['Verpackungsmaterial'][i]
+        Gebindegröße = TanklagermaterialienAkt['Gebindegröße LOME'][i]
+        Preis = TanklagermaterialienAkt['Preis pro Gebinde'][i]
+        Stück = TanklagermaterialienAkt['Stück pro Schicht'][i]
+
+
+Länge = len(Tanklagermaterialien)
+i = 0
+Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
+Verpackungsmaterial = Tanklagermaterialien['Verpackungsmaterial'][i]
+Gebindegröße = Tanklagermaterialien['Gebindegröße LOME'][i]
+Preis = Tanklagermaterialien['Preis pro Gebinde'][i]
+Stück = Tanklagermaterialien['Stück pro Schicht'][i]
+while i<Länge:
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Verpackungsmaterial'] = Verpackungsmaterial
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Gebindegröße LOME'] = Gebindegröße
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Preis pro Gebinde'] = Preis
+    BenötigtenRohstoffeTanklager.loc[(BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Stück pro Schicht'] = Stück
+    i=i+1
+    if i<Länge:
+        Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
+        Verpackungsmaterial = Tanklagermaterialien['Verpackungsmaterial'][i]
+        Gebindegröße = Tanklagermaterialien['Gebindegröße LOME'][i]
+        Preis = Tanklagermaterialien['Preis pro Gebinde'][i]
+        Stück = Tanklagermaterialien['Stück pro Schicht'][i]
+
+BenötigtenRohstoffeTanklager['Benötigte Einheiten'] = np.ceil((BenötigtenRohstoffeTanklager['Komponentenmng.']/BenötigtenRohstoffeTanklager['Gebindegröße LOME']))
+
 #Jetzt BenötigtenRohstoffeTanklager mit der Tanklagermaterialien abgleichen
 Länge = len(Tanklagermaterialien)
 BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] = False
@@ -529,6 +577,7 @@ while i < Länge:
     if i < Länge:
         Materialnummer= TanklagermaterialienAkt['Artikelnummer'][i]
 
+
 TanklagerZukunft=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == True] #Hier weden alle Tanklagerprodukte gefiltert für den Forecast
 RohstoffeZukunft = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] == False] #Hier sind alle Rohstoffe ohne Tanklager für den Forecast
 Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == True] #Hier sind alle Tanklagerprodukte mit der aktuellen Tanklagerbelegung
@@ -536,7 +585,6 @@ RohstoffeAktuell=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['Im
 #Hier werden noch jeweils alle Materialnummern der neuen Materialien zusammengefasst.
 #Bspw. für Methyl-THF 821093 und 202781
 SammlungMaterialnummern = pd.read_excel('Dateien\Belegung Tanklager.xlsx', sheet_name=1)
-#TanklagerZukunft['E-Material']=TanklagerZukunft['E-Material'].astype(str)
 SammlungMaterialnummern['Basisnummer'] = SammlungMaterialnummern['Basisnummer'].astype(str)
 SammlungMaterialnummern['Alternativen'] = SammlungMaterialnummern['Alternativen'].astype(str)
 Länge = len(SammlungMaterialnummern)
@@ -556,12 +604,7 @@ TanklagerZukunft.drop(columns=['ImTanklager',
                        'ImTanklagerZukunft',
                        'Base UOM',
                        'Kennzeichen für Temperaturbedingung',
-                       'Kennzeichen Lose Menge',
-                       'Verpackungsmaterial',
-                       'Gebindegröße LOME',
-                       'Preis pro Gebinde',
-                       'Stück pro Schicht',
-                       'Benötigte Einheiten'], inplace=True)
+                       'Kennzeichen Lose Menge'], inplace=True)
 RohstoffeZukunft.drop(columns=['ImTanklager',
                        'ImTanklagerZukunft',
                        'Kennzeichen Lose Menge'], inplace=True)
