@@ -3,6 +3,7 @@ os.chdir(r"C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Pr
 import Dateneinlesen
 
 
+
 #print(format(cwd)
 #from Programmcodes import Datenaufbereitung(Dateneinlesen)
 #from Programmcodes.Datenaufbereitung import Dateneinlesen

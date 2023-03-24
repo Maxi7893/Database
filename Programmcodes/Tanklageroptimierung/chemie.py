@@ -2,6 +2,9 @@ import csv
 from decimal import *
 import time
 
+import numpy as np
+import pandas as pd
+
 from lp import LP
 from recursion import Recursion
 
@@ -46,7 +49,6 @@ def einlesen_kann_in_tank() -> list:
 
 # endregion
 
-
 def run_recursion():
     anzahl_tanks = 30
 
@@ -90,30 +92,45 @@ def run_recursion():
     ).run()
 
 
+
 def run_lp():
+    rohstoffe = pd.read_excel(
+        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
+    rohstoff_mapping = rohstoffe["E-Material"].unique()
+    rohstoff_mapping = pd.DataFrame(rohstoff_mapping)
+    rohstoff_mapping['r'] = rohstoff_mapping.index
+    rohstoff_mapping.rename({0: "E-Material"}, axis=1, inplace=True)
+    reinigungskosten = rohstoffe[["E-Material", "Preis pro Gebinde"]].fillna(0)
+    reinigungskosten = pd.merge(reinigungskosten, rohstoff_mapping, how="inner").drop_duplicates()
+    reinigungskosten_r: pd.DataFrame = reinigungskosten[["Preis pro Gebinde"]].reset_index(drop=True)
+    kap_bahnkesselwagen = rohstoffe[["E-Material", "Kapazität Bahnkesselwagen (m³)",'Dichte (kg/m³)']].fillna(0)
+    kap_bahnkesselwagen['Kapazität (kg)'] = (kap_bahnkesselwagen["Kapazität Bahnkesselwagen (m³)"]*kap_bahnkesselwagen["Dichte (kg/m³)"])
+    kap_bahnkesselwagen =  pd.merge(kap_bahnkesselwagen, rohstoff_mapping, how="inner").drop_duplicates()
+    kap_bahnkesselwagen_r : pd.DataFrame = kap_bahnkesselwagen[['Kapazität (kg)']].reset_index(drop=True)
+
     LP(
-        rohstoffkosten_r=None,
-        abfallkosten_r=None,
-        reinigungskosten_rohstoffgebinde_r=None,
-        kosten_tankreinigung_tr=None,
-        kapazitaet_bahnkesselwagen_r=None,
+        rohstoffkosten=300,
+        abfallkosten=250,
+        reinigungskosten_rohstoffgebinde_r=reinigungskosten_r.to_numpy(),
+        kosten_tankreinigung=4000,
+        kapazitaet_bahnkesselwagen_r=kap_bahnkesselwagen_r.to_numpy(),
         auftraege_zr=None,
         kosten_bahnkesselwagen_r=None,
         maximale_fuellmengen_tr=None,
         gebindegroessen_r=None,
         initiale_tankfuellung_tr=None,
-        anzahl_zeitpunkte=None,
-        anzahl_tanks=None,
-        anzahl_rohstoffe=None,
-        anzahl_zeitpunkte_tankfuellung_tr=None,
-        anzahl_zeitpunkte_reinigung_tr=None,
+        anzahl_zeitpunkte=25,  # TODO
+        anzahl_tanks=30,
+        anzahl_rohstoffe=len(reinigungskosten_r.to_numpy()),
+        anzahl_zeitpunkte_tankfuellung=8,
+        anzahl_zeitpunkte_reinigung=24,
         anteil_bahnkesselwagen_tr=None
+        #Moeglichkeiten der Befüllung?
     ).run()
 
 
 if __name__ == '__main__':
     start = time.time()
-
     # run_recursion()
     run_lp()
 

@@ -6,10 +6,10 @@ from gurobipy import GRB, LinExpr
 # noinspection DuplicatedCode,SpellCheckingInspection
 class LP:
     def __init__(self,
-                 rohstoffkosten: int,
-                 abfallkosten: int,
+                 rohstoffkosten_r: np.ndarray,
+                 abfallkosten_r: np.ndarray,
                  reinigungskosten_rohstoffgebinde_r: np.ndarray,
-                 kosten_tankreinigung: int,
+                 kosten_tankreinigung_tr: np.ndarray,
                  kapazitaet_bahnkesselwagen_r: np.ndarray,
                  auftraege_zr: np.ndarray,
                  kosten_bahnkesselwagen_r: np.ndarray,
@@ -19,8 +19,8 @@ class LP:
                  anzahl_zeitpunkte: int,
                  anzahl_tanks: int,
                  anzahl_rohstoffe: int,
-                 anzahl_zeitpunkte_tankfuellung: int,
-                 anzahl_zeitpunkte_reinigung: int,
+                 anzahl_zeitpunkte_tankfuellung_tr: np.ndarray,
+                 anzahl_zeitpunkte_reinigung_tr: np.ndarray,
                  anteil_bahnkesselwagen_tr: np.ndarray):
         """
         Initialisierer für das LP. Alle ndarrays müssen in der Reihenfolge der Subscripts indiziert werden, d.h. z.B.
@@ -30,10 +30,10 @@ class LP:
         z -> t -> r.
 
 
-        :param rohstoffkosten: Kosten für Rohstoffe.
-        :param abfallkosten: Kosten für Abfall.
+        :param rohstoffkosten_r: Kosten für Rohstoff r.
+        :param abfallkosten_r: Kosten für Abfall r.
         :param reinigungskosten_rohstoffgebinde_r: Kosten für Rohstoffgebinde r bei Reinigung.
-        :param kosten_tankreinigung: Kosten für Reinigung.
+        :param kosten_tankreinigung_tr: Kosten für Reinigung von Tank t mit Rohstoff r.
         :param kapazitaet_bahnkesselwagen_r: Kapazität Bahnkesselwagen für Rohstoff r.
         :param auftraege_zr: Benötigte Menge von Rohstoff r zum Zeitpunkt z.
         :param kosten_bahnkesselwagen_r: Kosten pro Bahnkesselwagen für Rohstoff r.
@@ -43,14 +43,14 @@ class LP:
         :param anzahl_zeitpunkte: Anzahl Zeitpunkte.
         :param anzahl_tanks: Anzahl Tanks.
         :param anzahl_rohstoffe: Anzahl verschiedener Rohstoffe.
-        :param anzahl_zeitpunkte_tankfuellung: Anzahl benötigter Zeitpunkte (Zeitschlitze) zum Auffüllen von Tanks.
-        :param anzahl_zeitpunkte_reinigung: Anzahl benötigter Zeitpunkte, benötigt für Reinigung von Tanks.
+        :param anzahl_zeitpunkte_tankfuellung_tr: Anzahl Zeitpunkte zum Auffüllen von Tank t mit Rohstoff r.
+        :param anzahl_zeitpunkte_reinigung_tr: Anzahl Zeitpunkte, benötigt für Reinigung von Tank t mit Rohstoff r.
         :param anteil_bahnkesselwagen_tr: Anteil der Bahnkesselwagen für Rohstoff r in Tank t zum Zeitpunkt z.
         """
-        self.gamma = rohstoffkosten
-        self.gamma_hat = abfallkosten
+        self.gamma_r = rohstoffkosten_r
+        self.gamma_hat_r = abfallkosten_r
         self.c_hat_r = reinigungskosten_rohstoffgebinde_r
-        self.c = kosten_tankreinigung
+        self.c_tr = kosten_tankreinigung_tr
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
         self.g_r = kosten_bahnkesselwagen_r
@@ -60,8 +60,8 @@ class LP:
         self.Z = anzahl_zeitpunkte
         self.T = anzahl_tanks
         self.R = anzahl_rohstoffe
-        self.p_tilde = anzahl_zeitpunkte_tankfuellung
-        self.p = anzahl_zeitpunkte_reinigung
+        self.p_tilde_tr = anzahl_zeitpunkte_tankfuellung_tr
+        self.p_tr = anzahl_zeitpunkte_reinigung_tr
         self.v_ztr = anteil_bahnkesselwagen_tr
 
         # initialize model
@@ -120,7 +120,7 @@ class LP:
         for z in range(1, self.Z + 1):
             for t in range(1, self.T + 1):
                 for r in range(1, self.R + 1):
-                    exp += self.y_zt[z, t] * (self.c + self.f_ztr[z, t, r] * self.gamma_hat)
+                    exp += self.y_zt[z, t] * (self.c_tr[t, r] + self.f_ztr[z, t, r] * self.gamma_hat_r[r])
 
         for z in range(1, self.Z + 1):
             for r in range(1, self.R + 1):
@@ -128,7 +128,7 @@ class LP:
 
         for z in range(1, self.Z + 1):
             for r in range(1, self.R + 1):
-                exp += self.gamma * self.s_zr[z, r]
+                exp += self.gamma_r[r] * self.s_zr[z, r]
                 exp += self.c_hat_r[r]
                 for t in range(1, self.T + 1):
                     exp += self.u_ztr[z, t, r] * self.c_hat_r[r]
@@ -156,7 +156,7 @@ class LP:
                     self.model.addConstr(self.f_ztr[z, t, r] == (
                             self.f_ztr[z - 1, t, r]
                             - (self.a_zr[z, r] * self.u_ztr[z, t, r])
-                            + self.v_ztr[z, t, r] * self.l_zr[z, r] * self.m_r[r])
+                            + self.v_ztr[z, t, r] * self.l_zr[z, r])
                                          * (1 - self.y_zt[z, t]),
                                          f"C2_{z}_{t}_{r}")
 
@@ -170,7 +170,7 @@ class LP:
                 for t in range(1, self.T + 1):
                     exp += self.v_ztr[z, t, r]
 
-                self.model.addConstr(exp <= self.l_zr[z, r], f"C3_{z}_{r}")
+                self.model.addConstr(exp <= self.l_zr[z, r] * self.m_r[r], f"C3_{z}_{r}")
 
     def __add_constraint4(self):
         """
@@ -180,11 +180,11 @@ class LP:
             for t in range(1, self.T + 1):
                 for r in range(1, self.R + 1):
                     exp1 = LinExpr()
-                    for k in range(z - self.p, z + 1):
+                    for k in range(z - self.p_tr[t, r], z + 1):
                         exp1 += self.y_zt[k, t]
 
                     exp2 = LinExpr()
-                    for k in range(z - self.p_tilde, z + 1):
+                    for k in range(z - self.p_tilde_tr[t, r], z + 1):
                         exp2 += self.v_ztr[k, t, r]
 
                     self.model.addConstr(self.u_ztr[z, t, r] + exp1 + exp2 <= 1, f"C4_{z}_{t}_{r}")
@@ -206,11 +206,11 @@ class LP:
             for t in range(1, self.T + 1):
                 for r in range(1, self.R + 1):
                     exp = LinExpr()
-                    for k in range(z - self.p + 1, z + 1):
+                    for k in range(z - self.p_tr[t, r] + 1, z + 1):
                         exp += self.y_zt[k, t]
 
                     self.model.addConstr(self.x_tilde_ztr[z, t, r] <=
-                                         self.x_tilde_ztr[z-1, t, r] - exp + self.y_zt[z, t-self.p],
+                                         self.x_tilde_ztr[z-1, t, r] - exp + self.y_zt[z, t-self.p_tr[t, r]],
                                          f"C6_{z}_{t}_{r}")
 
     def __add_constraint7(self):
@@ -263,10 +263,7 @@ class LP:
 
     def run(self):
         try:
-            self.model.setParam('TimeLimit', 5 * 60)
             self.model.optimize()
-
-            # TODO: Save results
 
         except gp.GurobiError as e:
             # noinspection PyUnresolvedReferences
