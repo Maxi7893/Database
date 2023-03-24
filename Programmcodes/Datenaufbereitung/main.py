@@ -1,6 +1,6 @@
 import os
-os.chdir(r"C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation")
-import
+os.chdir(r"C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung")
+import Dateneinlesen
 
 
 #print(format(cwd)
