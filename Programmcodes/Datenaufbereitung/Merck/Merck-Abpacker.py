@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from datetime import date, timedelta
+
 #Produktionstermine werden eingelesen
 a = 10 #Länge der Materialnummern
 b = 0 #Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
@@ -11,7 +12,7 @@ Date = date.today() #Aktueller Tag wird gespeichert
 #NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
 NextDate = Date + timedelta(days=280)
 #Starttermine Produktionsaufträge G20
-Starttermine = pd.read_excel('Dateien\Starttermine G20 - 2023.xlsx') #Einlesen der Excel Liste für die Produktionstermine
+Starttermine = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Starttermine G20 - 2023.xlsx') #Einlesen der Excel Liste für die Produktionstermine
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.' , '')  #Punkte aus der Materialnummer entfernen
 if b>0:
     Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
@@ -51,7 +52,7 @@ Starttermine.drop(columns=['Ansatznummer',
 Starttermine=Starttermine.sort_values(by='Start') #Index nach Datum sortieren
 Next=Starttermine[Date:NextDate] #Filtern des Betrachtungszeitraums!
 #Starttermine Produktionsaufträge G1
-Starttermine=pd.read_excel('Dateien\Produktion_G1.xlsx', header=1) #Einlesen der Excel-Liste G1'
+Starttermine=pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Produktion_G1.xlsx', header=1) #Einlesen der Excel-Liste G1'
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.' , '') #Punkte aus der Materialnummer entfernen
 if b>0:
     Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[:-b] #hier werden die Materialnummern um die letzten Ziffern gekürzt
@@ -70,7 +71,7 @@ Next2 = Next2.reset_index()
 Next = pd.merge(Next,Next2, how='outer')
 Next.to_excel('Nächsten Produktionstermine.xlsx')
 #Stücklisten werden eingelesen
-List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
+List1 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Material',
                         'Al',
                         'Kurztext',
@@ -90,7 +91,7 @@ List1 = pd.read_csv('Dateien\STUELI_EL-DOD-4.TXT',names=['Werk',
                         'Fev',
                         'Dis',
                         'Lab'],sep='#',encoding='windows-1252') #Einlseen der txt und encoding
-List2 = pd.read_csv('Dateien\Stückliste G1.TXT',names=['Werk',
+List2 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Stückliste G1.TXT',names=['Werk',
                         'Material',
                         'Al',
                         'Kurztext',
@@ -374,7 +375,7 @@ BR.drop(columns=['Al',
                  'Umrechnungsfaktor',
                  '2nd_Check'],inplace=True) #hier werden alle unwichtigen Spalten gelöscht
 #Abpacker werden eingelesen
-Abpacker = pd.read_excel('Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
+Abpacker = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Abpacker.xlsx', sheet_name=1) #Abpacker werden aus der Excel-Liste eingelesen
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
                        'PSA K16',
                        'Gruppen-BA',
@@ -387,14 +388,14 @@ if b>0:
     Abpacker['APN'] = Abpacker['APN'].str[:-b] # Die letzten Ziffern werden entfernt, wenn die Bedingung erfüllt wird
 
 #Abpackgebinde werden eingelesen
-Abpackergebinde = pd.read_excel('Dateien\MARA_G1_G20_Gebinde.xlsx')
+Abpackergebinde = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\MARA_G1_G20_Gebinde.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
 Abpackergebinde.drop_duplicates(subset=['Materialnummer'],inplace=True)#Hier noch Duplikate entfernen
 Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.' , '')
 if b>0:
     Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str[:-b] #die letzten Ziffern werden entfernt
 #Kosten für die Reinigung der Abpackgebinde werden eingelesen
-Reinigungskosten = pd.read_excel('Dateien\Kosten_Reinigung_Gebinde.xlsx')
+Reinigungskosten = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Kosten_Reinigung_Gebinde.xlsx')
 Reinigungskosten.drop(columns=['Materialnummer',
                                'Base UOM',
                                'Kennzeichen für Temperaturbedingung',
@@ -456,8 +457,8 @@ BR.to_excel('Geplante_Abpacker.xlsx')
 #Hier werden die Stücklisten nach den Materialien für das Tanklager gefiltert
 #Zuerst Tanklager einlesen und die Materialnummer um die letzten 4-Ziffern entfernen
 Kürzen = 0 #Anzahl der Nummern die von der Materialnummer enfernt werden
-Tanklagermaterialien = pd.read_excel('Dateien\Belegung Tanklager.xlsx') #Hier ist die zukünftige Tanklagerbelegung
-TanklagermaterialienAkt = pd.read_excel('Dateien\Belegung Tanklager.xlsx', sheet_name=2) #Hier ist die aktuelle Tanklagerbelegung
+Tanklagermaterialien = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx') #Hier ist die zukünftige Tanklagerbelegung
+TanklagermaterialienAkt = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx', sheet_name=2) #Hier ist die aktuelle Tanklagerbelegung
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(str)
 TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].astype(str)
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-2] #Da die Materialnummern bei dieser Liste als Float eingelesen werden
@@ -584,7 +585,7 @@ Tanklager=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklag
 RohstoffeAktuell=BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager['ImTanklager'] == False] #Hier sind alle Rohstoffe mit der aktuellen Tanklagerbelegung
 #Hier werden noch jeweils alle Materialnummern der neuen Materialien zusammengefasst.
 #Bspw. für Methyl-THF 821093 und 202781
-SammlungMaterialnummern = pd.read_excel('Dateien\Belegung Tanklager.xlsx', sheet_name=1)
+SammlungMaterialnummern = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx', sheet_name=1)
 SammlungMaterialnummern['Basisnummer'] = SammlungMaterialnummern['Basisnummer'].astype(str)
 SammlungMaterialnummern['Alternativen'] = SammlungMaterialnummern['Alternativen'].astype(str)
 Länge = len(SammlungMaterialnummern)
