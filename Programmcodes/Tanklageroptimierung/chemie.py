@@ -1,6 +1,7 @@
 import csv
 from decimal import *
 import time
+from datetime import date, timedelta, datetime
 
 import numpy as np
 import pandas as pd
@@ -103,10 +104,22 @@ def run_lp():
     reinigungskosten = rohstoffe[["E-Material", "Preis pro Gebinde"]].fillna(0)
     reinigungskosten = pd.merge(reinigungskosten, rohstoff_mapping, how="inner").drop_duplicates()
     reinigungskosten_r: pd.DataFrame = reinigungskosten[["Preis pro Gebinde"]].reset_index(drop=True)
+
     kap_bahnkesselwagen = rohstoffe[["E-Material", "Kapazität Bahnkesselwagen (m³)",'Dichte (kg/m³)']].fillna(0)
     kap_bahnkesselwagen['Kapazität (kg)'] = (kap_bahnkesselwagen["Kapazität Bahnkesselwagen (m³)"]*kap_bahnkesselwagen["Dichte (kg/m³)"])
     kap_bahnkesselwagen =  pd.merge(kap_bahnkesselwagen, rohstoff_mapping, how="inner").drop_duplicates()
     kap_bahnkesselwagen_r : pd.DataFrame = kap_bahnkesselwagen[['Kapazität (kg)']].reset_index(drop=True)
+
+    #Date = datetime.today()
+    Date = '2023-03-25' #Für den Test hier nur ein beispielhafter Tag
+    Date = pd.to_datetime(Date)
+    aufraege = rohstoffe[["E-Material", 'Komponentenmng.', 'Start']]
+    aufraege['Start'] = aufraege['Start'] - Date
+    aufraege = pd.merge(aufraege, rohstoff_mapping, how="inner")
+    geplante_auftraege_zr = aufraege[['r','Start','Komponentenmng.']]
+    geplante_auftraege_zr.sort_values(by='Start',inplace=True)
+    geplante_auftraege_zr.set_index(['Start', 'r'], inplace=True)
+    #geplante_auftraege_zr=geplante_auftraege_zr.to_numpy();
 
     LP(
         rohstoffkosten=300,
@@ -114,7 +127,7 @@ def run_lp():
         reinigungskosten_rohstoffgebinde_r=reinigungskosten_r.to_numpy(),
         kosten_tankreinigung=4000,
         kapazitaet_bahnkesselwagen_r=kap_bahnkesselwagen_r.to_numpy(),
-        auftraege_zr=None,
+        auftraege_zr=geplante_auftraege_zr.to_numpy(),
         kosten_bahnkesselwagen_r=None,
         maximale_fuellmengen_tr=None,
         gebindegroessen_r=None,
