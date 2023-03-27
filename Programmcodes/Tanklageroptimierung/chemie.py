@@ -138,24 +138,19 @@ def run_lp():
     geplante_auftraege_zr.sort_values(by='Start',inplace=True)
     geplante_auftraege_zr=geplante_auftraege_zr.to_numpy();
     #geplante_auftraege_zr.set_index(['Start', 'r'], inplace=True)
+
     #Anzahl Tanks inkl. initialer Tankfüllung
     tanks = pd.read_excel(
         r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',sheet_name=0)
     tanks['Artikelnummer']=tanks['Artikelnummer'].astype(str)
     tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
     rohstoff_mapping['E-Material'] =  rohstoff_mapping['E-Material'].astype(str)
-    tanks.drop(tanks.loc[tanks['Tank-Nr.'].str.contains('Neu') | tanks['Tank-Nr.'].str.contains('Alt')].index, inplace= True)
     tanks.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
-
-
-    #AusgangszustandTanks= pd.merge(tanks, rohstoff_mapping, left_on='E-Material', right_on='E-Material')
-
-    AusgangszustandTanks = pd.merge(tanks, rohstoff_mapping, how="inner").drop_duplicates()
-    #reinigungskosten_r: pd.DataFrame = reinigungskosten[["Preis pro Gebinde"]].reset_index(drop=True)
-    #AusgangszustandTanks = tanks[["Tank-Nr.", "Artikelnummer"]]
-
-   #FS['Material'] == Auftragsnummer
-    #tanks.drop(labels=[30:35], axis=0, inplace=True)
+    tanks.drop(tanks.loc[tanks['Tank-Nr.'].str.contains('Neu') | tanks['Tank-Nr.'].str.contains('Alt') | tanks['E-Material'].str.contains('n')].index, inplace= True)
+    AusgangszustandTanks = pd.merge(tanks, rohstoff_mapping, how="inner")
+    AusgangszustandTanks_tr: pd.DataFrame = AusgangszustandTanks[["Tank-Nr.", "r"]]
+    AusgangszustandTanks_tr.sort_values(by='Tank-Nr.', inplace=True)
+    AusgangszustandTanks_tr.set_index(['Tank-Nr.'], inplace=True)
 
     # TODO
     '''
@@ -174,7 +169,7 @@ def run_lp():
         kosten_bahnkesselwagen_r=bahnkesselwagenKosten_r.to_numpy(), #gesamte Kosten für BKW
         maximale_fuellmengen_tr=None,  #Maximale Füllmengen aller Kombinationen
         gebindegroessen_r=groeßegebinde_r.to_numpy(),
-        initiale_tankfuellung_tr=None,
+        initiale_tankfuellung_tr=AusgangszustandTanks_tr.to_numpy(), #Tanks sind Index
         anzahl_zeitpunkte=None,  # TODO #Stundenweise
         anzahl_tanks=len(tanks),
         anzahl_rohstoffe=len(reinigungskosten_r.to_numpy()),
