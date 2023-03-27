@@ -101,14 +101,26 @@ def run_lp():
     rohstoff_mapping = pd.DataFrame(rohstoff_mapping)
     rohstoff_mapping['r'] = rohstoff_mapping.index
     rohstoff_mapping.rename({0: "E-Material"}, axis=1, inplace=True)
+   #RohstoffkostenIBC/Abfallkosten
+    rohstoffkosten = rohstoffe[["E-Material", "Kosten (KG für IBC)"]].fillna(0)
+    rohstoffkosten = pd.merge(rohstoffkosten, rohstoff_mapping, how="inner").drop_duplicates()
+    KostenRohstoff_r: pd.DataFrame = rohstoffkosten[["Kosten (KG für IBC)"]].reset_index(drop=True)
+
+    abfallkosten = rohstoffe[["E-Material", "Kosten (KG für Tank)"]].fillna(0)
+    abfallkosten =  pd.merge(abfallkosten, rohstoff_mapping, how="inner").drop_duplicates()
+    KostenAbfall_r: pd.DataFrame = abfallkosten[["Kosten (KG für Tank)"]].reset_index(drop=True)
+
+   #Reinigungskosten einlesen
     reinigungskosten = rohstoffe[["E-Material", "Preis pro Gebinde"]].fillna(0)
     reinigungskosten = pd.merge(reinigungskosten, rohstoff_mapping, how="inner").drop_duplicates()
     reinigungskosten_r: pd.DataFrame = reinigungskosten[["Preis pro Gebinde"]].reset_index(drop=True)
-
-    kap_bahnkesselwagen = rohstoffe[["E-Material", "Kapazität Bahnkesselwagen (m³)",'Dichte (kg/m³)']].fillna(0)
+    #Kapazität Bahnkesselwagen inkl. Kosten
+    kap_bahnkesselwagen = rohstoffe[["E-Material", "Kapazität Bahnkesselwagen (m³)",'Dichte (kg/m³)','Kosten (KG für Tank)']].fillna(0)
     kap_bahnkesselwagen['Kapazität (kg)'] = (kap_bahnkesselwagen["Kapazität Bahnkesselwagen (m³)"]*kap_bahnkesselwagen["Dichte (kg/m³)"])
+    kap_bahnkesselwagen['Kosten (BW)'] = (kap_bahnkesselwagen['Kapazität (kg)']* kap_bahnkesselwagen['Kosten (KG für Tank)'])
     kap_bahnkesselwagen =  pd.merge(kap_bahnkesselwagen, rohstoff_mapping, how="inner").drop_duplicates()
     kap_bahnkesselwagen_r : pd.DataFrame = kap_bahnkesselwagen[['Kapazität (kg)']].reset_index(drop=True)
+    bahnkesselwagenKosten_r : pd.DataFrame = kap_bahnkesselwagen[['Kosten (BW)']].reset_index(drop=True)
 
     #Date = datetime.today()
     Date = '2023-03-25' #Für den Test hier nur ein beispielhafter Tag
@@ -118,22 +130,28 @@ def run_lp():
     aufraege = pd.merge(aufraege, rohstoff_mapping, how="inner")
     geplante_auftraege_zr = aufraege[['r','Start','Komponentenmng.']]
     geplante_auftraege_zr.sort_values(by='Start',inplace=True)
-    geplante_auftraege_zr.set_index(['Start', 'r'], inplace=True)
-    #geplante_auftraege_zr=geplante_auftraege_zr.to_numpy();
+    geplante_auftraege_zr=geplante_auftraege_zr.to_numpy();
+    #geplante_auftraege_zr.set_index(['Start', 'r'], inplace=True)
+    # TODO
+    '''
+    set index numpy geplante Aufträge
+    Rohstoffkosten wieder auf Abhängigkeit des Rohstoffs anpassen!
+    Abfallkosten wieder auf Abhängigkeit des Rohstoffes anpassen!
+    '''
 
     LP(
-        rohstoffkosten=300,
-        abfallkosten=250,
+        rohstoffkosten_r=KostenRohstoff_r.to_numpy(), #Rohstoffkosten pro KG
+        abfallkosten_r=KostenAbfall_r.to_numpy(), #Abfallkosten pro KG
         reinigungskosten_rohstoffgebinde_r=reinigungskosten_r.to_numpy(),
         kosten_tankreinigung=4000,
         kapazitaet_bahnkesselwagen_r=kap_bahnkesselwagen_r.to_numpy(),
         auftraege_zr=geplante_auftraege_zr.to_numpy(),
-        kosten_bahnkesselwagen_r=None,
-        maximale_fuellmengen_tr=None,
+        kosten_bahnkesselwagen_r=bahnkesselwagenKosten_r.to_numpy(), #gesamte Kosten für BKW
+        maximale_fuellmengen_tr=None,  #Was ist damit gemeint? Die Tank sind initial mit einem Rohstoff gefüllt!
         gebindegroessen_r=None,
         initiale_tankfuellung_tr=None,
-        anzahl_zeitpunkte=25,  # TODO
-        anzahl_tanks=30,
+        anzahl_zeitpunkte=None,  # TODO
+        anzahl_tanks=None,
         anzahl_rohstoffe=len(reinigungskosten_r.to_numpy()),
         anzahl_zeitpunkte_tankfuellung=8,
         anzahl_zeitpunkte_reinigung=24,

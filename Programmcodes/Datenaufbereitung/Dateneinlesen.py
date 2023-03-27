@@ -591,6 +591,8 @@ KapazitaetTankwagen = Tanklagermaterialien['Kapazität Bahnkesselwagen (m³)'][i
 Dichte = Tanklagermaterialien['Dichte (kg/m³)'][i]
 Preis = Tanklagermaterialien['Preis pro Gebinde'][i]
 Stück = Tanklagermaterialien['Stück pro Schicht'][i]
+RohstoffkostenIBC = Tanklagermaterialien['Kosten (KG für IBC)'][i]
+RohstoffkostenTank = Tanklagermaterialien['Kosten (KG für Tank)'][i]
 while i < Länge:
     BenötigtenRohstoffeTanklager.loc[
         (BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Verpackungsmaterial'] = Verpackungsmaterial
@@ -604,6 +606,10 @@ while i < Länge:
         (BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Kapazität Bahnkesselwagen (m³)'] = KapazitaetTankwagen
     BenötigtenRohstoffeTanklager.loc[
         (BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Dichte (kg/m³)'] = Dichte
+    BenötigtenRohstoffeTanklager.loc[
+        (BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Kosten (KG für IBC)'] = RohstoffkostenIBC
+    BenötigtenRohstoffeTanklager.loc[
+        (BenötigtenRohstoffeTanklager['E-Material'] == Materialnummer), 'Kosten (KG für Tank)'] = RohstoffkostenTank
     i = i + 1
     if i < Länge:
         Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
@@ -613,6 +619,8 @@ while i < Länge:
         Dichte = Tanklagermaterialien['Dichte (kg/m³)'][i]
         Preis = Tanklagermaterialien['Preis pro Gebinde'][i]
         Stück = Tanklagermaterialien['Stück pro Schicht'][i]
+        RohstoffkostenIBC = Tanklagermaterialien['Kosten (KG für IBC)'][i]
+        RohstoffkostenTank = Tanklagermaterialien['Kosten (KG für Tank)'][i]
 
 BenötigtenRohstoffeTanklager['Benötigte Einheiten'] = np.ceil(
     (BenötigtenRohstoffeTanklager['Komponentenmng.'] / BenötigtenRohstoffeTanklager['Gebindegröße LOME']))
