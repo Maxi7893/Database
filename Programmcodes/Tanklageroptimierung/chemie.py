@@ -5,6 +5,7 @@ from datetime import date, timedelta, datetime
 
 import numpy as np
 import pandas as pd
+from datetime import date, timedelta
 
 from lp import LP
 from recursion import Recursion
@@ -93,7 +94,6 @@ def run_recursion():
     ).run()
 
 
-
 def run_lp():
     rohstoffe = pd.read_excel(
         r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
@@ -102,57 +102,86 @@ def run_lp():
     rohstoff_mapping['r'] = rohstoff_mapping.index
     rohstoff_mapping.rename({0: "E-Material"}, axis=1, inplace=True)
 
-   #RohstoffkostenIBC/Abfallkosten
+    # region RohstoffkostenIBC/Abfallkosten
     rohstoffkosten = rohstoffe[["E-Material", "Kosten (KG für IBC)"]].fillna(0)
     rohstoffkosten = pd.merge(rohstoffkosten, rohstoff_mapping, how="inner").drop_duplicates()
     KostenRohstoff_r: pd.DataFrame = rohstoffkosten[["Kosten (KG für IBC)"]].reset_index(drop=True)
+    # endregion
 
     abfallkosten = rohstoffe[["E-Material", "Kosten (KG für Tank)"]].fillna(0)
-    abfallkosten =  pd.merge(abfallkosten, rohstoff_mapping, how="inner").drop_duplicates()
-    KostenAbfall_r: pd.DataFrame = abfallkosten[["Kosten (KG für Tank)"]].reset_index(drop=True)
+    abfallkosten = pd.merge(abfallkosten, rohstoff_mapping, how="inner").drop_duplicates()
+    kosten_abfall_r: pd.DataFrame = abfallkosten[["Kosten (KG für Tank)"]].reset_index(drop=True)
 
-    #Reinigungskosten und Gebindegrößen einlesen
+    # Reinigungskosten und Gebindegrößen einlesen
     reinigungskosten = rohstoffe[["E-Material", "Preis pro Gebinde"]].fillna(0)
     reinigungskosten = pd.merge(reinigungskosten, rohstoff_mapping, how="inner").drop_duplicates()
     reinigungskosten_r: pd.DataFrame = reinigungskosten[["Preis pro Gebinde"]].reset_index(drop=True)
-    groeßegebinde = rohstoffe[["E-Material", "Gebindegröße LOME"]].fillna(0)
-    groeßegebinde = pd.merge(groeßegebinde, rohstoff_mapping, how="inner").drop_duplicates()
-    groeßegebinde_r: pd.DataFrame = groeßegebinde[["Gebindegröße LOME"]].reset_index(drop=True)
+    groessegebinde = rohstoffe[["E-Material", "Gebindegröße LOME"]].fillna(0)
+    groessegebinde = pd.merge(groessegebinde, rohstoff_mapping, how="inner").drop_duplicates()
+    groeßegebinde_r: pd.DataFrame = groessegebinde[["Gebindegröße LOME"]].reset_index(drop=True)
 
-    #Kapazität Bahnkesselwagen inkl. Kosten
-    kap_bahnkesselwagen = rohstoffe[["E-Material", "Kapazität Bahnkesselwagen (m³)",'Dichte (kg/m³)','Kosten (KG für Tank)']].fillna(0)
-    kap_bahnkesselwagen['Kapazität (kg)'] = (kap_bahnkesselwagen["Kapazität Bahnkesselwagen (m³)"]*kap_bahnkesselwagen["Dichte (kg/m³)"])
-    kap_bahnkesselwagen['Kosten (BW)'] = (kap_bahnkesselwagen['Kapazität (kg)']* kap_bahnkesselwagen['Kosten (KG für Tank)'])
-    kap_bahnkesselwagen =  pd.merge(kap_bahnkesselwagen, rohstoff_mapping, how="inner").drop_duplicates()
-    kap_bahnkesselwagen_r : pd.DataFrame = kap_bahnkesselwagen[['Kapazität (kg)']].reset_index(drop=True)
-    bahnkesselwagenKosten_r : pd.DataFrame = kap_bahnkesselwagen[['Kosten (BW)']].reset_index(drop=True)
+    # Kapazität Bahnkesselwagen inkl. Kosten
+    kap_bahnkesselwagen = rohstoffe[
+        ["E-Material", "Kapazität Bahnkesselwagen (m³)", 'Dichte (kg/m³)', 'Kosten (KG für Tank)']].fillna(0)
+    kap_bahnkesselwagen['Kapazität (kg)'] = (
+                kap_bahnkesselwagen["Kapazität Bahnkesselwagen (m³)"] * kap_bahnkesselwagen["Dichte (kg/m³)"])
+    kap_bahnkesselwagen['Kosten (BW)'] = (
+                kap_bahnkesselwagen['Kapazität (kg)'] * kap_bahnkesselwagen['Kosten (KG für Tank)'])
+    kap_bahnkesselwagen = pd.merge(kap_bahnkesselwagen, rohstoff_mapping, how="inner").drop_duplicates()
+    kap_bahnkesselwagen_r: pd.DataFrame = kap_bahnkesselwagen[['Kapazität (kg)']].reset_index(drop=True)
+    bahnkesselwagenKosten_r: pd.DataFrame = kap_bahnkesselwagen[['Kosten (BW)']].reset_index(drop=True)
 
-    #Gplante Aufträge einlesen
-    #Date = datetime.today()
-    Date = '2023-03-25' #Für den Test hier nur ein beispielhafter Tag
+    # Gplante Aufträge einlesen
+    # Date = datetime.today()
+    Date = '2023-03-25'  # Für den Test hier nur ein beispielhafter Tag
     Date = pd.to_datetime(Date)
     aufraege = rohstoffe[["E-Material", 'Komponentenmng.', 'Start']]
-    aufraege['Start'] = aufraege['Start'] - Date
+    aufraege['Start'] = (aufraege['Start'] - Date)
+    aufraege['Start'] = aufraege['Start']/np.timedelta64(1,'h')
     aufraege = pd.merge(aufraege, rohstoff_mapping, how="inner")
-    geplante_auftraege_zr = aufraege[['r','Start','Komponentenmng.']]
-    geplante_auftraege_zr.sort_values(by='Start',inplace=True)
-    geplante_auftraege_zr=geplante_auftraege_zr.to_numpy();
-    #geplante_auftraege_zr.set_index(['Start', 'r'], inplace=True)
+    geplante_auftraege = aufraege[['r', 'Start', 'Komponentenmng.']]
+    geplante_auftraege.sort_values(by='Start', inplace=True)
+    #geplante_auftraege = pd.crosstab(index=geplante_auftraege['Start'], columns=geplante_auftraege['r'])
+    #geplante_auftraege = pd.pivot_table(geplante_auftraege, values='Komponentenmng.', index='Start',columns='r').fillna(0)
 
-    #Anzahl Tanks inkl. initialer Tankfüllung
+    #geplante_auftraege.set_index('Start',inplace=True)
+
+
+    z = len(geplante_auftraege)
+    r = len(reinigungskosten_r.to_numpy())
+    geplante_auftraege_zr = np.ndarray(shape=(z, r), dtype=float)
+
+
+    # array = np.ndarray(shape=(t, r), dtype=int)
+    # array[5, 6] = 3000
+
+    # Anzahl Tanks inkl. initialer Tankfüllung
     tanks = pd.read_excel(
-        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',sheet_name=0)
-    tanks['Artikelnummer']=tanks['Artikelnummer'].astype(str)
+        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
+        sheet_name=0)
+    tanks['Artikelnummer'] = tanks['Artikelnummer'].astype(str)
     tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
-    tanks['Ausgangsfüllstand'] = (tanks['Tankvolumen Vn  (m³)']*tanks['Dichte (kg/m³)'])
-    rohstoff_mapping['E-Material'] =  rohstoff_mapping['E-Material'].astype(str)
+    tanks['Ausgangsfüllstand'] = (tanks['Tankvolumen Vn  (m³)'] * tanks['Dichte (kg/m³)'])
+    rohstoff_mapping['E-Material'] = rohstoff_mapping['E-Material'].astype(str)
     tanks.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
-    tanks.drop(tanks.loc[tanks['Tank-Nr.'].str.contains('Neu') | tanks['Tank-Nr.'].str.contains('Alt') | tanks['E-Material'].str.contains('n')].index, inplace= True)
-    AusgangszustandTanks = pd.merge(tanks, rohstoff_mapping, how="inner")
-    AusgangszustandTanks_tr: pd.DataFrame = AusgangszustandTanks[["Tank-Nr.", "r", 'Ausgangsfüllstand']]
-    AusgangszustandTanks_tr.sort_values(by='Tank-Nr.', inplace=True)
-    AusgangszustandTanks_tr.set_index(['Tank-Nr.'], inplace=True)
+    tanks.drop(tanks.loc[tanks['Tank-Nr.'].str.contains('Neu') | tanks['Tank-Nr.'].str.contains('Alt') | tanks[
+        'E-Material'].str.contains('n')].index, inplace=True)
+    ausgangszustand_tanks = pd.merge(tanks, rohstoff_mapping, how="inner")
+    ausgangszustand_tanks_tr: pd.DataFrame = ausgangszustand_tanks[["Tank-Nr.", "r", 'Ausgangsfüllstand']]
+    ausgangszustand_tanks_tr.sort_values(by='Tank-Nr.', inplace=True)
+    ausgangszustand_tanks_tr.set_index(['Tank-Nr.'], inplace=True)
 
+    # Maximale Füllmengen aller Alternativen in DataFrame
+    tanklager_alt = pd.read_excel(
+        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
+        sheet_name=3).fillna(99)
+    tanklager_alt.iloc[:, 2:] = tanklager_alt.iloc[:, 2:].astype(int)
+
+
+    t = len(tanks)
+
+    # array = np.ndarray(shape=(t, r), dtype=int)
+    # array[5, 6] = 3000
     # TODO
     '''
     set index numpy geplante Aufträge / Geplante Aufträge anpassen
@@ -161,23 +190,24 @@ def run_lp():
     '''
 
     LP(
-        rohstoffkosten_r=KostenRohstoff_r.to_numpy(), #Rohstoffkosten pro KG
-        abfallkosten_r=KostenAbfall_r.to_numpy(), #Abfallkosten pro KG
+        rohstoffkosten_r=KostenRohstoff_r.to_numpy(),  # Rohstoffkosten pro KG
+        abfallkosten_r=kosten_abfall_r.to_numpy(),  # Abfallkosten pro KG
         reinigungskosten_rohstoffgebinde_r=reinigungskosten_r.to_numpy(),
         kosten_tankreinigung=4000,
         kapazitaet_bahnkesselwagen_r=kap_bahnkesselwagen_r.to_numpy(),
         auftraege_zr=geplante_auftraege_zr.to_numpy(),
-        kosten_bahnkesselwagen_r=bahnkesselwagenKosten_r.to_numpy(), #gesamte Kosten für BKW
-        maximale_fuellmengen_tr=None,  #Maximale Füllmengen aller Kombinationen
+        kosten_bahnkesselwagen_r=bahnkesselwagenKosten_r.to_numpy(),  # gesamte Kosten für BKW
+        maximale_fuellmengen_tr=None,  # Maximale Füllmengen aller Kombinationen
         gebindegroessen_r=groeßegebinde_r.to_numpy(),
-        initiale_tankfuellung_tr=AusgangszustandTanks_tr.to_numpy(), #Tanks sind Index, dann Rohstoffnummer und Ausgangsfüllstand
-        anzahl_zeitpunkte=None,  # TODO #Stundenweise
-        anzahl_tanks=len(tanks),
-        anzahl_rohstoffe=len(reinigungskosten_r.to_numpy()),
+        initiale_tankfuellung_tr=ausgangszustand_tanks_tr.to_numpy(),
+        # Tanks sind Index, dann Rohstoffnummer und Ausgangsfüllstand
+        anzahl_zeitpunkte=z,  # TODO #Stundenweise
+        anzahl_tanks=t,
+        anzahl_rohstoffe=r,
         anzahl_zeitpunkte_tankfuellung=8,
         anzahl_zeitpunkte_reinigung=24,
-        anteil_bahnkesselwagen_tr=None #Das wird in der Optimierung bestimmt... Dazu kann ich keine Aussagen treffen!
-        #Moeglichkeiten der Befüllung?
+        anteil_bahnkesselwagen_tr=None  # Das wird in der Optimierung bestimmt... Dazu kann ich keine Aussagen treffen!
+        # Moeglichkeiten der Befüllung?
     ).run()
 
 

@@ -1,39 +1,6 @@
 import numpy as np
 import pandas as pd
 from datetime import date, timedelta
-
-#Tanklageralternativen in DataFrame
-TanklagerAlt = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
-    sheet_name=3)
-#Test = TanklagerAlt['Alternativen'].split(',')
-Laenge = len(TanklagerAlt)
-alternates = pd.DataFrame
-i=0
-while i < Laenge:
-    Serie = TanklagerAlt['Alternativen'][i]
-    Serie = str(Serie)
-    if(","in Serie):
-        Serie = Serie.split(',')
-        Serie =pd.DataFrame(Serie)
-    else:
-        Ueber = pd.DataFrame
-        Ueber.add(Serie)
-        print(Ueber)
-    print(Serie)
-    if (i == 0):
-       alternates = Serie
-    else:
-        alternates = pd.merge(alternates, Serie, how='outer')
-
-    i= i+1
-
-
-
-
-
-
-
 # Produktionstermine werden eingelesen
 a = 10  # Länge der Materialnummern
 b = 0  # Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
