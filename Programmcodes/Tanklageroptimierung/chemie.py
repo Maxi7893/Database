@@ -144,11 +144,12 @@ def run_lp():
         r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',sheet_name=0)
     tanks['Artikelnummer']=tanks['Artikelnummer'].astype(str)
     tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
+    tanks['Ausgangsfüllstand'] = (tanks['Tankvolumen Vn  (m³)']*tanks['Dichte (kg/m³)'])
     rohstoff_mapping['E-Material'] =  rohstoff_mapping['E-Material'].astype(str)
     tanks.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
     tanks.drop(tanks.loc[tanks['Tank-Nr.'].str.contains('Neu') | tanks['Tank-Nr.'].str.contains('Alt') | tanks['E-Material'].str.contains('n')].index, inplace= True)
     AusgangszustandTanks = pd.merge(tanks, rohstoff_mapping, how="inner")
-    AusgangszustandTanks_tr: pd.DataFrame = AusgangszustandTanks[["Tank-Nr.", "r"]]
+    AusgangszustandTanks_tr: pd.DataFrame = AusgangszustandTanks[["Tank-Nr.", "r", 'Ausgangsfüllstand']]
     AusgangszustandTanks_tr.sort_values(by='Tank-Nr.', inplace=True)
     AusgangszustandTanks_tr.set_index(['Tank-Nr.'], inplace=True)
 
@@ -169,7 +170,7 @@ def run_lp():
         kosten_bahnkesselwagen_r=bahnkesselwagenKosten_r.to_numpy(), #gesamte Kosten für BKW
         maximale_fuellmengen_tr=None,  #Maximale Füllmengen aller Kombinationen
         gebindegroessen_r=groeßegebinde_r.to_numpy(),
-        initiale_tankfuellung_tr=AusgangszustandTanks_tr.to_numpy(), #Tanks sind Index
+        initiale_tankfuellung_tr=AusgangszustandTanks_tr.to_numpy(), #Tanks sind Index, dann Rohstoffnummer und Ausgangsfüllstand
         anzahl_zeitpunkte=None,  # TODO #Stundenweise
         anzahl_tanks=len(tanks),
         anzahl_rohstoffe=len(reinigungskosten_r.to_numpy()),
