@@ -95,9 +95,10 @@ def run_recursion():
 
 
 def run_lp():
+    # region data implementation
     # rohstoffmapping
     rohstoffe = pd.read_excel(
-        r'C:\Users\kiefer\PycharmProjects\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
+        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
     rohstoff_mapping = rohstoffe["E-Material"].unique()
     rohstoff_mapping = pd.DataFrame(rohstoff_mapping)
     rohstoff_mapping['r'] = rohstoff_mapping.index
@@ -157,7 +158,7 @@ def run_lp():
 
     # rohstoffdichte zuweisen
     tanks = pd.read_excel(
-        r'C:\Users\kiefer\PycharmProjects\Database\Dateien\Belegung Tanklager.xlsx',
+        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
         sheet_name=0)
     tank_dichte = pd.DataFrame(tanks)
     tanks['Artikelnummer'] = tanks['Artikelnummer'].astype(str)
@@ -191,7 +192,7 @@ def run_lp():
         i = i+1
     # Maximale Füllmengen aller Alternativen in DataFrame
     tanklager_alt = pd.read_excel(
-        r'C:\Users\kiefer\PycharmProjects\Database\Dateien\Belegung Tanklager.xlsx',
+        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
         sheet_name=3).fillna(0)
     tanklager_alt.iloc[:, 2:] = tanklager_alt.iloc[:, 2:].astype(int)
     tanklager_alt.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
@@ -212,7 +213,7 @@ def run_lp():
         material = tanklager_alt['r'][i]
         alternativen_tanklager_tr[alternate_tank][material] = value
         i = i+1
-
+    # endregion
     t = len(tanks)
 
     # array = np.ndarray(shape=(t, r), dtype=int)

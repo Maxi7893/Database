@@ -11,6 +11,7 @@ class LP:
                  abfallkosten_r: np.ndarray,
                  reinigungskosten_rohstoffgebinde_r: np.ndarray,
                  kosten_tankreinigung: int,
+                 kosten_bahnkesselwagen: int,
                  kapazitaet_bahnkesselwagen_r: np.ndarray,
                  auftraege_zr: np.ndarray,
                  kosten_bahnkesselwagen_r: np.ndarray,
@@ -21,8 +22,7 @@ class LP:
                  anzahl_tanks: int,
                  anzahl_rohstoffe: int,
                  anzahl_zeitpunkte_tankfuellung: int,
-                 anzahl_zeitpunkte_reinigung: int,
-                 anteil_bahnkesselwagen_tr: np.ndarray):
+                 anzahl_zeitpunkte_reinigung: int):
         """
         Initialisierer für das LP. Alle ndarrays müssen in der Reihenfolge der Subscripts indiziert werden, d.h. z.B.
         initiale_tankfuellung_tr wird in der ersten Dimension mit dem Tank und in der zweiten Dimension mit dem
@@ -35,6 +35,7 @@ class LP:
         :param abfallkosten_r: Kosten für Abfall.
         :param reinigungskosten_rohstoffgebinde_r: Kosten für Rohstoffgebinde r bei Reinigung.
         :param kosten_tankreinigung: Kosten für Reinigung.
+        :param kosten_bahnkesselwagen: Kosten pro Bahnkesselwagen (Fixkosten).
         :param kapazitaet_bahnkesselwagen_r: Kapazität Bahnkesselwagen für Rohstoff r.
         :param auftraege_zr: Benötigte Menge von Rohstoff r zum Zeitpunkt z.
         :param kosten_bahnkesselwagen_r: Kosten pro Bahnkesselwagen für Rohstoff r.
@@ -46,12 +47,12 @@ class LP:
         :param anzahl_rohstoffe: Anzahl verschiedener Rohstoffe.
         :param anzahl_zeitpunkte_tankfuellung: Anzahl benötigter Zeitpunkte (Zeitschlitze) zum Auffüllen von Tanks.
         :param anzahl_zeitpunkte_reinigung: Anzahl benötigter Zeitpunkte, benötigt für Reinigung von Tanks.
-        :param anteil_bahnkesselwagen_tr: Anteil der Bahnkesselwagen für Rohstoff r in Tank t zum Zeitpunkt z.
         """
         self.gamma_r = rohstoffkosten_r  # TODO: r
         self.gamma_hat_r = abfallkosten_r  # TODO: r
         self.c_hat_r = reinigungskosten_rohstoffgebinde_r
         self.c = kosten_tankreinigung
+        self.b = kosten_bahnkesselwagen
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
         self.g_r = kosten_bahnkesselwagen_r
@@ -63,7 +64,6 @@ class LP:
         self.R = anzahl_rohstoffe
         self.p_tilde = anzahl_zeitpunkte_tankfuellung
         self.p = anzahl_zeitpunkte_reinigung
-        self.v_ztr = anteil_bahnkesselwagen_tr
 
         self.__check_vars()
 
@@ -98,6 +98,7 @@ class LP:
         assert self.T > 0
         assert self.R > 0
         assert self.c >= 0
+        assert self.b >= 0
         assert self.p_tilde > 0
         assert self.p > 0
 
@@ -160,7 +161,8 @@ class LP:
 
         for z in range(1, self.Z + 1):
             for r in range(1, self.R + 1):
-                exp += self.l_zr[z, r] * self.g_r[r]
+                exp += self.l_zr[z, r] * self.b
+                for t in range(1, self.T)
 
         for z in range(1, self.Z + 1):
             for r in range(1, self.R + 1):
