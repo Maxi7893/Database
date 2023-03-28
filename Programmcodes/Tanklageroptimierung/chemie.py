@@ -156,7 +156,7 @@ def run_lp():
     rohstoff = geplante_auftraege['r'][i]
     beginn = geplante_auftraege['Start'][i]
     while i < laenge:
-        geplante_auftraege_zr[beginn][rohstoff] = value
+        #geplante_auftraege_zr[beginn][rohstoff] = value
         i = i+1
 
 
