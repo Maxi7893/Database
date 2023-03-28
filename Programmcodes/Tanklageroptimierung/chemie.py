@@ -140,16 +140,24 @@ def run_lp():
     aufraege['Start'] = aufraege['Start']/np.timedelta64(1,'h')
     aufraege = pd.merge(aufraege, rohstoff_mapping, how="inner")
     geplante_auftraege = aufraege[['r', 'Start', 'Komponentenmng.']]
-    geplante_auftraege.sort_values(by='Start', inplace=True)
+    geplante_auftraege.sort_values(by='Start', inplace=True, ignore_index=True)
+    geplante_auftraege['Start'] = geplante_auftraege['Start'].astype(int)
+    #geplante_auftraege.set_index('Start', 'r',inplace=True)
+
     #geplante_auftraege = pd.crosstab(index=geplante_auftraege['Start'], columns=geplante_auftraege['r'])
     #geplante_auftraege = pd.pivot_table(geplante_auftraege, values='Komponentenmng.', index='Start',columns='r').fillna(0)
-
-    #geplante_auftraege.set_index('Start',inplace=True)
-
-
-    z = len(geplante_auftraege)
+    z =  geplante_auftraege['Start'][len(geplante_auftraege)-1]
     r = len(reinigungskosten_r.to_numpy())
     geplante_auftraege_zr = np.ndarray(shape=(z, r), dtype=float)
+
+    i = 0
+    laenge = len(geplante_auftraege)
+    value = geplante_auftraege['Komponentenmng.'][i]
+    rohstoff = geplante_auftraege['r'][i]
+    beginn = geplante_auftraege['Start'][i]
+    while i < laenge:
+        geplante_auftraege_zr[beginn][rohstoff] = value
+        i = i+1
 
 
     # array = np.ndarray(shape=(t, r), dtype=int)
