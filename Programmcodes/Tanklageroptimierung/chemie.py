@@ -230,6 +230,7 @@ def run_lp():
         abfallkosten_r=kosten_abfall_r.to_numpy(),  # Abfallkosten pro KG
         reinigungskosten_rohstoffgebinde_r=reinigungskosten_r.to_numpy(),
         kosten_tankreinigung=4000,
+        kosten_bahnkesselwagen=300,
         kapazitaet_bahnkesselwagen_r=kap_bahnkesselwagen_r.to_numpy(),
         auftraege_zr=geplante_auftraege_zr,
         kosten_bahnkesselwagen_r=bahnkesselwagen_kosten_r.to_numpy(),  # gesamte Kosten für BKW
@@ -241,8 +242,6 @@ def run_lp():
         anzahl_rohstoffe=r,
         anzahl_zeitpunkte_tankfuellung=8,
         anzahl_zeitpunkte_reinigung=24,
-        anteil_bahnkesselwagen_tr=None  # Das wird in der Optimierung bestimmt... Dazu kann ich keine Aussagen treffen!
-        # Moeglichkeiten der Befüllung?
     ).run()
 
 

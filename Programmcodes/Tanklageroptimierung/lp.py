@@ -71,12 +71,13 @@ class LP:
         self.model = gp.Model("chemie")
 
         # initialize variables
-        self.y_zt = np.ndarray(shape=[self.Z, self.T])
-        self.u_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
-        self.l_zr = np.ndarray(shape=[self.Z, self.R])
-        self.x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
-        self.f_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
-        self.s_zr = np.ndarray(shape=[self.Z, self.R])
+        self.y_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
+        self.u_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
+        self.l_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
+        self.x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
+        self.f_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
+        self.v_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
+        self.s_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
 
         # set up variables, objective and constraints
         self.__add_vars()
@@ -90,7 +91,7 @@ class LP:
         self.__add_constraint7()
         self.__add_constraint8()
         self.__add_constraint9()
-        self.__add_constraint10()
+        # self.__add_constraint10()
 
     # region Variables
     def __check_vars(self):
@@ -113,10 +114,10 @@ class LP:
         assert len(self.a_zr[0]) == self.R
 
         assert len(self.k_tr) == self.T
-        assert len(self.k_tr) == self.R
+        assert len(self.k_tr[0]) == self.R
 
         assert len(self.f_0tr) == self.T
-        assert len(self.f_0tr) == self.R
+        assert len(self.f_0tr[0]) == self.R
 
         for r in range(self.R):
             assert self.gamma_r[r] > 0
@@ -128,11 +129,11 @@ class LP:
 
     # noinspection PyArgumentList
     def __add_vars(self):
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
                 self.y_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
 
-                for r in range(1, self.R + 1):
+                for r in range(0, self.R):
                     self.u_ztr[z, t, r] = self.model.addVar(vtype=GRB.BINARY,
                                                             name=f"u_{z}_{t}_{r}")
                     self.x_tilde_ztr[z, t, r] = self.model.addVar(vtype=GRB.BINARY,
@@ -141,9 +142,13 @@ class LP:
                                                             name=f"f_{z}_{t}_{r}",
                                                             lb=0,
                                                             ub=self.k_tr[t, r])
-            for r in range(1, self.R + 1):
+                    self.v_ztr[z, t, r] = self.model.addVar(vtype=GRB.CONTINUOUS,
+                                                            name=f"v_{z}_{t}_{r}",
+                                                            lb=0,
+                                                            ub=1)
+            for r in range(0, self.R):
                 self.l_zr[z, r] = self.model.addVar(vtype=GRB.BINARY, name=f"l_{z}_{r}")
-                self.s_zr[z, r] = self.model.addVar(vtype=GRB.BINARY, name=f"s_{z}_{r}")
+                self.s_zr[z, r] = self.model.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"s_{z}_{r}")
 
     # endregion
 
@@ -154,22 +159,23 @@ class LP:
         """
         exp = LinExpr()
 
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
-                for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     exp += self.y_zt[z, t] * (self.c + self.f_ztr[z, t, r] * self.gamma_hat_r[r])
 
-        for z in range(1, self.Z + 1):
-            for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for r in range(0, self.R):
                 exp += self.l_zr[z, r] * self.b
-                for t in range(1, self.T)
+                for t in range(0, self.T):
+                    exp += self.l_zr[z, r] * self.v_ztr[z, t, r] * self.g_r[r]
 
-        for z in range(1, self.Z + 1):
-            for r in range(1, self.R + 1):
-                exp += self.gamma_r[r] * self.s_zr[z, r]
-                exp += self.c_hat_r[r]
-                for t in range(1, self.T + 1):
-                    exp += self.u_ztr[z, t, r] * self.c_hat_r[r]
+        #        for z in range(0, self.Z):
+        #            for r in range(0, self.R):
+        #                exp += self.gamma_r[r] * self.s_zr[z, r]
+        #                exp += self.c_hat_r[r] * self.s_zr[z, r]
+        #                for t in range(0, self.T):
+        #                    exp -= self.u_ztr[z, t, r] * self.c_hat_r[r] * self.s_zr[z, r]
 
         self.model.setObjective(exp, GRB.MINIMIZE)
 
@@ -178,24 +184,24 @@ class LP:
     # region Constraints
     def __add_constraint1(self):
         """
-        (24)
+        (24) 26
         """
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
-                for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r], f"C1_{z}_{t}_{r}")
 
     def __add_constraint2(self):
         """
         (25)
         """
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
-                for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] == (
                             self.f_ztr[z - 1, t, r]
                             - (self.a_zr[z, r] * self.u_ztr[z, t, r])
-                            + self.v_ztr[z, t, r] * self.l_zr[z, r] * self.m_r[r])
+                            + self.v_ztr[z, t, r] * self.m_r[r])
                                          * (1 - self.y_zt[z, t]),
                                          f"C2_{z}_{t}_{r}")
 
@@ -203,10 +209,10 @@ class LP:
         """
         (26)
         """
-        for z in range(1, self.Z + 1):
-            for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for r in range(0, self.R):
                 exp = LinExpr()
-                for t in range(1, self.T + 1):
+                for t in range(0, self.T):
                     exp += self.v_ztr[z, t, r]
 
                 self.model.addConstr(exp <= self.l_zr[z, r], f"C3_{z}_{r}")
@@ -215,15 +221,14 @@ class LP:
         """
         (27)
         """
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
-                for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     exp1 = LinExpr()
-                    for k in range(z - self.p, z + 1):
+                    for k in range(max(z - self.p, 1), z + 1):
                         exp1 += self.y_zt[k, t]
-
                     exp2 = LinExpr()
-                    for k in range(z - self.p_tilde, z + 1):
+                    for k in range(max(z - self.p_tilde, 1), z + 1):
                         exp2 += self.v_ztr[k, t, r]
 
                     self.model.addConstr(self.u_ztr[z, t, r] + exp1 + exp2 <= 1, f"C4_{z}_{t}_{r}")
@@ -232,34 +237,34 @@ class LP:
         """
         (28)
         """
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
-                for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     self.model.addConstr(self.v_ztr[z, t, r] <= self.x_tilde_ztr[z, t, r], f"C5_{z}_{t}_{r}")
 
     def __add_constraint6(self):
         """
         (29)
         """
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
-                for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     exp = LinExpr()
-                    for k in range(z - self.p + 1, z + 1):
+                    for k in range(max(z - self.p + 1, 1), z + 1):
                         exp += self.y_zt[k, t]
 
                     self.model.addConstr(self.x_tilde_ztr[z, t, r] <=
-                                         self.x_tilde_ztr[z - 1, t, r] - exp + self.y_zt[z, t - self.p],
+                                         self.x_tilde_ztr[z - 1, t, r] - exp + self.y_zt[z, max(t - self.p, 1)],
                                          f"C6_{z}_{t}_{r}")
 
     def __add_constraint7(self):
         """
         (30)
         """
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
                 exp = LinExpr()
-                for r in range(1, self.R + 1):
+                for r in range(0, self.R):
                     exp += self.x_tilde_ztr[z, t, r]
 
                 self.model.addConstr(exp <= 1, f"C7_{z}_{t}")
@@ -268,9 +273,9 @@ class LP:
         """
         (31)
         """
-        for z in range(1, self.Z + 1):
+        for z in range(0, self.Z):
             exp = LinExpr()
-            for r in range(1, self.R + 1):
+            for r in range(0, self.R):
                 exp += self.l_zr[z, r]
 
             self.model.addConstr(exp <= 1, f"C8_{z}")
@@ -279,22 +284,22 @@ class LP:
         """
         (32)
         """
-        for z in range(1, self.Z + 1):
-            for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
                 exp = LinExpr()
-                for t in range(1, self.T + 1):
+                for r in range(0, self.R):
                     exp += self.u_ztr[z, t, r]
 
-                self.model.addConstr(exp <= 1, f"C9_{z}_{r}")
+                self.model.addConstr(exp <= 1, f"C9_{z}_{t}")
 
     def __add_constraint10(self):
         """
         (33)
         """
-        for z in range(1, self.Z + 1):
-            for r in range(1, self.R + 1):
+        for z in range(0, self.Z):
+            for r in range(0, self.R):
                 exp = LinExpr()
-                for t in range(1, self.T + 1):
+                for t in range(0, self.T):
                     exp += self.u_ztr[z, t, r]
 
                 self.model.addConstr(1 - exp <= self.s_zr[z, r], f"C10_{z}_{r}")
@@ -307,16 +312,16 @@ class LP:
         f_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
         s_zr = np.ndarray(shape=[self.Z, self.R])
 
-        for z in range(1, self.Z + 1):
-            for t in range(1, self.T + 1):
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
                 y_zt[z, t] = self.y_zt[z, t].X
 
-                for r in range(1, self.R + 1):
+                for r in range(0, self.R):
                     u_ztr[z, t, r] = self.u_ztr[z, t, r].X
                     x_tilde_ztr[z, t, r] = self.x_tilde_ztr[z, t, r].X
                     f_ztr[z, t, r] = self.f_ztr[z, t, r].X
 
-            for r in range(1, self.R + 1):
+            for r in range(0, self.R):
                 l_zr[z, r] = self.l_zr[z, r].X
                 s_zr[z, r] = self.s_zr[z, r].X
 
@@ -326,11 +331,12 @@ class LP:
         pd.DataFrame(x_tilde_ztr).to_csv("x_tilde_ztr.csv")
         pd.DataFrame(f_ztr).to_csv("f_ztr.csv")
         pd.DataFrame(s_zr).to_csv("s_zr.csv")
+
     # endregion
 
     def run(self):
         try:
-            self.model.setParam('TimeLimit', 5 * 60)
+            self.model.setParam('TimeLimit', 20 * 60)
             self.model.optimize()
             self.save_results()
 
