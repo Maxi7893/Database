@@ -202,8 +202,8 @@ class LP:
                             self.f_ztr[z - 1, t, r]
                             - (self.a_zr[z, r] * self.u_ztr[z, t, r])
                             + self.v_ztr[z, t, r] * self.m_r[r])
-                                         * (1 - self.y_zt[z, t]),
-                                         f"C2_{z}_{t}_{r}")
+                            * (1 - self.y_zt[z, t]),
+                            f"C2_{z}_{t}_{r}")
 
     def __add_constraint3(self):
         """
