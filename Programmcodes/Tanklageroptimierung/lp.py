@@ -129,7 +129,7 @@ class LP:
 
     # noinspection PyArgumentList
     def __add_vars(self):
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 self.y_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
 
@@ -159,18 +159,18 @@ class LP:
         """
         exp = LinExpr()
 
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     exp += self.y_zt[z, t] * (self.c + self.f_ztr[z, t, r] * self.gamma_hat_r[r])
 
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp += self.l_zr[z, r] * self.b
                 for t in range(0, self.T):
                     exp += self.l_zr[z, r] * self.v_ztr[z, t, r] * self.g_r[r]
 
-        #        for z in range(0, self.Z):
+        #        for z in range(1, self.Z):
         #            for r in range(0, self.R):
         #                exp += self.gamma_r[r] * self.s_zr[z, r]
         #                exp += self.c_hat_r[r] * self.s_zr[z, r]
@@ -186,7 +186,7 @@ class LP:
         """
         (24) 26
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r], f"C1_{z}_{t}_{r}")
@@ -195,7 +195,7 @@ class LP:
         """
         (25)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] == (
@@ -209,7 +209,7 @@ class LP:
         """
         (26)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -221,7 +221,7 @@ class LP:
         """
         (27)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     exp1 = LinExpr()
@@ -237,7 +237,7 @@ class LP:
         """
         (28)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.v_ztr[z, t, r] <= self.x_tilde_ztr[z, t, r], f"C5_{z}_{t}_{r}")
@@ -246,7 +246,7 @@ class LP:
         """
         (29)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     exp = LinExpr()
@@ -261,7 +261,7 @@ class LP:
         """
         (30)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 exp = LinExpr()
                 for r in range(0, self.R):
@@ -273,7 +273,7 @@ class LP:
         """
         (31)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             exp = LinExpr()
             for r in range(0, self.R):
                 exp += self.l_zr[z, r]
@@ -284,7 +284,7 @@ class LP:
         """
         (32)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 exp = LinExpr()
                 for r in range(0, self.R):
@@ -296,7 +296,7 @@ class LP:
         """
         (33)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -312,7 +312,7 @@ class LP:
         f_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
         s_zr = np.ndarray(shape=[self.Z, self.R])
 
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 y_zt[z, t] = self.y_zt[z, t].X
 
