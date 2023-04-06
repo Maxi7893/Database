@@ -195,7 +195,7 @@ class LP:
             for r in range(0, self.R):
                 exp += self.l_zr[z, r] * self.b
                 for t in range(0, self.T):
-                    exp += self.v_ztr[z, t, r] * self.g_r[r]
+                    exp += self.l_zr[z, r] * self.v_ztr[z, t, r] * self.g_r[r]
 
         for z in range(0, self.Z):
             for r in range(0, self.R):
@@ -218,7 +218,7 @@ class LP:
         """
         (27)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r], f"C1_{z}_{t}_{r}")
@@ -227,7 +227,7 @@ class LP:
         """
         (28)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] == (
@@ -241,7 +241,7 @@ class LP:
         """
         (29)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -253,7 +253,7 @@ class LP:
         """
         (30)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     exp1 = LinExpr()
@@ -269,7 +269,7 @@ class LP:
         """
         (31)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.v_ztr[z, t, r] <= self.x_tilde_ztr[z, t, r], f"C5_{z}_{t}_{r}")
@@ -278,18 +278,18 @@ class LP:
         """
         (32)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.x_tilde_ztr[z, t, r] <=
                                          self.x_tilde_ztr[z - 1, t, r] - self.y_zt[z, t] +
-                                         self.y_zt[max(z-self.p+1,1), t], f"C6_{z}_{t}_{r}")
+                                         self.y_zt[max(z-self.p,1), t], f"C6_{z}_{t}_{r}")
 
     def __add_constraint7(self):
         """
         (33)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 exp = LinExpr()
                 for r in range(0, self.R):
@@ -301,10 +301,11 @@ class LP:
         """
         (34)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             exp = LinExpr()
-            for r in range(0, self.R):
-                exp += self.l_zr[z, r]
+            for k in range(max(z - self.p_tilde, 1), z):
+                for r in range(0, self.R):
+                    exp += self.l_zr[k, r]
 
             self.model.addConstr(exp <= 1, f"C8_{z}")
 
@@ -312,28 +313,28 @@ class LP:
         """
         (35)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 exp = LinExpr()
                 for r in range(0, self.R):
                     exp += self.u_ztr[z, t, r]
 
-                self.model.addConstr(exp <= 1, f"C9_{z}_{t}") # Hier geändert! f"C9_{z}_{t}
+                self.model.addConstr(exp <= 1, f"C9_{z}_{t}")
 
     def __add_constraint10(self):
         """
         (36)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr(self.s_zr[t, r] >= self.a_zr[z, r]/self.k_hat_r[r] * self.e_zr[z, r], f"C10_{z}_{t}_{r}")
+                    self.model.addConstr(self.s_zr[t, r] >= self.a_zr[z, r] / self.k_hat_r[r] * self.e_zr[z, r], f"C10_{z}_{t}_{r}")
 
     def __add_constraint11(self):
         """
         (37)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -345,16 +346,16 @@ class LP:
         """
         (38)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr((self.s_zr[t, r] >= (self.a_zr[z, r] / self.k_hat_r[r])), f"C12_{z}_{t}_{r}")
+                    self.model.addConstr(self.e_zr[z, r] + self.u_ztr[z, t, r] <= 1, f"C12_{z}_{t}_{r}")
 
     def __add_constraint13(self):
         """
         (39)
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -363,6 +364,7 @@ class LP:
                 self.model.addConstr(exp <= self.l_zr[z, r], f"C13_{z}_{r}")
 
     def save_results(self):
+
         y_zt = np.ndarray(shape=[self.Z, self.T])
         u_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
         e_zr = np.ndarray(shape=[self.Z, self.R])
@@ -370,6 +372,7 @@ class LP:
         x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
         f_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
         s_zr = np.ndarray(shape=[self.Z, self.R])
+
 
         for z in range(0, self.Z):
             for t in range(0, self.T):
@@ -387,20 +390,28 @@ class LP:
                 e_zr[z, r] = self.e_ztr[z, r].X
 
         pd.DataFrame(y_zt).to_csv("y_zt.csv")
-        #pd.DataFrame(u_ztr).to_csv("u_ztr.csv")
-        #pd.DataFrame(l_zr).to_csv("l_zr.csv")
-        #pd.DataFrame(x_tilde_ztr).to_csv("x_tilde_ztr.csv")
-        #pd.DataFrame(f_ztr).to_csv("f_ztr.csv")
-        #pd.DataFrame(e_zt).to_csv("e_zr.csv")
-        #pd.DataFrame(s_zr).to_csv("s_zr.csv")
+        pd.DataFrame(u_ztr).to_csv("u_ztr.csv")
+        pd.DataFrame(l_zr).to_csv("l_zr.csv")
+        pd.DataFrame(x_tilde_ztr).to_csv("x_tilde_ztr.csv")
+        pd.DataFrame(f_ztr).to_csv("f_ztr.csv")
+        pd.DataFrame(e_zt).to_csv("e_zr.csv")
+        pd.DataFrame(s_zr).to_csv("s_zr.csv")
 
     # endregion
 
-    def run(self):
+    def run(self, time_limit: int):
+        """
+        Runs the optimization.
+        :param time_limit: Time limit in minutes.
+        """
         try:
-            self.model.setParam('TimeLimit', 20 * 60)
+            self.model.setParam('TimeLimit', 60 * time_limit)
+            self.model.setParam('NonConvex', 2)
             self.model.optimize()
-            self.save_results()
+            for i in range(self.model.SolCount):
+                self.model.Params.SolutionNumber = i
+                self.model.write(f"{i}.sol")
+            #self.save_results()
 
         except gp.GurobiError as e:
             # noinspection PyUnresolvedReferences
