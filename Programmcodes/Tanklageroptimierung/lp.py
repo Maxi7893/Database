@@ -50,8 +50,8 @@ class LP:
         :param anzahl_zeitpunkte_tankfuellung: Anzahl benötigter Zeitpunkte (Zeitschlitze) zum Auffüllen von Tanks.
         :param anzahl_zeitpunkte_reinigung: Anzahl benötigter Zeitpunkte, benötigt für Reinigung von Tanks.
         """
-        self.gamma_r = rohstoffkosten_r  # TODO: r
-        self.gamma_hat_r = abfallkosten_r  # TODO: r
+        self.gamma_r = rohstoffkosten_r
+        self.gamma_hat_r = abfallkosten_r
         self.c_hat_r = reinigungskosten_rohstoffgebinde_r
         self.c = kosten_tankreinigung
         self.b = kosten_bahnkesselwagen
@@ -100,12 +100,12 @@ class LP:
         print("Adding constraint 4")
         self.__add_constraint4()
         print("Adding constraint 5")
-        self.__add_constraint5()
-        print("Adding constraint 6")
-        self.__add_constraint6()
-        print("Adding constraint 7")
-        self.__add_constraint7()
-        print("Adding constraint 8")
+        #self.__add_constraint5()
+        #print("Adding constraint 6")
+        #self.__add_constraint6()
+        #print("Adding constraint 7")
+        #self.__add_constraint7()
+        #print("Adding constraint 8")
         self.__add_constraint8()
         print("Adding constraint 9")
         self.__add_constraint9()
@@ -117,6 +117,8 @@ class LP:
         self.__add_constraint12()
         print("Adding constraint 13")
         self.__add_constraint13()
+        print("Adding constraint 14")
+        self.__add_constraint14()
 
     # region Variables
     def __check_vars(self):
@@ -174,8 +176,8 @@ class LP:
                                                             ub=1)
             for r in range(0, self.R):
                 self.l_zr[z, r] = self.model.addVar(vtype=GRB.BINARY, name=f"l_{z}_{r}")
-                self.s_zr[z, r] = self.model.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"s_{z}_{r}")
-                self.e_zr[z, r] = self.model.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"e_{z}_{r}")
+                self.s_zr[z, r] = self.model.addVar(vtype=GRB.INTEGER, lb=0, name=f"s_{z}_{r}") # geaendert
+                self.e_zr[z, r] = self.model.addVar(vtype=GRB.BINARY, name=f"e_{z}_{r}") # geaendert
 
     # endregion
 
@@ -185,12 +187,12 @@ class LP:
         (26)
         """
         exp = LinExpr()
-
+        # Kosten für die Reinigung
         for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     exp += self.y_zt[z, t] * (self.c + self.f_ztr[z, t, r] * self.gamma_hat_r[r])
-
+        # Kosten für das Auffüllen des Tanks
         for z in range(0, self.Z):
             for r in range(0, self.R):
                 exp += self.l_zr[z, r] * self.b
@@ -326,9 +328,8 @@ class LP:
         (36)
         """
         for z in range(1, self.Z):
-            for t in range(0, self.T):
-                for r in range(0, self.R):
-                    self.model.addConstr(self.s_zr[t, r] >= self.a_zr[z, r] / self.k_hat_r[r] * self.e_zr[z, r], f"C10_{z}_{t}_{r}")
+            for r in range(0, self.R):
+                    self.model.addConstr(self.s_zr[z, r] >= (self.a_zr[z, r] / self.k_hat_r[r]), f"C10_{z}_{r}")
 
     def __add_constraint11(self):
         """
@@ -362,6 +363,25 @@ class LP:
                     exp += self.u_ztr[z, t, r]
 
                 self.model.addConstr(exp <= self.l_zr[z, r], f"C13_{z}_{r}")
+
+    def __add_constraint14(self):
+        """
+        (40)
+        """
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
+                    #exp1 = LinExpr()
+                    #for k in range(0, self.T):
+                    #    exp1 += self.f_ztr[z, k, r]
+                   # exp2 = LinExpr()
+                    #for k in range(0, self.T):
+                     #   exp2 += self.k_tr[k, r]
+                    #self.model.addConstr(exp1 <= self.u_ztr[z, t, r] * exp2, f"C14_{z}_{t}_{r}")
+                     exp = LinExpr()
+                     for k in range(0, self.T):
+                        exp += self.u_ztr[z, k, r]
+                     self.model.addConstr(self.k_tr[t, r] * exp >= self.f_ztr[z, t, r], f"C14_{z}_{t}_{r}")
 
     def save_results(self):
 
