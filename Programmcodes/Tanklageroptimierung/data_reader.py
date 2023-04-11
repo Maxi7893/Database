@@ -25,6 +25,7 @@ class DataReader:
         self.kosten_bahnkesselwagen_r = bahnkesselwagen[1]
 
         self.auftraege_zr = self.__read_auftraege()
+        self.time_mapping = self._read_time_mapping()
         self.gebindegroessen_r = self.__read_gebinde_groesse()
 
         tanks = self.__read_tanks()
@@ -110,6 +111,30 @@ class DataReader:
             geplante_auftraege_zr[int(beginn / self.raster_zeitschritte)][rohstoff] += abs(value)
 
         return geplante_auftraege_zr
+
+    def _read_time_mapping(self) -> np.ndarray:
+        date = pd.to_datetime('2023-03-25')  # Für den Test hier nur ein beispielhafter Tag
+        auftraege = self.rohstoffe[["E-Material", 'Komponentenmng.', 'Start']]
+        auftraege['Start'] = (auftraege['Start'] - date) / np.timedelta64(1, 'h')
+        auftraege = pd.merge(auftraege, self.rohstoff_mapping, how="inner")
+
+        geplante_auftraege = auftraege[['r', 'Start', 'Komponentenmng.']]
+        geplante_auftraege.sort_values(by='Start', inplace=True, ignore_index=True)
+        geplante_auftraege['Start'] = geplante_auftraege['Start'].astype(int)
+
+        anzahl_zeitpunkte = int(geplante_auftraege['Start'][len(geplante_auftraege) - 1] /
+                                     self.raster_zeitschritte) + 1
+
+        Initial_time = np.full(shape=(anzahl_zeitpunkte, 1),
+                                        dtype=float,
+                                        fill_value=0.0)
+        for i in range(len(Initial_time)):
+            Initial_time[i] = self.raster_zeitschritte*i
+        Initial_time = pd.DataFrame(Initial_time)
+        Initial_time.rename(columns={0:"Model Time"}, inplace=True)
+        return Initial_time
+
+
 
     def __read_tanks(self) -> (np.ndarray, np.ndarray):
         tanks = pd.read_excel(
