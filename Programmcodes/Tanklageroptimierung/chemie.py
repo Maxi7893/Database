@@ -56,7 +56,7 @@ def run_lp():
     raster_zeitschritte = 8  # Summiere immer 8h Zeitfenster auf
 
     data = DataReader(raster_zeitschritte)
-    dataevaluation = DataEvaluation()
+    dataevaluation = DataEvaluation(raster_zeitschritte)
     print(" ")
     print("Data analysis completed!")
     LP(
@@ -78,7 +78,9 @@ def run_lp():
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
     ).run(time_limit=3000) # Zeitlimit in Minuten!
-
+    dataevaluation = DataEvaluation()
+    print(" ")
+    print("Data analysis completed!")
 
 
 if __name__ == '__main__':
