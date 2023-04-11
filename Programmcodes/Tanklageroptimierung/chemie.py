@@ -55,6 +55,9 @@ def run_recursion():
 def run_lp():
     raster_zeitschritte = 8  # Summiere immer 8h Zeitfenster auf
     data = DataReader(raster_zeitschritte)
+    dataevaluation = DataEvaluation(raster_zeitschritte)
+    print(" ")
+    print("Data analysis completed!")
     LP(
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG

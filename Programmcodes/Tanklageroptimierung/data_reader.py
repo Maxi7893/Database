@@ -132,6 +132,7 @@ class DataReader:
             Initial_time[i] = self.raster_zeitschritte * i
         Initial_time = pd.DataFrame(Initial_time)
         Initial_time.rename(columns={0: "Model Time"}, inplace=True)
+        Initial_time.reset_index()
         return Initial_time
 
     def __read_tanks(self) -> (np.ndarray, np.ndarray):

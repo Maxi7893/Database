@@ -38,8 +38,9 @@ class DataEvaluation:
         e.rename(columns={0: 'type', 1 : "value"}, inplace=True)
         e[['type', 'Time', 'Material']] = e.type.str.split(pat="_", expand=True)
         e = pd.merge(e, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
-
-        e.drop(columns=['r'], inplace=True)
+        e['Time'] = e['Time'].astype(float)
+        e = pd.merge(e, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        e.drop(columns=['r', 'Time'], inplace=True)
         return e
 
     def __read_x_tilde(self) -> pd.DataFrame:
