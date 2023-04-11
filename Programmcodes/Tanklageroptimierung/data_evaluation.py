@@ -12,6 +12,7 @@ class DataEvaluation:
         self.data = DataReader(raster_zeitschritte)
         self.rohstoff_mapping = self.data.rohstoff_mapping
         self.rohstoff_mapping['r'] = self.rohstoff_mapping['r'].astype(str)
+        self.time_mapping = self.data.time_mapping
         self.e = self._read_e()
         self.x_tilde = self._read_x_tilde()
         self.u = self._read_u()
@@ -36,6 +37,7 @@ class DataEvaluation:
         e.rename(columns={0: 'type', 1 : "value"}, inplace=True)
         e[['type', 'Time', 'Material']] = e.type.str.split(pat="_", expand=True)
         e = pd.merge(e, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
+
         e.drop(columns=['r'], inplace=True)
         e.to_excel(
             r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\e_zr.xlsx')
