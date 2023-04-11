@@ -21,6 +21,7 @@ class DataEvaluation:
         self.l = self.__read_l()
         self.s = self.__read_s()
         self.f = self.__read_f()
+        self.__write_excel()
 
 
     def _read_solution(self) -> pd.DataFrame:
