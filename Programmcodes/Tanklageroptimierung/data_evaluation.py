@@ -37,6 +37,8 @@ class DataEvaluation:
         e[['type', 'Time', 'Material']] = e.type.str.split(pat="_", expand=True)
         e = pd.merge(e, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         e.drop(columns=['r'], inplace=True)
+        e.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\e_zr.xlsx')
         return e
 
     def _read_x_tilde(self) -> pd.DataFrame:
