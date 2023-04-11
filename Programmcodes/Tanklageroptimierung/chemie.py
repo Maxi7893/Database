@@ -76,6 +76,7 @@ def run_lp():
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
     ).run(time_limit=3000) # Zeitlimit in Minuten!
     dataevaluation = DataEvaluation()
+    print(" ")
     print("Data analysis completed!")
 
 
