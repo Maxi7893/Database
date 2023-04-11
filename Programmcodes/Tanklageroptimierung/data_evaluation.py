@@ -2,11 +2,14 @@ import csv
 
 import numpy as np
 import pandas as pd
+from Tanklageroptimierung.data_reader import DataReader
 
 
 class DataEvaluation:
     def __init__(self):
         self.solution = self._read_solution()
+        raster_zeitschritte = 8
+        self.data = DataReader(raster_zeitschritte)
         self.e = self._read_e()
         self.x_tilde = self._read_x_tilde()
         self.u = self._read_u()
@@ -79,6 +82,7 @@ class DataEvaluation:
         s = s.type.str.split(pat=" ", expand=True)
         s.rename(columns={0: 'type', 1 : "value"}, inplace=True)
         s[['type', 'Time', 'Material']] = s.type.str.split(pat="_", expand=True)
+        #s = self.data.rohstoff_mapping
         return s
 
 
