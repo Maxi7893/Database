@@ -56,8 +56,6 @@ def run_lp():
     raster_zeitschritte = 8  # Summiere immer 8h Zeitfenster auf
 
     data = DataReader(raster_zeitschritte)
-    dataevaluation = DataEvaluation()
-
     LP(
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG
@@ -77,6 +75,8 @@ def run_lp():
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
     ).run(time_limit=3000) # Zeitlimit in Minuten!
+    dataevaluation = DataEvaluation()
+    print("Data analysis completed!")
 
 
 if __name__ == '__main__':

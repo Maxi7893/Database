@@ -50,6 +50,8 @@ class DataEvaluation:
         x_tilde[['Time', 'Tank', 'Material']] = x_tilde.temp.str.rsplit(pat="_", expand=True)
         x_tilde = pd.merge(x_tilde, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         x_tilde.drop(columns=['reset', 'temp', 'r'], inplace=True)
+        x_tilde.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\x_tilde_ztr.xlsx')
         return x_tilde
 
     def _read_f(self) -> pd.DataFrame:
@@ -59,6 +61,8 @@ class DataEvaluation:
         f[['type', 'Time','Tank', 'Material']] = f.type.str.split(pat="_", expand=True)
         f = pd.merge(f, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         f.drop(columns=['r'], inplace=True)
+        f.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\f_ztr.xlsx')
         return f
 
     def _read_u(self) -> pd.DataFrame:
@@ -68,6 +72,8 @@ class DataEvaluation:
         u[['type', 'Time','Tank', 'Material']] = u.type.str.split(pat="_", expand=True)
         u = pd.merge(u, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         u.drop(columns=['r'], inplace=True)
+        u.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\u_ztr.xlsx')
         return u
 
     def _read_v(self) -> pd.DataFrame:
@@ -77,6 +83,8 @@ class DataEvaluation:
         v[['type', 'Time','Tank', 'Material']] = v.type.str.split(pat="_", expand=True)
         v = pd.merge(v, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         v.drop(columns=['r'], inplace=True)
+        v.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\v_ztr.xlsx')
         return v
 
     def _read_y(self) -> pd.DataFrame:
@@ -84,6 +92,8 @@ class DataEvaluation:
         y = y.type.str.split(pat=" ", expand=True)
         y.rename(columns={0: 'type', 1 : "value"}, inplace=True)
         y[['type', 'Time','Tank']] = y.type.str.split(pat="_", expand=True)
+        y.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\y_zt.xlsx')
         return y
 
     def _read_l(self) -> pd.DataFrame:
@@ -93,6 +103,8 @@ class DataEvaluation:
         l[['type', 'Time', 'Material']] = l.type.str.split(pat="_", expand=True)
         l = pd.merge(l, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         l.drop(columns=['r'], inplace=True)
+        l.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\l_zr.xlsx')
         return l
 
     def _read_s(self) -> pd.DataFrame:
@@ -102,4 +114,6 @@ class DataEvaluation:
         s[['type', 'Time', 'Material']] = s.type.str.split(pat="_", expand=True)
         s = pd.merge(s, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         s.drop(columns=['r'], inplace=True)
+        s.to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\s_zr.xlsx')
         return s
