@@ -1,0 +1,84 @@
+import csv
+
+import numpy as np
+import pandas as pd
+
+
+class DataEvaluation:
+    def __init__(self):
+        self.solution = self._read_solution()
+        self.e = self._read_e()
+        self.x_tilde = self._read_x_tilde()
+        self.u = self._read_u()
+        self.v = self._read_v()
+        self.y = self._read_y()
+        self.l = self._read_l()
+        self.s = self._read_s()
+        self.f = self._read_f()
+
+
+    def _read_solution(self) -> pd.DataFrame:
+        solution = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\0.sol')
+        solution = pd.DataFrame(solution)
+        solution.drop([0], inplace=True)
+        solution.reset_index(drop=True,inplace=True)
+        solution.rename(columns={"# Solution for model chemie": 'type'}, inplace=True)
+        return solution
+
+    def _read_e(self) -> pd.DataFrame:
+        e = self.solution[self.solution["type"].str[0] == "e"]
+        e = e.type.str.split(pat=" ", expand=True)
+        e.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        e[['type', 'Time', 'Material']] = e.type.str.split(pat="_", expand=True)
+        return e
+
+    def _read_x_tilde(self) -> pd.DataFrame:
+        x_tilde = self.solution[self.solution["type"].str.contains('x_tilde') == True]
+        x_tilde = x_tilde.type.str.split(pat=" ", expand=True)
+        #x_tilde.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        #x_tilde[['type', 'Time', 'Material']] = e.type.str.split(pat="_", expand=True)
+        return x_tilde
+
+    def _read_f(self) -> pd.DataFrame:
+        f = self.solution[self.solution["type"].str[0] == "f"]
+        f = f.type.str.split(pat=" ", expand=True)
+        f.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        f[['type', 'Time','Tank', 'Material']] = f.type.str.split(pat="_", expand=True)
+        return f
+
+    def _read_u(self) -> pd.DataFrame:
+        u = self.solution[self.solution["type"].str[0] == "u"]
+        u = u.type.str.split(pat=" ", expand=True)
+        u.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        u[['type', 'Time','Tank', 'Material']] = u.type.str.split(pat="_", expand=True)
+        return u
+
+    def _read_v(self) -> pd.DataFrame:
+        v = self.solution[self.solution["type"].str[0] == "v"]
+        v = v.type.str.split(pat=" ", expand=True)
+        v.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        v[['type', 'Time','Tank', 'Material']] = v.type.str.split(pat="_", expand=True)
+        return v
+
+    def _read_y(self) -> pd.DataFrame:
+        y = self.solution[self.solution["type"].str[0] == "y"]
+        y = y.type.str.split(pat=" ", expand=True)
+        y.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        y[['type', 'Time','Tank']] = y.type.str.split(pat="_", expand=True)
+        return y
+
+    def _read_l(self) -> pd.DataFrame:
+        l = self.solution[self.solution["type"].str[0] == "l"]
+        l = l.type.str.split(pat=" ", expand=True)
+        l.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        l[['type', 'Time', 'Material']] = l.type.str.split(pat="_", expand=True)
+        return l
+
+    def _read_s(self) -> pd.DataFrame:
+        s = self.solution[self.solution["type"].str[0] == "s"]
+        s = s.type.str.split(pat=" ", expand=True)
+        s.rename(columns={0: 'type', 1 : "value"}, inplace=True)
+        s[['type', 'Time', 'Material']] = s.type.str.split(pat="_", expand=True)
+        return s
+
+

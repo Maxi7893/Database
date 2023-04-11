@@ -2,6 +2,7 @@ from decimal import *
 import time
 
 from Tanklageroptimierung.data_reader import DataReader
+from Tanklageroptimierung.data_evaluation import DataEvaluation
 from lp import LP
 from recursion import Recursion
 
@@ -55,6 +56,7 @@ def run_lp():
     raster_zeitschritte = 8  # Summiere immer 8h Zeitfenster auf
 
     data = DataReader(raster_zeitschritte)
+    dataevaluation = DataEvaluation()
 
     LP(
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
