@@ -7,7 +7,7 @@ from Tanklageroptimierung.data_reader import DataReader
 
 class DataEvaluation:
     def __init__(self, raster_zeitschritte):
-        self.solution = self._read_solution()
+        self.solution = self.__read_solution()
         self.raster_zeitschritte = raster_zeitschritte
         self.data = DataReader(self.raster_zeitschritte)
         self.rohstoff_mapping = self.data.rohstoff_mapping
@@ -23,8 +23,7 @@ class DataEvaluation:
         self.f = self.__read_f()
         self.__write_excel()
 
-
-    def _read_solution(self) -> pd.DataFrame:
+    def __read_solution(self) -> pd.DataFrame:
         solution = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\0.sol')
         solution = pd.DataFrame(solution)
         solution.drop([0], inplace=True)
