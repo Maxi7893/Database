@@ -76,7 +76,7 @@ def run_lp():
         anzahl_rohstoffe=data.anzahl_rohstoffe,
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
-    ).run(time_limit=3000) # Zeitlimit in Minuten!
+    ).run(time_limit=30) # Zeitlimit in Minuten!
     DataEvaluation(raster_zeitschritte)
     print(" ")
     print("Data analysis completed!")

@@ -5,9 +5,9 @@ from datetime import date, timedelta
 a = 10  # Länge der Materialnummern
 b = 0  # Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1  # Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-# Date = '2023-02-18' #Für den Test hier nur ein beispielhafter Tag
-# Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
-Date = date.today()  # Aktueller Tag wird gespeichert
+Date = '2023-03-25' #Für den Test hier nur ein beispielhafter Tag
+Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
+#Date = date.today()  # Aktueller Tag wird gespeichert
 # NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
 NextDate = Date + timedelta(days=280)
 # Starttermine Produktionsaufträge G20
@@ -710,6 +710,9 @@ Tanklager.set_index(['Auftragsnummer'], inplace=True)
 RohstoffeAktuell.set_index(['Auftragsnummer'], inplace=True)
 
 RohstoffeZukunft.loc[(RohstoffeZukunft['Verpackungsmaterial'] == ''), 'Verpackungsmaterial'] = 0  # Da in der Simulation
+
+DatenSim = pd.merge(TanklagerZukunft, RohstoffeZukunft, how='outer')
+
 TanklagerZukunft.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
 RohstoffeZukunft.to_excel(
@@ -718,4 +721,6 @@ Tanklager.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit aktueller Belegung.xlsx')
 RohstoffeAktuell.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch ohne Tanklager mit aktueller Belegung (Sim).xlsx')
+DatenSim.to_excel(
+    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
