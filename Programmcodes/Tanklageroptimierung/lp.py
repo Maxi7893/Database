@@ -67,6 +67,8 @@ class LP:
         self.R = anzahl_rohstoffe
         self.p_tilde = anzahl_zeitpunkte_tankfuellung
         self.p = anzahl_zeitpunkte_reinigung
+        #self.eps = 0.0001
+        #self.M = 1 + self.eps
 
         self.__check_vars()
         self.__init_model()
@@ -100,25 +102,25 @@ class LP:
         print("Adding constraint 4")
         self.__add_constraint4()
         print("Adding constraint 5")
-        #self.__add_constraint5()
-        #print("Adding constraint 6")
-        #self.__add_constraint6()
-        #print("Adding constraint 7")
-        #self.__add_constraint7()
-        #print("Adding constraint 8")
+        self.__add_constraint5()
+        print("Adding constraint 6")
+        self.__add_constraint6()
+        print("Adding constraint 7")
+        self.__add_constraint7()
+        print("Adding constraint 8")
         self.__add_constraint8()
         print("Adding constraint 9")
         self.__add_constraint9()
         print("Adding constraint 10")
         self.__add_constraint10()
-        print("Adding constraint 11")
-        self.__add_constraint11()
+        #print("Adding constraint 11")
+        #self.__add_constraint11()
         print("Adding constraint 12")
         self.__add_constraint12()
         print("Adding constraint 13")
         self.__add_constraint13()
-        print("Adding constraint 14")
-        self.__add_constraint14()
+        #print("Adding constraint 14")
+        #self.__add_constraint14()
 
     # region Variables
     def __check_vars(self):
@@ -223,7 +225,7 @@ class LP:
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r], f"C1_{z}_{t}_{r}")
+                    self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r] * self.u_ztr[z, t, r], f"C1_{z}_{t}_{r}")
 
     def __add_constraint2(self):
         """
@@ -331,17 +333,18 @@ class LP:
             for r in range(0, self.R):
                     self.model.addConstr(self.s_zr[z, r] >= (self.a_zr[z, r] / self.k_hat_r[r]), f"C10_{z}_{r}")
 
-    def __add_constraint11(self):
+    #def __add_constraint11(self):
         """
         (37)
         """
-        for z in range(1, self.Z):
-            for r in range(0, self.R):
-                exp = LinExpr()
-                for t in range(0, self.T):
-                    exp += self.u_ztr[z, t, r]
+    #    for z in range(1, self.Z):
+     #       for r in range(0, self.R):
+      #          exp = LinExpr()
+       #         for t in range(0, self.T):
+        #            exp += self.u_ztr[z, t, r]
 
-                self.model.addConstr(self.e_zr[z,r] >= 1 - exp, f"C11_{z}_{r}")
+         #       self.model.addConstr(self.e_zr[z,r] >= 1 - exp, f"C11_{z}_{r}")
+#https://support.gurobi.com/hc/en-us/articles/4414392016529-How-do-I-model-conditional-statements-in-Gurobi-
 
     def __add_constraint12(self):
         """
@@ -356,35 +359,29 @@ class LP:
         """
         (39)
         """
+        #for z in range(1, self.Z):
+        #    for t in range(0, self.T):
+        #        for r in range(0, self.R):
+                    #self.model.addConstr(self.k_tr[t, r] * self.u_ztr[z, t, r] >= self.f_ztr[z, t, r], f"C13_{z}_{t}_{r}")
         for z in range(1, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
-                    exp += self.u_ztr[z, t, r]
+                    exp += self.f_ztr[z, t, r]
+                self.model.addConstr((exp * (1 - self.e_zr[z, r])) + ((self.s_zr[z, r] * self.k_hat_r[r]) * self.e_zr[z, r]) >= self.a_zr[z, r], f"C13_{z}_{r}")
 
-                self.model.addConstr(exp <= self.l_zr[z, r], f"C13_{z}_{r}")
 
-    def __add_constraint14(self):
-        """
-        (40)
-        """
-        for z in range(1, self.Z):
-            for t in range(0, self.T):
-                for r in range(0, self.R):
-                    #exp1 = LinExpr()
-                    #for k in range(0, self.T):
-                    #    exp1 += self.f_ztr[z, k, r]
-                   # exp2 = LinExpr()
-                    #for k in range(0, self.T):
-                     #   exp2 += self.k_tr[k, r]
-                    #self.model.addConstr(exp1 <= self.u_ztr[z, t, r] * exp2, f"C14_{z}_{t}_{r}")
-                     exp = LinExpr()
-                     for k in range(0, self.T):
-                        exp += self.u_ztr[z, k, r]
-                     self.model.addConstr(self.k_tr[t, r] * exp >= self.f_ztr[z, t, r], f"C14_{z}_{t}_{r}")
+    #def __add_constraint14(self):
+    #    """
+    #    (40)
+    #    """
+    #    for t in range(0, self.T):
+    #        for r in range(0, self.R):
+    #        self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr, f
+    #        "C14_{z}_{t}_{r}")
 
     def save_results(self):
-
+        a_zr = np.ndarray(shape=[self.Z, self.R])
         y_zt = np.ndarray(shape=[self.Z, self.T])
         u_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
         e_zr = np.ndarray(shape=[self.Z, self.R])
@@ -394,7 +391,7 @@ class LP:
         s_zr = np.ndarray(shape=[self.Z, self.R])
 
 
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             for t in range(0, self.T):
                 y_zt[z, t] = self.y_zt[z, t].X
 
@@ -403,20 +400,21 @@ class LP:
                     x_tilde_ztr[z, t, r] = self.x_tilde_ztr[z, t, r].X
                     f_ztr[z, t, r] = self.f_ztr[z, t, r].X
 
-
             for r in range(0, self.R):
                 l_zr[z, r] = self.l_zr[z, r].X
                 s_zr[z, r] = self.s_zr[z, r].X
-                e_zr[z, r] = self.e_ztr[z, r].X
+                e_zr[z, r] = self.e_zr[z, r].X
+                a_zr[z, r] = self.a_zr[z, r].X
 
-        pd.DataFrame(y_zt).to_csv("y_zt.csv")
-        pd.DataFrame(u_ztr).to_csv("u_ztr.csv")
-        pd.DataFrame(l_zr).to_csv("l_zr.csv")
-        pd.DataFrame(x_tilde_ztr).to_csv("x_tilde_ztr.csv")
-        pd.DataFrame(f_ztr).to_csv("f_ztr.csv")
-        pd.DataFrame(e_zt).to_csv("e_zr.csv")
-        pd.DataFrame(s_zr).to_csv("s_zr.csv")
-
+        #pd.DataFrame(y_zt).to_csv("y_zt.csv")
+        #pd.DataFrame(u_ztr).to_csv("u_ztr.csv")
+        #pd.DataFrame(l_zr).to_csv("l_zr.csv")
+        #pd.DataFrame(x_tilde_ztr).to_csv("x_tilde_ztr.csv")
+        #pd.DataFrame(f_ztr).to_csv("f_ztr.csv")
+        #pd.DataFrame(e_zt).to_csv("e_zr.csv")
+        #pd.DataFrame(s_zr).to_csv("s_zr.csv")
+        pd.DataFrame(self.a_zr).to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\auftaege_zr.xlsx')
     # endregion
 
     def run(self, time_limit: int):
@@ -431,7 +429,7 @@ class LP:
             for i in range(self.model.SolCount):
                 self.model.Params.SolutionNumber = i
                 self.model.write(f"{i}.sol")
-            #self.save_results()
+            self.save_results()
 
         except gp.GurobiError as e:
             # noinspection PyUnresolvedReferences
