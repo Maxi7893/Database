@@ -52,9 +52,9 @@ class DataReader:
         return kosten_rohstoff_r.values.flatten()
 
     def __read_abfallkosten(self) -> np.ndarray:
-        abfallkosten = self.rohstoffe[["E-Material", "Kosten (KG für Tank)"]].fillna(0)
+        abfallkosten = self.rohstoffe[["E-Material", "Abfallkosten (KG für IBC)"]].fillna(0)
         abfallkosten = pd.merge(abfallkosten, self.rohstoff_mapping, how="inner").drop_duplicates()
-        kosten_abfall_r: pd.DataFrame = abfallkosten[["Kosten (KG für Tank)"]].reset_index(drop=True)
+        kosten_abfall_r: pd.DataFrame = abfallkosten[["Abfallkosten (KG für IBC)"]].reset_index(drop=True)
         return kosten_abfall_r.values.flatten()
 
     def __read_reinigungskosten(self) -> np.ndarray:

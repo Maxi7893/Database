@@ -113,14 +113,15 @@ class LP:
         self.__add_constraint9()
         print("Adding constraint 10")
         self.__add_constraint10()
-        #print("Adding constraint 11")
-        #self.__add_constraint11()
+        print("Adding constraint 11")
+        self.__add_constraint11()
         print("Adding constraint 12")
         self.__add_constraint12()
-        print("Adding constraint 13")
-        self.__add_constraint13()
-        #print("Adding constraint 14")
-        #self.__add_constraint14()
+        #print("Adding constraint 13")
+        #self.__add_constraint13()
+        print("Adding constraint 14")
+        self.__add_constraint14()
+
 
     # region Variables
     def __check_vars(self):
@@ -200,7 +201,7 @@ class LP:
                 exp += self.l_zr[z, r] * self.b
                 for t in range(0, self.T):
                     exp += self.l_zr[z, r] * self.v_ztr[z, t, r] * self.g_r[r]
-
+        # Kosten für Versorgung mit Stückgut
         for z in range(0, self.Z):
             for r in range(0, self.R):
                 exp += (self.gamma_r[r] * self.a_zr[z, r] +
@@ -225,7 +226,7 @@ class LP:
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r] * self.u_ztr[z, t, r], f"C1_{z}_{t}_{r}")
+                    self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r], f"C1_{z}_{t}_{r}")
 
     def __add_constraint2(self):
         """
@@ -333,17 +334,17 @@ class LP:
             for r in range(0, self.R):
                     self.model.addConstr(self.s_zr[z, r] >= (self.a_zr[z, r] / self.k_hat_r[r]), f"C10_{z}_{r}")
 
-    #def __add_constraint11(self):
+    def __add_constraint11(self):
         """
         (37)
         """
-    #    for z in range(1, self.Z):
-     #       for r in range(0, self.R):
-      #          exp = LinExpr()
-       #         for t in range(0, self.T):
-        #            exp += self.u_ztr[z, t, r]
+        for z in range(1, self.Z):
+            for r in range(0, self.R):
+                exp = LinExpr()
+                for t in range(0, self.T):
+                    exp += self.u_ztr[z, t, r]
 
-         #       self.model.addConstr(self.e_zr[z,r] >= 1 - exp, f"C11_{z}_{r}")
+                self.model.addConstr(self.e_zr[z,r] >= 1 - exp, f"C11_{z}_{r}")
 #https://support.gurobi.com/hc/en-us/articles/4414392016529-How-do-I-model-conditional-statements-in-Gurobi-
 
     def __add_constraint12(self):
@@ -355,30 +356,25 @@ class LP:
                 for r in range(0, self.R):
                     self.model.addConstr(self.e_zr[z, r] + self.u_ztr[z, t, r] <= 1, f"C12_{z}_{t}_{r}")
 
-    def __add_constraint13(self):
+   # def __add_constraint13(self):
+   #     """
+   #     (39)
+   #     """
+   #     for z in range(1, self.Z):
+   #         for r in range(0, self.R):
+   #             exp = LinExpr()
+   #             for t in range(0, self.T):
+   #                 exp += self.f_ztr[z, t, r]
+   #             self.model.addConstr((exp * (1 - self.e_zr[z, r])) + (self.a_zr[z, r] * self.e_zr[z, r]) >= self.a_zr[z, r], f"C13_{z}_{r}")
+
+
+    def __add_constraint14(self):
         """
-        (39)
+        (40)
         """
-        #for z in range(1, self.Z):
-        #    for t in range(0, self.T):
-        #        for r in range(0, self.R):
-                    #self.model.addConstr(self.k_tr[t, r] * self.u_ztr[z, t, r] >= self.f_ztr[z, t, r], f"C13_{z}_{t}_{r}")
-        for z in range(1, self.Z):
+        for t in range(0, self.T):
             for r in range(0, self.R):
-                exp = LinExpr()
-                for t in range(0, self.T):
-                    exp += self.f_ztr[z, t, r]
-                self.model.addConstr((exp * (1 - self.e_zr[z, r])) + ((self.s_zr[z, r] * self.k_hat_r[r]) * self.e_zr[z, r]) >= self.a_zr[z, r], f"C13_{z}_{r}")
-
-
-    #def __add_constraint14(self):
-    #    """
-    #    (40)
-    #    """
-    #    for t in range(0, self.T):
-    #        for r in range(0, self.R):
-    #        self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr, f
-    #        "C14_{z}_{t}_{r}")
+                self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr[t][r], f"C14_{t}_{r}")
 
     def save_results(self):
         a_zr = np.ndarray(shape=[self.Z, self.R])

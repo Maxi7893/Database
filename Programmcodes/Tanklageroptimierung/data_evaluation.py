@@ -38,8 +38,8 @@ class DataEvaluation:
         e[['type', 'Time', 'Material']] = e.type.str.split(pat="_", expand=True)
         e = pd.merge(e, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         e['Time'] = e['Time'].astype(float)
-        e = pd.merge(e, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        e.drop(columns=['type', 'r', 'Time'], inplace=True)
+        #e = pd.merge(e, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #e.drop(columns=['type', 'r', 'Time'], inplace=True)
         return e
 
     def __read_x_tilde(self) -> pd.DataFrame:
@@ -51,8 +51,8 @@ class DataEvaluation:
         x_tilde[['Time', 'Tank', 'Material']] = x_tilde.temp.str.rsplit(pat="_", expand=True)
         x_tilde = pd.merge(x_tilde, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         x_tilde['Time'] = x_tilde['Time'].astype(float)
-        x_tilde = pd.merge(x_tilde, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        x_tilde.drop(columns=['type', 'reset', 'temp', 'r', 'Time'], inplace=True)
+        #x_tilde = pd.merge(x_tilde, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #x_tilde.drop(columns=['type', 'reset', 'temp', 'r', 'Time'], inplace=True)
         return x_tilde
 
     def __read_f(self) -> pd.DataFrame:
@@ -62,8 +62,8 @@ class DataEvaluation:
         f[['type', 'Time','Tank', 'Material']] = f.type.str.split(pat="_", expand=True)
         f = pd.merge(f, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         f['Time'] = f['Time'].astype(float)
-        f = pd.merge(f, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        f.drop(columns=['type', 'r', 'Time'], inplace=True)
+        #f = pd.merge(f, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #f.drop(columns=['type', 'r', 'Time'], inplace=True)
         return f
 
     def __read_u(self) -> pd.DataFrame:
@@ -73,8 +73,8 @@ class DataEvaluation:
         u[['type', 'Time','Tank', 'Material']] = u.type.str.split(pat="_", expand=True)
         u = pd.merge(u, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         u['Time'] = u['Time'].astype(float)
-        u = pd.merge(u, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        u.drop(columns=['type', 'r', 'Time'], inplace=True)
+        #u = pd.merge(u, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #u.drop(columns=['type', 'r', 'Time'], inplace=True)
         return u
 
     def __read_v(self) -> pd.DataFrame:
@@ -84,8 +84,8 @@ class DataEvaluation:
         v[['type', 'Time','Tank', 'Material']] = v.type.str.split(pat="_", expand=True)
         v = pd.merge(v, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         v['Time'] = v['Time'].astype(float)
-        v = pd.merge(v, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        v.drop(columns=['type', 'r', 'Time'], inplace=True)
+        #v = pd.merge(v, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #v.drop(columns=['type', 'r', 'Time'], inplace=True)
         return v
 
     def __read_y(self) -> pd.DataFrame:
@@ -94,8 +94,8 @@ class DataEvaluation:
         y.rename(columns={0: 'type', 1 : "value"}, inplace=True)
         y[['type', 'Time','Tank']] = y.type.str.split(pat="_", expand=True)
         y['Time'] = y['Time'].astype(float)
-        y = pd.merge(y, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        y.drop(columns=['type', 'Time'], inplace=True)
+        #y = pd.merge(y, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #y.drop(columns=['type', 'Time'], inplace=True)
         return y
 
     def __read_l(self) -> pd.DataFrame:
@@ -105,8 +105,8 @@ class DataEvaluation:
         l[['type', 'Time', 'Material']] = l.type.str.split(pat="_", expand=True)
         l = pd.merge(l, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         l['Time'] = l['Time'].astype(float)
-        l = pd.merge(l, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        l.drop(columns=['type', 'r', 'Time'], inplace=True)
+        #l = pd.merge(l, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #l.drop(columns=['type', 'r', 'Time'], inplace=True)
         return l
 
     def __read_s(self) -> pd.DataFrame:
@@ -116,8 +116,8 @@ class DataEvaluation:
         s[['type', 'Time', 'Material']] = s.type.str.split(pat="_", expand=True)
         s = pd.merge(s, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
         s['Time'] = s['Time'].astype(float)
-        s = pd.merge(s, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
-        s.drop(columns=['type', 'r', 'Time'], inplace=True)
+        #s = pd.merge(s, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        #s.drop(columns=['type', 'r', 'Time'], inplace=True)
         return s
 
     def __write_excel(self):
