@@ -123,8 +123,8 @@ class LP:
         self.__add_constraint14()
         print("Adding constraint 15")
         self.__add_constraint15()
-        print("Adding constraint 16")
-        self.__add_constraint16()
+        #print("Adding constraint 16")
+        #self.__add_constraint16()
 
 
     # region Variables

@@ -62,9 +62,9 @@ def run_lp():
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
-        kosten_tankreinigung=2000,
+        kosten_tankreinigung=1000,
         kosten_bahnkesselwagen=300,
-        kosten_gebinde_personal=200,
+        kosten_gebinde_personal=100,
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
         kosten_bahnkesselwagen_r=data.kosten_bahnkesselwagen_r,  # gesamte Kosten für BKW
@@ -76,7 +76,7 @@ def run_lp():
         anzahl_rohstoffe=data.anzahl_rohstoffe,
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
-    ).run(time_limit=7000) # Zeitlimit in Minuten!
+    ).run(time_limit=1000) # Zeitlimit in Minuten! 7000
     DataEvaluation(raster_zeitschritte)
     print(" ")
     print("Data analysis completed!")
