@@ -3,7 +3,7 @@ import time
 
 from Tanklageroptimierung.data_reader import DataReader
 from Tanklageroptimierung.data_evaluation import DataEvaluation
-from lp import LP
+from lp_patrick import LP
 from recursion import Recursion
 
 getcontext().prec = 3500
