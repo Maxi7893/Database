@@ -137,12 +137,12 @@ class DataReader:
 
     def __read_tanks(self) -> (np.ndarray, np.ndarray):
         tanks = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Test.xlsx',
             sheet_name=0)
 
         tank_dichte = pd.DataFrame(tanks)
         tanks['Artikelnummer'] = tanks['Artikelnummer'].astype(str)
-        tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
+        #tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
         tanks['Ausgangsfüllstand'] = (tanks['Tankvolumen Vn  (m³)'] * tanks['Dichte (kg/m³)'])
 
         tanks.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
@@ -166,6 +166,7 @@ class DataReader:
         ausgangszustand_tanks.reset_index(inplace=True, drop=True)
 
         self.anzahl_tanks = len(ausgangszustand_tanks)
+
         ausgangszustand_tanks_tr = np.full(shape=(self.anzahl_tanks, self.anzahl_rohstoffe),
                                            dtype=float,
                                            fill_value=0.0)
@@ -177,7 +178,7 @@ class DataReader:
 
         # Maximale Füllmengen aller Alternativen in DataFrame
         tanklager_alt = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Test.xlsx',
             sheet_name=3).fillna(0)
         tanklager_alt.iloc[:, 2:] = tanklager_alt.iloc[:, 2:].astype(int)
         tanklager_alt.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)

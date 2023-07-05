@@ -1,7 +1,7 @@
 import numpy as np
 import gurobipy as gp
 import pandas as pd
-from gurobipy import GRB, LinExpr
+from gurobipy import GRB, LinExpr, min_, max_
 
 
 # noinspection DuplicatedCode,SpellCheckingInspection
@@ -86,6 +86,8 @@ class LP:
         self.v_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
         self.s_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
         self.e_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
+        self.g_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
+        self.alpha_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
 
         # set up variables, objective and constraints
         print("Adding variables")
@@ -126,6 +128,10 @@ class LP:
         self.__add_constraint16()
         print("Adding constraint 17")
         self.__add_constraint17()
+        print("Adding constraint 18")
+        self.__add_constraint18()
+        print("Adding constraint 19")
+        self.__add_constraint19()
 
     # region Variables
     def __check_vars(self):
@@ -167,6 +173,8 @@ class LP:
         for z in range(0, self.Z):
             for t in range(0, self.T):
                 self.y_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
+                self.g_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
+                self.alpha_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
 
                 for r in range(0, self.R):
                     self.u_ztr[z, t, r] = self.model.addVar(vtype=GRB.BINARY,
@@ -366,18 +374,22 @@ class LP:
     def __add_constraint17(self):
         for z in range(1, self.Z):
             for t in range(0, self.T):
+                self.model.addConstr(self.alpha_zt[z, t] == min_(self.g_zt[z, t] + self.y_zt[z, t], 1), f"C17_{z}_{t}")
+
+    def __add_constraint18(self):
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                exp = LinExpr()
                 for r in range(0, self.R):
-                    for hat_r in range(0, self.R):
-                        for hat_z in range(0, z):
-                            if hat_r == r:
-                                continue
-                            exp = LinExpr()
-                            for n in range(hat_z, z):
-                                exp += self.y_zt[n, t]
+                    exp += self.x_tilde_ztr[z, t, r]
+                    self.model.addConstr(self.g_zt[z, t] == max_(self.alpha_zt[z - 1, t] - exp, 0), f"C18_{z}_{t}")
 
-                            self.model.addConstr(self.x_tilde_ztr[hat_z, t, hat_r] + self.x_tilde_ztr[z, t, r] <=
-                                                 1 + exp, f"C17_{z}_{t}_{r}_{hat_r}_{hat_z}")
-
+    def __add_constraint19(self):
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
+                    self.model.addConstr(self.x_tilde_ztr[z, t, r] <=
+                                         self.x_tilde_ztr[z - 1, t , r] + self.g_zt[z - 1, t], f"C19_{z}_{t}")
 
 def save_results(self):
     a_zr = np.ndarray(shape=[self.Z, self.R])

@@ -57,7 +57,7 @@ def run_lp():
     data = DataReader(raster_zeitschritte)
     #dataevaluation = DataEvaluation(raster_zeitschritte)
     #print(" ")
-    #print("Data analysis completed!")
+    print("Data analysis completed!")
     LP(
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG

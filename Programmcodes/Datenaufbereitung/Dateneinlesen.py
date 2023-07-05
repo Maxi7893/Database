@@ -492,15 +492,18 @@ BR.to_excel(
 # Hier werden die Stücklisten nach den Materialien für das Tanklager gefiltert
 # Zuerst Tanklager einlesen und die Materialnummer um die letzten 4-Ziffern entfernen
 Kürzen = 0  # Anzahl der Nummern die von der Materialnummer enfernt werden
+
+## Wenn hier die Test-Datei verwendet wird, dann muss Zeile 505 und 506 wieder eingefügt werden!
+
 Tanklagermaterialien = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
+    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Test.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
 TanklagermaterialienAkt = pd.read_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
     sheet_name=2)  # Hier ist die aktuelle Tanklagerbelegung
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(str)
 TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].astype(str)
-Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[
-                                        :-2]  # Da die Materialnummern bei dieser Liste als Float eingelesen werden
+#Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[
+#                                        :-2]  # Da die Materialnummern bei dieser Liste als Float eingelesen werden
 TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].str[:-2]
 if Kürzen > 0:
     Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-Kürzen]
@@ -552,11 +555,15 @@ TanklagermaterialienAkt.reset_index(drop=True, inplace=True)
 # Jeweils die Gebinde raussuchen und anschließend der Stückliste zuordnen
 Tanklagermaterialien = pd.merge(Tanklagermaterialien, AbpackgebindeSim, left_on='Alternative Mehrwegverpackungen',
                                 right_on='Verpackungsmaterial')
+
 Tanklagermaterialien.drop(columns=['Alternative Mehrwegverpackungen'], inplace=True)
 TanklagermaterialienAkt = pd.merge(TanklagermaterialienAkt, AbpackgebindeSim, left_on='Alternative Mehrwegverpackungen',
                                    right_on='Verpackungsmaterial')
 TanklagermaterialienAkt.drop(columns=['Alternative Mehrwegverpackungen'], inplace=True)
-
+print(Tanklagermaterialien)
+print("Hallo")
+print(TanklagermaterialienAkt)
+print("Hallo")
 Länge = len(TanklagermaterialienAkt)
 i = 0
 Materialnummer = TanklagermaterialienAkt['Artikelnummer'][i]
