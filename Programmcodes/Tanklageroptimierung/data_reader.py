@@ -1,4 +1,5 @@
 import csv
+import random
 
 import numpy as np
 import pandas as pd
@@ -103,12 +104,17 @@ class DataReader:
         geplante_auftraege_zr = np.full(shape=(self.anzahl_zeitpunkte, self.anzahl_rohstoffe),
                                         dtype=float,
                                         fill_value=0.0)
-
         for i in range(len(geplante_auftraege)):
+
             value = geplante_auftraege['Komponentenmng.'][i]
             rohstoff = geplante_auftraege['r'][i]
             beginn = geplante_auftraege['Start'][i] - 1
             geplante_auftraege_zr[int(beginn / self.raster_zeitschritte)][rohstoff] += abs(value)
+
+            #hier Aufträge ändern! """
+        pd.DataFrame(geplante_auftraege_zr).to_excel(
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\auftaege_zr.xlsx')
+
 
         return geplante_auftraege_zr
 

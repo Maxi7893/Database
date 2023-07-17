@@ -560,10 +560,11 @@ Tanklagermaterialien.drop(columns=['Alternative Mehrwegverpackungen'], inplace=T
 TanklagermaterialienAkt = pd.merge(TanklagermaterialienAkt, AbpackgebindeSim, left_on='Alternative Mehrwegverpackungen',
                                    right_on='Verpackungsmaterial')
 TanklagermaterialienAkt.drop(columns=['Alternative Mehrwegverpackungen'], inplace=True)
-print(Tanklagermaterialien)
+print(Tanklagermaterialien.dtypes)
 print("Hallo")
 print(TanklagermaterialienAkt)
 print("Hallo")
+
 Länge = len(TanklagermaterialienAkt)
 i = 0
 Materialnummer = TanklagermaterialienAkt['Artikelnummer'][i]
@@ -722,8 +723,6 @@ RohstoffeAktuell.set_index(['Auftragsnummer'], inplace=True)
 
 RohstoffeZukunft.loc[(RohstoffeZukunft['Verpackungsmaterial'] == ''), 'Verpackungsmaterial'] = 0  # Da in der Simulation
 
-DatenSim = pd.merge(TanklagerZukunft, RohstoffeZukunft, how='outer')
-
 TanklagerZukunft.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
 RohstoffeZukunft.to_excel(
@@ -732,6 +731,15 @@ Tanklager.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit aktueller Belegung.xlsx')
 RohstoffeAktuell.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch ohne Tanklager mit aktueller Belegung (Sim).xlsx')
+#Kombination  Verbrauch Tanklager und Gebinde
+TanklagerZukunft.reset_index(drop=False, inplace=True)
+RohstoffeZukunft.reset_index(drop=False, inplace=True)
+DatenSim = pd.merge(TanklagerZukunft, RohstoffeZukunft, how='outer')
+DatenSim.set_index(['Auftragsnummer'], inplace=True)
+DatenSim.sort_values(by='Auftragsnummer', inplace=True)
+DatenSim.sort_values(by='Start', inplace=True)
+DatenSim['Verpackungsmaterial'].fillna(value= '7.92701.9053', inplace=True) #Hier werden alle leeren Gebindezellen aufgeüllt!
+DatenSim.loc[DatenSim['Verpackungsmaterial'] == '7.92443.9090', 'Verpackungsmaterial'] = '7.92443.9150'
 DatenSim.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 

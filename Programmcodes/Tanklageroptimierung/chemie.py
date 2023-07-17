@@ -62,9 +62,9 @@ def run_lp():
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
-        kosten_tankreinigung=1000,
-        kosten_bahnkesselwagen=300,
-        kosten_gebinde_personal=100,
+        kosten_tankreinigung=10,
+        kosten_bahnkesselwagen=10,
+        kosten_gebinde_personal=1000000,
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
         kosten_bahnkesselwagen_r=data.kosten_bahnkesselwagen_r,  # gesamte Kosten für BKW
