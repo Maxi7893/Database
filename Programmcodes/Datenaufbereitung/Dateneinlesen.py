@@ -771,5 +771,11 @@ Materials.drop(columns=['Auftragsnummer',
                         'Base UOM',
                         'Kennzeichen für Temperaturbedingung'], inplace=True)
 Materials = pd.merge(Materials, Rohsto, how = "outer")
+Materials.loc[Materials['Gebindegröße LOME'] == 0, 'Preis pro Gebinde'] = 250.26
+Materials.loc[Materials['Gebindegröße LOME'] == 0, 'Gebindegröße LOME'] = 800
+Materials.loc[Materials['Verpackungsmaterial'] == '9.90701.1002', 'Gebindegröße LOME'] = 744
+Materials.loc[Materials['Verpackungsmaterial'] == '9.90701.1002', 'Preis pro Gebinde'] = 250.26
+Materials.loc[Materials['Verpackungsmaterial'] == '7.92701.9053', 'Gebindegröße LOME'] = 744
+Materials.loc[Materials['Verpackungsmaterial'] == '7.92701.9053', 'Preis pro Gebinde'] = 250.26
 Materials.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
