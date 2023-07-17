@@ -709,8 +709,6 @@ RohstoffeAktuell.drop(columns=['ImTanklager',
                                'Kennzeichen Lose Menge'], inplace=True)
 
 
-
-
 TanklagerZukunft.sort_values(by='Start', inplace=True)
 RohstoffeZukunft.sort_values(by='Start', inplace=True)
 Tanklager.sort_values(by='Start', inplace=True)
@@ -743,3 +741,35 @@ DatenSim.loc[DatenSim['Verpackungsmaterial'] == '7.92443.9090', 'Verpackungsmate
 DatenSim.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
+#Materialmapping
+Materials = DatenSim
+Materials.drop_duplicates(subset=['E-Material'], inplace=True) # Hier Duplikate entfernen
+Materials.reset_index(inplace=True)
+Rohsto = pd.DataFrame(Materials)
+Rohsto.drop_duplicates(subset=['Material'], inplace=True) # Hier Duplikate entfernen
+Rohsto = Rohsto[['Material', 'Kurztext', 'Me','Abpacker']]
+Rohsto['Abpacker'] = False
+Rohsto.rename(columns={'Material': 'E-Material','Me' : 'Me2', 'Kurztext' : 'Kurztext2'}, inplace = True)
+Rohsto = pd.merge(Rohsto, Abpackergebinde, left_on='E-Material', right_on='Materialnummer', how ='left')
+Rohsto = Rohsto[['E-Material', 'Me2', 'Kurztext2',  'Verpackungsmaterial','Gebindegröße LOME', 'Abpacker']]
+Rohsto['Verpackungsmaterial'].fillna(value= '7.92701.9053', inplace=True) #Hier werden alle leeren Gebindezellen aufgeüllt!
+Materials.drop(columns=['Auftragsnummer',
+                        'Material',
+                        'Kurztext',
+                        'Basismenge',
+                        'Me',
+                        'Komponentenmng.',
+                        'Start',
+                        'Hinweis',
+                        'Preis pro Gebinde',
+                        'Stück pro Schicht',
+                        'Benötigte Einheiten',
+                        'Kapazität Bahnkesselwagen (m³)',
+                        'Kosten (KG für IBC)',
+                        'Kosten (KG für Tank)',
+                        'Abfallkosten (KG für IBC)',
+                        'Base UOM',
+                        'Kennzeichen für Temperaturbedingung'], inplace=True)
+Materials = pd.merge(Materials, Rohsto, how = "outer")
+Materials.to_excel(
+    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
