@@ -1,7 +1,7 @@
 import numpy as np
 import gurobipy as gp
 import pandas as pd
-from gurobipy import GRB, LinExpr, min_, max_
+from gurobipy import GRB, LinExpr, max_
 
 
 # noinspection DuplicatedCode,SpellCheckingInspection
@@ -58,6 +58,21 @@ class LP:
         self.d = kosten_gebinde_personal
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
+        for i in range(1, 815):
+            if i<=250:
+                self.a_zr[i, 0] = 2000
+                self.a_zr[i, 1] = 2000
+                self.a_zr[i, 2] = 0
+            elif i<=500:
+                self.a_zr[i, 0] = 2000
+                self.a_zr[i, 1] = 0
+                self.a_zr[i, 2] = 2000
+            else:
+                self.a_zr[i, 0] = 0
+                self.a_zr[i, 1] = 2000
+                self.a_zr[i, 2] = 2000
+
+
         self.g_r = kosten_bahnkesselwagen_r
         self.k_tr = maximale_fuellmengen_tr
         self.k_hat_r = gebindegroessen_r
@@ -72,6 +87,7 @@ class LP:
 
         self.__check_vars()
         self.__init_model()
+
 
     def __init_model(self):
         # initialize model
@@ -88,6 +104,7 @@ class LP:
         self.e_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
         self.g_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
         self.alpha_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
+        self.beta_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
 
         # set up variables, objective and constraints
         print("Adding variables")
@@ -132,6 +149,36 @@ class LP:
         self.__add_constraint18()
         print("Adding constraint 19")
         self.__add_constraint19()
+        print("Adding constraint 20")
+        self.__add_constraint20()
+        print("Adding constraint 21")
+        self.__add_constraint21()
+        print("Adding constraint 22")
+        """self.__add_constraint22()
+        print("Adding constraint 23")
+        self.__add_constraint23()
+        print("Adding constraint 24")
+        self.__add_constraint24()
+        print("Adding constraint 25")
+        self.__add_constraint25()"""
+        print("Added constraint 25")
+        print("gamma_r = ", self.gamma_r, ", gamma_hat_r = ", self.gamma_hat_r,
+              self.c_hat_r, " = reinigungskosten_rohstoffgebinde_r, ",
+              self.c_hat_r, "= reinigungskosten_rohstoffgebinde_r, ",
+              self.c, "= kosten_tankreinigung, ",
+              self.b, "= kosten_bahnkesselwagen, ",
+              self.d, "= kosten_gebinde_personal, ",
+              self.m_r, "= kapazitaet_bahnkesselwagen_r, ",
+              self.g_r, "= kosten_bahnkesselwagen_r, ",
+              self.k_tr, "= maximale_fuellmengen_tr, ",
+              self.k_hat_r, "= gebindegroessen_r, ",
+              self.f_0tr, "= initiale_tankfuellung_tr, ",
+              self.Z, "= anzahl_zeitpunkte, ",
+              self.T, "= anzahl_tanks, ",
+              self.R, "= anzahl_rohstoffe, ",
+              self.p_tilde, "= anzahl_zeitpunkte_tankfuellung, ",
+              self.p, "= anzahl_zeitpunkte_reinigung")
+
 
     # region Variables
     def __check_vars(self):
@@ -170,11 +217,12 @@ class LP:
 
     # noinspection PyArgumentList
     def __add_vars(self):
-        for z in range(0, self.Z):
+        for z in range(0, self.Z):   #Hier auf 1 geändert
             for t in range(0, self.T):
                 self.y_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
-                self.g_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
-                self.alpha_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
+                self.g_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"g_{z}_{t}")
+                self.alpha_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"alpha_{z}_{t}")
+                self.beta_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"beta_{z}_{t}")
 
                 for r in range(0, self.R):
                     self.u_ztr[z, t, r] = self.model.addVar(vtype=GRB.BINARY,
@@ -202,7 +250,7 @@ class LP:
         (26)
         """
         exp = LinExpr()
-        # Kosten für die Reinigung
+        # Kosten für die Reinigung, hier überall von 0 auf 1 geändert bei z
         for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
@@ -225,7 +273,6 @@ class LP:
         #                exp += self.c_hat_r[r] * self.s_zr[z, r]
         #                for t in range(0, self.T):
         #                    exp -= self.u_ztr[z, t, r] * self.c_hat_r[r] * self.s_zr[z, r]
-
         self.model.setObjective(exp, GRB.MINIMIZE)
 
     # endregion
@@ -272,13 +319,12 @@ class LP:
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
-                for r in range(0, self.R):
-                    exp = LinExpr()
-                    for n in range(max(z - 1 - self.p, 1), z - 1):
-                        exp += self.y_zt[n, t]
+                exp = LinExpr()
+                for n in range(max(z - 1 - self.p, 1), z - 1):
+                    exp += self.y_zt[n, t]
 
-                    self.model.addConstr(self.y_zt[z - 1, t] * (exp - self.p) + self.p * self.y_zt[z, t] >= 0,
-                                         f"C4_{z}_{t}_{r}")
+                self.model.addConstr(self.y_zt[z - 1, t] * (exp - self.p) + self.p * self.y_zt[z, t] >= 0,
+                                     f"C4_{z}_{t}")
 
     def __add_constraint5(self):
 
@@ -374,77 +420,109 @@ class LP:
     def __add_constraint17(self):
         for z in range(1, self.Z):
             for t in range(0, self.T):
-                self.model.addConstr(self.alpha_zt[z, t] == min_(self.g_zt[z, t] + self.y_zt[z, t], 1), f"C17_{z}_{t}")
+                self.model.addConstr(self.alpha_zt[z, t] ==
+                                     max_(self.g_zt[z - 1, t], self.y_zt[z - 1, t]), f"C17_{z}_{t}")
 
     def __add_constraint18(self):
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 exp = LinExpr()
                 for r in range(0, self.R):
-                    exp += self.x_tilde_ztr[z, t, r]
-                    self.model.addConstr(self.g_zt[z, t] == max_(self.alpha_zt[z - 1, t] - exp, 0), f"C18_{z}_{t}")
+                    exp += self.x_tilde_ztr[z - 1, t, r]
+                    self.model.addConstr(self.beta_zt[z, t] == self.alpha_zt[z - 1, t] - exp, f"C18_{z}_{t}")
 
     def __add_constraint19(self):
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
+                    self.model.addConstr(self.g_zt[z, t] == max_(self.beta_zt[z, t], 0), f"C19_{z}_{t}")
+
+    def __add_constraint20(self):
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
                     self.model.addConstr(self.x_tilde_ztr[z, t, r] <=
-                                         self.x_tilde_ztr[z - 1, t , r] + self.g_zt[z - 1, t], f"C19_{z}_{t}")
+                                         self.x_tilde_ztr[z - 1, t, r] + self.g_zt[z - 1, t], f"C20_{z}_{t}")
 
-def save_results(self):
-    a_zr = np.ndarray(shape=[self.Z, self.R])
-    y_zt = np.ndarray(shape=[self.Z, self.T])
-    u_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
-    e_zr = np.ndarray(shape=[self.Z, self.R])
-    l_zr = np.ndarray(shape=[self.Z, self.R])
-    x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
-    f_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
-    s_zr = np.ndarray(shape=[self.Z, self.R])
+    def __add_constraint21(self):
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
+                    self.model.addConstr(self.x_tilde_ztr[z, t, r] >= self.f_ztr[z, t, r]/1000000, f"C21_{z}_{t}_{r}")
 
-    for z in range(1, self.Z):
+    """def __add_constraint22(self):
         for t in range(0, self.T):
-            y_zt[z, t] = self.y_zt[z, t].X
+            self.model.addConstr(self.g_zt[0, t] == 0, f"C22_{t}")
+
+    def __add_constraint23(self):
+        for t in range(0, self.T):
+            self.model.addConstr(self.y_zt[0, t] == 0, f"C23_{t}")
+
+    def __add_constraint24(self):
+        for t in range(0, self.T):
+            for r in range(0, self.R):
+                self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr[t, r], f"C24_{t}_{r}")
+
+    def __add_constraint25(self):
+        for t in range(0, self.T):
+            for r in range(0, self.R):
+                self.model.addConstr(self.x_tilde_ztr[0, t, r] >= self.f_ztr[0, t, r]/10000000, f"C25_{t}_{r}")
+        self.g_zt[0, 0] = 0
+        self.g_zt[0, 1] = 0
+        self.y_zt[0, 1] = 0
+        self.y_zt[0, 0] = 0
+        self.x_tilde_ztr[0, 0, 0] = 0
+        self.x_tilde_ztr[0, 1, 0] = 0
+        self.x_tilde_ztr[0, 0, 1] = 1
+        self.x_tilde_ztr[0, 1, 1] = 0
+        self.x_tilde_ztr[0, 0, 2] = 0
+        self.x_tilde_ztr[0, 1, 2] = 1"""
+
+
+    def save_results(self):
+        a_zr = np.ndarray(shape=[self.Z, self.R])
+        y_zt = np.ndarray(shape=[self.Z, self.T])
+        u_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
+        e_zr = np.ndarray(shape=[self.Z, self.R])
+        l_zr = np.ndarray(shape=[self.Z, self.R])
+        x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
+        f_ztr = np.ndarray(shape=[self.Z, self.T, self.R])
+        s_zr = np.ndarray(shape=[self.Z, self.R])
+
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                y_zt[z, t] = self.y_zt[z, t].X
+
+                for r in range(0, self.R):
+                    u_ztr[z, t, r] = self.u_ztr[z, t, r].X
+                    x_tilde_ztr[z, t, r] = self.x_tilde_ztr[z, t, r].X
+                    f_ztr[z, t, r] = self.f_ztr[z, t, r].X
 
             for r in range(0, self.R):
-                u_ztr[z, t, r] = self.u_ztr[z, t, r].X
-                x_tilde_ztr[z, t, r] = self.x_tilde_ztr[z, t, r].X
-                f_ztr[z, t, r] = self.f_ztr[z, t, r].X
-
-        for r in range(0, self.R):
-            l_zr[z, r] = self.l_zr[z, r].X
-            s_zr[z, r] = self.s_zr[z, r].X
-            e_zr[z, r] = self.e_zr[z, r].X
-            a_zr[z, r] = self.a_zr[z, r].X
-
-    # pd.DataFrame(y_zt).to_csv("y_zt.csv")
-    # pd.DataFrame(u_ztr).to_csv("u_ztr.csv")
-    # pd.DataFrame(l_zr).to_csv("l_zr.csv")
-    # pd.DataFrame(x_tilde_ztr).to_csv("x_tilde_ztr.csv")
-    # pd.DataFrame(f_ztr).to_csv("f_ztr.csv")
-    # pd.DataFrame(e_zt).to_csv("e_zr.csv")
-    # pd.DataFrame(s_zr).to_csv("s_zr.csv")
-    pd.DataFrame(self.a_zr).to_excel(
-        r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\auftaege_zr.xlsx')
-    # endregion
+                l_zr[z, r] = self.l_zr[z, r].X
+                s_zr[z, r] = self.s_zr[z, r].X
+                e_zr[z, r] = self.e_zr[z, r].X
+                a_zr[z, r] = self.a_zr[z, r].X
+        # endregion
 
 
-def run(self, time_limit: int):
-    """
-    Runs the optimization.
-    :param time_limit: Time limit in minutes.
-    """
-    try:
-        self.model.setParam('TimeLimit', 60 * time_limit)
-        self.model.setParam('NonConvex', 2)
-        self.model.optimize()
-        for i in range(self.model.SolCount):
-            self.model.Params.SolutionNumber = i
-            self.model.write(f"{i}.sol")
-        self.save_results()
+    def run(self, time_limit: int):
+        """
+        Runs the optimization.
+        :param time_limit: Time limit in minutes.
+        """
+        try:
+            self.model.setParam('TimeLimit', 60 * time_limit)
+            self.model.setParam('NonConvex', 2)
+            self.model.optimize()
+            for i in range(self.model.SolCount):
+                self.model.Params.SolutionNumber = i
+                self.model.write(f"{i}.sol")
+            self.save_results()
 
-    except gp.GurobiError as e:
-        # noinspection PyUnresolvedReferences
-        print('Error code ' + str(e.errno) + ': ' + str(e))
+        except gp.GurobiError as e:
+            # noinspection PyUnresolvedReferences
+            print('Error code ' + str(e.errno) + ': ' + str(e))
 
-    except AttributeError:
-        print('Encountered an attribute error')
+        except AttributeError:
+            print('Encountered an attribute error')
