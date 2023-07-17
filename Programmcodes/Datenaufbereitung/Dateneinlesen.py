@@ -740,6 +740,7 @@ DatenSim['Verpackungsmaterial'].fillna(value= '7.92701.9053', inplace=True) #Hie
 DatenSim.loc[DatenSim['Verpackungsmaterial'] == '7.92443.9090', 'Verpackungsmaterial'] = '7.92443.9150'
 DatenSim.loc[DatenSim['Gebindegröße LOME'] == 0, 'Preis pro Gebinde'] = 250.26
 DatenSim.loc[DatenSim['Gebindegröße LOME'] == 0, 'Gebindegröße LOME'] = 800
+DatenSim['Benötigte Einheiten'] = np.ceil(abs(DatenSim['Komponentenmng.']) / DatenSim['Gebindegröße LOME'])
 DatenSim.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
