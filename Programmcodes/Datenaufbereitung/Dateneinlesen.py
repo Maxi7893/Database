@@ -13,6 +13,7 @@ NextDate = Date + timedelta(days=280)
 # Starttermine Produktionsaufträge G20
 Starttermine = pd.read_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Starttermine G20 - 2023.xlsx')  # Einlesen der Excel Liste für die Produktionstermine
+Starttermine['Gebäude'] = "G20"
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.', '')  # Punkte aus der Materialnummer entfernen
 if b > 0:
     Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[
@@ -52,11 +53,13 @@ Starttermine.drop(columns=['Ansatznummer',
                            'Änderungsdatum im ERP-System',
                            'Geändert von'], inplace=True)
 Starttermine = Starttermine.sort_values(by='Start')  # Index nach Datum sortieren
+
 Next = Starttermine[Date:NextDate]  # Filtern des Betrachtungszeitraums!
 # Starttermine Produktionsaufträge G1
 Starttermine = pd.read_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Produktion_G1.xlsx',
     header=1)  # Einlesen der Excel-Liste G1'
+Starttermine['Gebäude'] = "G1"
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.', '')  # Punkte aus der Materialnummer entfernen
 if b > 0:
     Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str[
@@ -74,8 +77,10 @@ Next2 = Starttermine[Date:NextDate]
 Next = Next.reset_index()
 Next2 = Next2.reset_index()
 Next = pd.merge(Next, Next2, how='outer')
+Next.sort_values(by='Start', inplace=True)
 Next.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Nächsten Produktionstermine.xlsx')
+
 # Stücklisten werden eingelesen
 List1 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\STUELI_EL-DOD-4.TXT',
                     names=['Werk',
@@ -120,6 +125,11 @@ List2 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\
                            'Dis',
                            'Lab'], sep='#', encoding='windows-1252')  # Einlseen der txt und encoding
 List2 = List2.dropna(subset=['Kurztext'])  # Hier werden die deleted entfernt
+
+#List1['Gebäude'] = "G20"
+#List1.drop(labels=0, axis=0, inplace=True)
+#List2["Gebäude"] = "G1"
+#List2.drop(labels=0, axis=0, inplace=True)
 List = pd.merge(List1, List2, how='outer')  # Die beiden Stücklisten werden zusammengefügt
 Stueli = pd.DataFrame(List)
 Stueli.drop(labels=0, axis=0, inplace=True)  # hier wird die erste Zeile gedropt

@@ -123,8 +123,8 @@ class DataEvaluation:
     def __write_excel(self):
         self.e.to_excel(
             r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\e_zr.xlsx')
-        self.x_tilde.to_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\x_tilde_ztr.xlsx')
+        #self.x_ztr.to_excel(
+        #    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\x_ztr.xlsx')
         self.f.to_excel(
             r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\f_ztr.xlsx')
         self.u.to_excel(

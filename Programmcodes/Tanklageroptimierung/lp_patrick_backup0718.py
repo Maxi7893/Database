@@ -72,8 +72,6 @@ class LP:
                 self.a_zr[i, 1] = 200
                 self.a_zr[i, 2] = 200
         self.g_r = kosten_bahnkesselwagen_r
-        for i in range(3):
-            self.g_r[i] = 1000
         self.k_tr = maximale_fuellmengen_tr
         self.k_hat_r = gebindegroessen_r
         self.f_0tr = initiale_tankfuellung_tr
@@ -253,10 +251,9 @@ class LP:
         # Kosten für das Auffüllen des Tanks
         for z in range(0, self.Z):
             for r in range(0, self.R):
-                exp2 = LinExpr()
+                exp += self.l_zr[z, r] * self.b
                 for t in range(0, self.T):
-                    exp2 += self.v_ztr[z, t, r]
-                exp += self.l_zr[z, r] * (self.b + exp2 * self.g_r[r])
+                    exp += self.l_zr[z, r] * self.v_ztr[z, t, r] * self.g_r[r]
         # Kosten für Versorgung mit Stückgut
         for z in range(0, self.Z):
             for r in range(0, self.R):
