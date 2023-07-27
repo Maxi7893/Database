@@ -45,7 +45,7 @@ def run_recursion():
         kapa_tanks=kapazitaet_tanks,
         abfallpreis_gebinde=250,
         kosten_nachladen=170,  # Kosten wenn Stoff schon im Tank
-        kosten_tankreinigung=3000,
+        kosten_tankreinigung=20,
         kosten_abfallentsorgung=300,
         kosten_tankleerung_pro_einheit=1. / 300,
         reinigungszeit=25,
@@ -62,9 +62,9 @@ def run_lp():
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
-        kosten_tankreinigung=10,
-        kosten_bahnkesselwagen=10,
-        kosten_gebinde_personal=1000000,
+        kosten_tankreinigung= 6000, # 48 Stunden mit einem Stundensatz von 125€/h
+        kosten_bahnkesselwagen= 750, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks
+        kosten_gebinde_personal=125, #Daten werden durch die Simulation bestimmt!
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
         kosten_bahnkesselwagen_r=data.kosten_bahnkesselwagen_r,  # gesamte Kosten für BKW
