@@ -58,22 +58,7 @@ class LP:
         self.d = kosten_gebinde_personal
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
-        for i in range(1, 815):
-            if i<=250:
-                self.a_zr[i, 0] = 200
-                self.a_zr[i, 1] = 200
-                self.a_zr[i, 2] = 0
-            elif i<=500:
-                self.a_zr[i, 0] = 200
-                self.a_zr[i, 1] = 0
-                self.a_zr[i, 2] = 200
-            else:
-                self.a_zr[i, 0] = 0
-                self.a_zr[i, 1] = 200
-                self.a_zr[i, 2] = 200
         self.g_r = kosten_bahnkesselwagen_r
-        for i in range(3):
-            self.g_r[i] = 1000
         self.k_tr = maximale_fuellmengen_tr
         self.k_hat_r = gebindegroessen_r
         self.f_0tr = initiale_tankfuellung_tr
@@ -101,7 +86,7 @@ class LP:
         self.v_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
         self.s_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
         self.e_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
-        self.g_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
+        self.lambda_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
         self.alpha_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
         self.beta_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
 
@@ -124,11 +109,8 @@ class LP:
         self.__add_constraint6()
         print("Adding constraint 7")
         self.__add_constraint7()
-        print("Adding constraint 8")
-        print("Adding constraint 9")
         print("Adding constraint 10")
         self.__add_constraint10()
-        print("Adding constraint 11")
         print("Adding constraint 12")
         self.__add_constraint12()
         print("Adding constraint 13")
@@ -137,27 +119,14 @@ class LP:
         self.__add_constraint14()
         print("Adding constraint 15")
         self.__add_constraint15()
-        print("Adding constraint 16")
-        print("Adding constraint 17")
-        self.__add_constraint17()
-        print("Adding constraint 18")
-        self.__add_constraint18()
-        print("Adding constraint 19")
-        self.__add_constraint19()
-        print("Adding constraint 20")
-        self.__add_constraint20()
         print("Adding constraint 21")
         self.__add_constraint21()
         print("Adding constraint 22")
-        """self.__add_constraint22()
-        print("Adding constraint 23")
-        self.__add_constraint23()
+        self.__add_constraint22()
         print("Adding constraint 24")
         self.__add_constraint24()
-        print("Adding constraint 25")
-        self.__add_constraint25()"""
-        print("Added constraint 25")
-        print("gamma_r = ", self.gamma_r, ", gamma_hat_r = ", self.gamma_hat_r,
+
+        """print("gamma_r = ", self.gamma_r, ", gamma_hat_r = ", self.gamma_hat_r,
               self.c_hat_r, " = reinigungskosten_rohstoffgebinde_r, ",
               self.c_hat_r, "= reinigungskosten_rohstoffgebinde_r, ",
               self.c, "= kosten_tankreinigung, ",
@@ -172,7 +141,10 @@ class LP:
               self.T, "= anzahl_tanks, ",
               self.R, "= anzahl_rohstoffe, ",
               self.p_tilde, "= anzahl_zeitpunkte_tankfuellung, ",
-              self.p, "= anzahl_zeitpunkte_reinigung")
+              self.p, "= anzahl_zeitpunkte_reinigung",)
+        for i in range(3):
+            print(self.f_0tr[0][i])
+            print(self.f_0tr[1][i])"""
 
 
     # region Variables
@@ -215,7 +187,7 @@ class LP:
         for z in range(0, self.Z):   #Hier auf 1 geändert
             for t in range(0, self.T):
                 self.y_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"y_{z}_{t}")
-                self.g_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"g_{z}_{t}")
+                self.lambda_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"g_{z}_{t}")
                 self.alpha_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"alpha_{z}_{t}")
                 self.beta_zt[z, t] = self.model.addVar(vtype=GRB.BINARY, name=f"beta_{z}_{t}")
 
@@ -307,7 +279,7 @@ class LP:
                 for t in range(0, self.T):
                     exp += self.v_ztr[z, t, r]
 
-                self.model.addConstr(exp <= self.l_zr[z, r], f"C3_{z}_{r}")  # ab hier: geänderrt
+                    self.model.addConstr(exp <= self.l_zr[z, r], f"C3_{z}_{r}")  # ab hier: geänderrt
 
     def __add_constraint4(self):
         """
@@ -391,7 +363,7 @@ class LP:
         """
         for z in range(1, self.Z):
             for r in range(0, self.R):
-                self.model.addConstr(self.s_zr[z, r] >= (self.a_zr[z, r] / self.k_hat_r[r]), f"C14_{z}_{r}")
+                self.model.addConstr(self.s_zr[z, r] >= self.e_zr[z, r] * (self.a_zr[z, r] / self.k_hat_r[r]), f"C14_{z}_{r}")
 
     def __add_constraint15(self):
         """
@@ -415,7 +387,7 @@ class LP:
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 self.model.addConstr(self.alpha_zt[z, t] ==
-                                     max_(self.g_zt[z - 1, t], self.y_zt[z - 1, t]), f"C17_{z}_{t}")
+                                     max_(self.lambda_zt[z - 1, t], self.y_zt[z - 1, t]), f"C17_{z}_{t}")
 
     def __add_constraint18(self):
         for z in range(1, self.Z):
@@ -423,14 +395,14 @@ class LP:
                 exp = LinExpr()
                 for r in range(0, self.R):
                     #exp += self.x_tilde_ztr[z - 1, t, r]
-                    exp += self.u_ztr[z, t, r] #hier -1 weg
-                self.model.addConstr(self.beta_zt[z, t] == self.alpha_zt[z, t] - exp, f"C18_{z}_{t}")  #hier -1 bei alpha weg
+                    exp += self.u_ztr[z - 1, t, r] #hier -1 weg
+                self.model.addConstr(self.beta_zt[z, t] == self.alpha_zt[z, t] - exp, f"C18_{z}_{t}")
 
     def __add_constraint19(self):
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr(self.g_zt[z, t] == max_(self.beta_zt[z, t], 0), f"C19_{z}_{t}")
+                    self.model.addConstr(self.lambda_zt[z, t] == max_(self.beta_zt[z, t], 0), f"C19_{z}_{t}")
 
     def __add_constraint20(self):
         for z in range(1, self.Z):
@@ -439,14 +411,25 @@ class LP:
                     #self.model.addConstr(self.x_tilde_ztr[z, t, r] <=
                     #                     self.x_tilde_ztr[z - 1, t, r] + self.g_zt[z - 1, t], f"C20_{z}_{t}")
                     self.model.addConstr(self.u_ztr[z, t, r] <=
-                                         self.u_ztr[z - 1, t, r] + self.g_zt[z - 1, t], f"C20_{z}_{t}")
+                                         self.u_ztr[z - 1, t, r] + self.lambda_zt[z, t], f"C20_{z}_{t}")
 
     def __add_constraint21(self):
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     #self.model.addConstr(self.x_tilde_ztr[z, t, r] >= self.f_ztr[z, t, r]/1000000, f"C21_{z}_{t}_{r}")
                     self.model.addConstr(self.u_ztr[z, t, r] >= self.f_ztr[z, t, r] / 1000000, f"C21_{z}_{t}_{r}")
+
+    def __add_constraint22(self):
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
+                    self.model.addConstr((self.u_ztr[z, t, r]) <= self.u_ztr[z - 1, t, r] + self.y_zt[z - 1, t], f"C22_{z}_{t}_{r}")
+
+    def __add_constraint24(self):
+        for t in range(0, self.T):
+            for r in range(0, self.R):
+                self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr[t][r], f"C24_{t}_{r}")
 
     """def __add_constraint22(self):
         for t in range(0, self.T):

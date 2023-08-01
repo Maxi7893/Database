@@ -495,7 +495,6 @@ BR.drop(columns=['Abpacker'], inplace=True)
 # Abpacker werden ausgegeben in Liste
 BR = BR.sort_values(by='Start')
 BR.set_index(['Start', 'Auftragsnummer'], inplace=True)
-print(BR)
 BR.to_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Geplante_Abpacker.xlsx')
 
@@ -506,14 +505,17 @@ Kürzen = 0  # Anzahl der Nummern die von der Materialnummer enfernt werden
 ## Wenn hier die Test-Datei verwendet wird, dann muss Zeile 505 und 506 wieder eingefügt werden!
 
 Tanklagermaterialien = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Test.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
+    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
+
+
 TanklagermaterialienAkt = pd.read_excel(
     r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
     sheet_name=2)  # Hier ist die aktuelle Tanklagerbelegung
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(str)
 TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].astype(str)
-#Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[
-#                                        :-2]  # Da die Materialnummern bei dieser Liste als Float eingelesen werden
+# Bei Test-Excel hier 517 und 518 entfernen!
+Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[
+                                        :-2]  # Da die Materialnummern bei dieser Liste als Float eingelesen werden
 TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].str[:-2]
 if Kürzen > 0:
     Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].str[:-Kürzen]
@@ -570,10 +572,7 @@ Tanklagermaterialien.drop(columns=['Alternative Mehrwegverpackungen'], inplace=T
 TanklagermaterialienAkt = pd.merge(TanklagermaterialienAkt, AbpackgebindeSim, left_on='Alternative Mehrwegverpackungen',
                                    right_on='Verpackungsmaterial')
 TanklagermaterialienAkt.drop(columns=['Alternative Mehrwegverpackungen'], inplace=True)
-print(Tanklagermaterialien.dtypes)
-print("Hallo")
-print(TanklagermaterialienAkt)
-print("Hallo")
+
 
 Länge = len(TanklagermaterialienAkt)
 i = 0
@@ -646,6 +645,8 @@ while i < Länge:
 BenötigtenRohstoffeTanklager['Benötigte Einheiten'] = np.ceil(
     (BenötigtenRohstoffeTanklager['Komponentenmng.'] / BenötigtenRohstoffeTanklager['Gebindegröße LOME']))
 
+
+
 # Jetzt BenötigtenRohstoffeTanklager mit der Tanklagermaterialien abgleichen
 Länge = len(Tanklagermaterialien)
 BenötigtenRohstoffeTanklager['ImTanklagerZukunft'] = False
@@ -658,6 +659,9 @@ while i < Länge:
     i = i + 1
     if i < Länge:
         Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
+
+print(BenötigtenRohstoffeTanklager)
+
 Länge = len(TanklagermaterialienAkt)
 i = 0
 Materialnummer = TanklagermaterialienAkt['Artikelnummer'][i]
@@ -676,6 +680,8 @@ Tanklager = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager[
                                              'ImTanklager'] == True]  # Hier sind alle Tanklagerprodukte mit der aktuellen Tanklagerbelegung
 RohstoffeAktuell = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager[
                                                     'ImTanklager'] == False]  # Hier sind alle Rohstoffe mit der aktuellen Tanklagerbelegung
+
+
 # Hier werden noch jeweils alle Materialnummern der neuen Materialien zusammengefasst.
 # Bspw. für Methyl-THF 821093 und 202781
 SammlungMaterialnummern = pd.read_excel(
@@ -693,6 +699,7 @@ while i < Länge:
         Basisnummer = SammlungMaterialnummern['Basisnummer'][i]
         Alternativnummer = SammlungMaterialnummern['Alternativen'][i]
 # Ende des Auslesevorgangs der alternativen Materialnummern
+
 
 TanklagerZukunft.drop(columns=['ImTanklager',
                                'Abpacker',

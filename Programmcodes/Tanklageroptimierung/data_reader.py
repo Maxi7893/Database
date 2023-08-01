@@ -82,7 +82,7 @@ class DataReader:
         bahnkesselwagen['Kosten (BW)'] = (bahnkesselwagen['Kapazität (kg)'] *
                                           bahnkesselwagen['Kosten (KG für Tank)'])
 
-        kap_bahnkesselwagen = pd.merge(bahnkesselwagen, self.rohstoff_mapping, how="inner").drop_duplicates()
+        kap_bahnkesselwagen = pd.merge(bahnkesselwagen, self.rohstoff_mapping, how="inner").drop_duplicates(subset=["E-Material"])
         kap_bahnkesselwagen_r: pd.DataFrame = kap_bahnkesselwagen[['Kapazität (kg)']].reset_index(drop=True)
         bahnkesselwagen_kosten_r: pd.DataFrame = kap_bahnkesselwagen[['Kosten (BW)']].reset_index(drop=True)
 
@@ -143,12 +143,13 @@ class DataReader:
 
     def __read_tanks(self) -> (np.ndarray, np.ndarray):
         tanks = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Test.xlsx',
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
             sheet_name=0)
 
         tank_dichte = pd.DataFrame(tanks)
         tanks['Artikelnummer'] = tanks['Artikelnummer'].astype(str)
-        #tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
+        #Bei Test 152 entfernen!
+        tanks['Artikelnummer'] = tanks['Artikelnummer'].str[:-2]
         tanks['Ausgangsfüllstand'] = (tanks['Tankvolumen Vn  (m³)'] * tanks['Dichte (kg/m³)'])
 
         tanks.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
@@ -184,7 +185,7 @@ class DataReader:
 
         # Maximale Füllmengen aller Alternativen in DataFrame
         tanklager_alt = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Test.xlsx',
+            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
             sheet_name=3).fillna(0)
         tanklager_alt.iloc[:, 2:] = tanklager_alt.iloc[:, 2:].astype(int)
         tanklager_alt.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)
@@ -210,7 +211,7 @@ class DataReader:
 
         return alternativen_tanklager_tr, ausgangszustand_tanks_tr
 
-    # region read data for recursion
+'''    # region read data for recursion
     @staticmethod
     def einlesen() -> list:
         array = []
@@ -235,4 +236,4 @@ class DataReader:
                 array.append(row)
 
         return array
-    # endregion
+    # endregion'''

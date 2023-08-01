@@ -2,6 +2,7 @@ import csv
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from Tanklageroptimierung.data_reader import DataReader
 
 
@@ -119,6 +120,7 @@ class DataEvaluation:
         #s = pd.merge(s, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
         #s.drop(columns=['type', 'r', 'Time'], inplace=True)
         return s
+
 
     def __write_excel(self):
         self.e.to_excel(
