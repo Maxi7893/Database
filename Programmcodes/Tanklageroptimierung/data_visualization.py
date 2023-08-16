@@ -7,7 +7,7 @@ import seaborn.objects as so
 
 
 Auswertung_a = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\Testversuche\Testversuch_a\u_ztr.xlsx', header = 0)
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\Testversuche\Testversuch_a\u_ztr.xlsx', header = 0)
 print(Auswertung_a)
 Auswertung_a = Auswertung_a[Auswertung_a['value'] == 1]
 Auswertung_a = Auswertung_a[Auswertung_a['Time'] > 0]

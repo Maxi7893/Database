@@ -9,7 +9,7 @@ class DataReader:
     def __init__(self, raster_zeitschritte):
         self.raster_zeitschritte = raster_zeitschritte
         self.rohstoffe = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung'
+            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung'
             r'\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
 
         self.rohstoff_mapping = self.__read_rohstoff_mapping()
@@ -113,7 +113,7 @@ class DataReader:
 
             #hier Aufträge ändern! """
         pd.DataFrame(geplante_auftraege_zr).to_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\auftaege_zr.xlsx')
+            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\auftaege_zr.xlsx')
 
 
         return geplante_auftraege_zr
@@ -143,7 +143,7 @@ class DataReader:
 
     def __read_tanks(self) -> (np.ndarray, np.ndarray):
         tanks = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
+            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
             sheet_name=0)
 
         tank_dichte = pd.DataFrame(tanks)
@@ -185,7 +185,7 @@ class DataReader:
 
         # Maximale Füllmengen aller Alternativen in DataFrame
         tanklager_alt = pd.read_excel(
-            r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
+            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx',
             sheet_name=3).fillna(0)
         tanklager_alt.iloc[:, 2:] = tanklager_alt.iloc[:, 2:].astype(int)
         tanklager_alt.rename(columns={'Artikelnummer': "E-Material"}, inplace=True)

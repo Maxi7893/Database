@@ -1,5 +1,5 @@
 import os
-os.chdir(r"C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung")
+os.chdir(r"C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung")
 import Dateneinlesen
 
 

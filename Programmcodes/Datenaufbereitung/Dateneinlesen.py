@@ -12,7 +12,7 @@ Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden u
 NextDate = Date + timedelta(days=280)
 # Starttermine Produktionsaufträge G20
 Starttermine = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Starttermine G20 - 2023.xlsx')  # Einlesen der Excel Liste für die Produktionstermine
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Starttermine G20 - 2023.xlsx')  # Einlesen der Excel Liste für die Produktionstermine
 Starttermine['Gebäude'] = "G20"
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.', '')  # Punkte aus der Materialnummer entfernen
 if b > 0:
@@ -57,7 +57,7 @@ Starttermine = Starttermine.sort_values(by='Start')  # Index nach Datum sortiere
 Next = Starttermine[Date:NextDate]  # Filtern des Betrachtungszeitraums!
 # Starttermine Produktionsaufträge G1
 Starttermine = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Produktion_G1.xlsx',
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Produktion_G1.xlsx',
     header=1)  # Einlesen der Excel-Liste G1'
 Starttermine['Gebäude'] = "G1"
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.', '')  # Punkte aus der Materialnummer entfernen
@@ -79,10 +79,10 @@ Next2 = Next2.reset_index()
 Next = pd.merge(Next, Next2, how='outer')
 Next.sort_values(by='Start', inplace=True)
 Next.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Nächsten Produktionstermine.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Nächsten Produktionstermine.xlsx')
 
 # Stücklisten werden eingelesen
-List1 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\STUELI_EL-DOD-4.TXT',
+List1 = pd.read_csv(r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\STUELI_EL-DOD-4.TXT',
                     names=['Werk',
                            'Material',
                            'Al',
@@ -103,7 +103,7 @@ List1 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\
                            'Fev',
                            'Dis',
                            'Lab'], sep='#', encoding='windows-1252')  # Einlseen der txt und encoding
-List2 = pd.read_csv(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Stückliste G1.TXT',
+List2 = pd.read_csv(r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Stückliste G1.TXT',
                     names=['Werk',
                            'Material',
                            'Al',
@@ -169,7 +169,7 @@ indexNames = Stueli[(Stueli['Me2'].str.contains(
 FS = pd.DataFrame(Stueli)  # Es wird ein neues DataFrame iniziert
 FS.drop(indexNames, inplace=True)  # Es werden alle Abfälle und Stückmengen entfernt
 FS.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Stücklisten.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Stücklisten.xlsx')
 # Hier wird die Häufigkeit ermittelt
 data = Next['Mat.-Nr.']
 data = data.reset_index()
@@ -411,7 +411,7 @@ BR.drop(columns=['Al',
                  'Umrechnungsfaktor',
                  '2nd_Check'], inplace=True)  # hier werden alle unwichtigen Spalten gelöscht
 # Abpacker werden eingelesen
-Abpacker = pd.read_excel(r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Abpacker.xlsx',
+Abpacker = pd.read_excel(r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Abpacker.xlsx',
                          sheet_name=1)  # Abpacker werden aus der Excel-Liste eingelesen
 Abpacker.drop(columns=['auch GMP-Abpackungen?',
                        'PSA K16',
@@ -426,7 +426,7 @@ if b > 0:
 
 # Abpackgebinde werden eingelesen
 Abpackergebinde = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\MARA_G1_G20_Gebinde.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\MARA_G1_G20_Gebinde.xlsx')
 Abpackergebinde = Abpackergebinde.iloc[1:]
 Abpackergebinde.drop_duplicates(subset=['Materialnummer'], inplace=True)  # Hier noch Duplikate entfernen
 Abpackergebinde['Materialnummer'] = Abpackergebinde['Materialnummer'].str.replace('.', '')
@@ -435,7 +435,7 @@ if b > 0:
                                         :-b]  # die letzten Ziffern werden entfernt
 # Kosten für die Reinigung der Abpackgebinde werden eingelesen
 Reinigungskosten = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Kosten_Reinigung_Gebinde.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Kosten_Reinigung_Gebinde.xlsx')
 Reinigungskosten.drop(columns=['Materialnummer',
                                'Base UOM',
                                'Kennzeichen für Temperaturbedingung',
@@ -445,7 +445,7 @@ Reinigungskosten.drop(columns=['Materialnummer',
 Abpackergebinde = pd.merge(Abpackergebinde, Reinigungskosten, left_on='Verpackungsmaterial',
                            right_on='Verpackungsmaterial')
 Abpackergebinde.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Abpackgebinde.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Abpackgebinde.xlsx')
 AbpackgebindeSim = pd.DataFrame(Abpackergebinde)
 AbpackgebindeSim.drop_duplicates(subset=['Verpackungsmaterial'], inplace=True)  # Hier noch Duplikate entfernen
 AbpackgebindeSim['Test'] = False
@@ -458,7 +458,7 @@ AbpackgebindeSim.drop(columns=['Materialnummer',
                                'Test'], inplace=True)
 AbpackgebindeSim.dropna(subset=['Verpackungsmaterial'], inplace=True)
 AbpackgebindeSim.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\AbpackgebindeSim.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\AbpackgebindeSim.xlsx')
 # Rohstoffe und Gebinde werden in ein DataFrame zusammengefügt
 
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material', right_on='Materialnummer')
@@ -477,7 +477,7 @@ BenötigtenRohstoffeTanklager = BR  # Hier werden die Rohstoffe für die Tanklag
 Rohstoffe = BR.sort_values(by='Start')
 Rohstoffe.set_index(['Start', 'Auftragsnummer'], inplace=True)
 Rohstoffe.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Benötigten_Rohstoffe.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Benötigten_Rohstoffe.xlsx')
 
 # Liste wird auf Abpacker reduziert
 i = 0
@@ -496,7 +496,7 @@ BR.drop(columns=['Abpacker'], inplace=True)
 BR = BR.sort_values(by='Start')
 BR.set_index(['Start', 'Auftragsnummer'], inplace=True)
 BR.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Geplante_Abpacker.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Geplante_Abpacker.xlsx')
 
 # Hier werden die Stücklisten nach den Materialien für das Tanklager gefiltert
 # Zuerst Tanklager einlesen und die Materialnummer um die letzten 4-Ziffern entfernen
@@ -505,11 +505,11 @@ Kürzen = 0  # Anzahl der Nummern die von der Materialnummer enfernt werden
 ## Wenn hier die Test-Datei verwendet wird, dann muss Zeile 505 und 506 wieder eingefügt werden!
 
 Tanklagermaterialien = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
 
 
 TanklagermaterialienAkt = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx',
     sheet_name=2)  # Hier ist die aktuelle Tanklagerbelegung
 Tanklagermaterialien['Artikelnummer'] = Tanklagermaterialien['Artikelnummer'].astype(str)
 TanklagermaterialienAkt['Artikelnummer'] = TanklagermaterialienAkt['Artikelnummer'].astype(str)
@@ -685,7 +685,7 @@ RohstoffeAktuell = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager[
 # Hier werden noch jeweils alle Materialnummern der neuen Materialien zusammengefasst.
 # Bspw. für Methyl-THF 821093 und 202781
 SammlungMaterialnummern = pd.read_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx', sheet_name=1)
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx', sheet_name=1)
 SammlungMaterialnummern['Basisnummer'] = SammlungMaterialnummern['Basisnummer'].astype(str)
 SammlungMaterialnummern['Alternativen'] = SammlungMaterialnummern['Alternativen'].astype(str)
 Länge = len(SammlungMaterialnummern)
@@ -739,13 +739,13 @@ RohstoffeAktuell.set_index(['Auftragsnummer'], inplace=True)
 RohstoffeZukunft.loc[(RohstoffeZukunft['Verpackungsmaterial'] == ''), 'Verpackungsmaterial'] = 0  # Da in der Simulation
 
 TanklagerZukunft.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit neuer Belegung.xlsx')
 RohstoffeZukunft.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch ohne Tanklager mit neuer Belegung (Sim).xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch ohne Tanklager mit neuer Belegung (Sim).xlsx')
 Tanklager.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit aktueller Belegung.xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Tanklagerverbrauch mit aktueller Belegung.xlsx')
 RohstoffeAktuell.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch ohne Tanklager mit aktueller Belegung (Sim).xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch ohne Tanklager mit aktueller Belegung (Sim).xlsx')
 #Kombination  Verbrauch Tanklager und Gebinde
 TanklagerZukunft.reset_index(drop=False, inplace=True)
 RohstoffeZukunft.reset_index(drop=False, inplace=True)
@@ -759,7 +759,7 @@ DatenSim.loc[DatenSim['Gebindegröße LOME'] == 0, 'Preis pro Gebinde'] = 250.26
 DatenSim.loc[DatenSim['Gebindegröße LOME'] == 0, 'Gebindegröße LOME'] = 800
 DatenSim['Benötigte Einheiten'] = np.ceil(abs(DatenSim['Komponentenmng.']) / DatenSim['Gebindegröße LOME'])
 DatenSim.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
 #Materialmapping
 Materials = DatenSim
@@ -798,4 +798,4 @@ Materials.loc[Materials['Verpackungsmaterial'] == '9.90701.1002', 'Preis pro Geb
 Materials.loc[Materials['Verpackungsmaterial'] == '7.92701.9053', 'Gebindegröße LOME'] = 744
 Materials.loc[Materials['Verpackungsmaterial'] == '7.92701.9053', 'Preis pro Gebinde'] = 250.26
 Materials.to_excel(
-    r'C:\Users\Gruppeplansim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
