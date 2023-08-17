@@ -797,5 +797,34 @@ Materials.loc[Materials['Verpackungsmaterial'] == '9.90701.1002', 'Gebindegröß
 Materials.loc[Materials['Verpackungsmaterial'] == '9.90701.1002', 'Preis pro Gebinde'] = 250.26
 Materials.loc[Materials['Verpackungsmaterial'] == '7.92701.9053', 'Gebindegröße LOME'] = 744
 Materials.loc[Materials['Verpackungsmaterial'] == '7.92701.9053', 'Preis pro Gebinde'] = 250.26
-Materials.to_excel(
+
+
+#Hier müssen noch die Gebinde für die Produkte hinzugefügt werden
+GebindeProdukte = pd.merge(Next, Abpackergebinde, left_on='Mat.-Nr.', right_on='Materialnummer', how='left')
+GebindeProdukte = GebindeProdukte[['Mat.-Nr.', 'Material', 'Menge' , 'Me', 'Auftrags-Nr.', 'Verpackungsmaterial', 'Gebindegröße LOME']]
+GebindeProdukte.loc[GebindeProdukte['Verpackungsmaterial'].isnull(), 'Preis pro Gebinde'] = 250.26
+GebindeProdukte.loc[GebindeProdukte['Verpackungsmaterial'].isnull(), 'Verpackungsmaterial'] = '7.92701.9053'
+GebindeProdukte['Test'] = False
+GebindeProdukte.loc[GebindeProdukte['Gebindegröße LOME'].isnull(), 'Test'] = True
+GebindeProdukte.loc[GebindeProdukte['Gebindegröße LOME'] == 0, 'Test'] = True
+GebindeProdukte.loc[GebindeProdukte['Test'] == True, 'Gebindegröße LOME'] = 744
+GebindeProdukte.drop(columns=['Test'], inplace = True)
+GebindeProdukte.drop_duplicates(subset=['Auftrags-Nr.'], inplace=True)
+GebindeProdukte.loc[GebindeProdukte['Me'] == 'G', 'Menge'] = GebindeProdukte['Menge']/1000
+GebindeProdukte.loc[GebindeProdukte['Me'] == 'G', 'Me'] = 'KG'
+
+GebindeProdukte['Benötigte Einheiten'] = np.ceil(
+    (GebindeProdukte['Menge'] / GebindeProdukte['Gebindegröße LOME']))
+GebindeProdukte['Mat.-Nr.'].astype(str)
+GebindeProdukte['Gebindegröße LOME'] = GebindeProdukte['Gebindegröße LOME'].astype(float)
+GebindeProdukte['Benötigte Einheiten'] = GebindeProdukte['Benötigte Einheiten'].astype(float)
+GebindeProdukte.to_excel(
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\GebindeProdukte (Sim).xlsx')
+
+GebindeProdukte.rename(columns={'Mat.-Nr.': 'E-Material', 'Material': 'Kurztext2', 'Me': 'Me2'}, inplace=True)
+Materials2 =pd.DataFrame(GebindeProdukte[['E-Material', 'Me2', 'Kurztext2', 'Verpackungsmaterial', 'Gebindegröße LOME', 'Preis pro Gebinde']])
+Materials2.loc[Materials2['Verpackungsmaterial'] == '7.92443.9550', 'Preis pro Gebinde'] = 250.26
+Material = pd.merge(Materials, Materials2, how='outer', sort=False)
+Material.drop_duplicates(subset=['E-Material'], inplace=True)
+Material.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
