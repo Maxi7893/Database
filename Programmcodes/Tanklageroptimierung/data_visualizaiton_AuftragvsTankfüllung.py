@@ -29,7 +29,7 @@ Auswertung_Nachfrage = pd.read_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\Nachfrage.xlsx', header = 0)
 
 
-plot_label = 'Füllstände Tank ' + str(Tankvisualisierung) + ' mit Rohstoff ' + str(Rohstoffvisualisierung) 'und Auftragsnachfrage von Rohstoff ' + str(Rohstoffvisualisierung)
+plot_label = 'Füllstände Tank ' + str(Tankvisualisierung) + ' mit Rohstoff ' + str(Rohstoffvisualisierung) + 'und Auftragsnachfrage von Rohstoff ' + str(Rohstoffvisualisierung)
 sns.set(style = "whitegrid")
 fig, ax1 = plt.subplots()
 sns.lineplot(data = Auswertung_final, x='Time', y='value', ax = ax1, label = plot_label)

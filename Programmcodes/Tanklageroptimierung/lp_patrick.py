@@ -125,6 +125,8 @@ class LP:
         self.__add_constraint22()
         print("Adding constraint 24")
         self.__add_constraint24()
+        print("Adding constraint 25")
+        self.__add_constraint25()
 
         """print("gamma_r = ", self.gamma_r, ", gamma_hat_r = ", self.gamma_hat_r,
               self.c_hat_r, " = reinigungskosten_rohstoffgebinde_r, ",

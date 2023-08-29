@@ -17,7 +17,7 @@ def run_lp():
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
         kosten_tankreinigung= 6000, # 48 Stunden mit einem Stundensatz von 125€/h
         kosten_bahnkesselwagen= 750, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks
-        kosten_gebinde_personal=125, #Daten werden durch die Simulation bestimmt!
+        kosten_gebinde_personal=500000, #Daten werden durch die Simulation bestimmt! #125
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
         kosten_bahnkesselwagen_r=data.kosten_bahnkesselwagen_r,  # gesamte Kosten für BKW
@@ -29,7 +29,7 @@ def run_lp():
         anzahl_rohstoffe=data.anzahl_rohstoffe,
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
-    ).run(time_limit=4222) # Zeitlimit in Minuten! 7000
+    ).run(time_limit=3000) # Zeitlimit in Minuten! 7000
     DataEvaluation(raster_zeitschritte)
     print(" ")
     print("Data analysis completed!")
