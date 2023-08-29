@@ -431,6 +431,14 @@ class LP:
             for r in range(0, self.R):
                 self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr[t][r], f"C24_{t}_{r}")
 
+    def __add_constraint25(self):
+        for z in range(0, self.Z):
+            for r in range(0, self.R):
+                exp = LinExpr()
+                for t in range(0, self.T):
+                    exp += self.u_ztr[z, t, r]
+                self.model.addConstr(exp <= 5, f"C25_{z}_{r}")
+
     """def __add_constraint22(self):
         for t in range(0, self.T):
             self.model.addConstr(self.g_zt[0, t] == 0, f"C22_{t}")
