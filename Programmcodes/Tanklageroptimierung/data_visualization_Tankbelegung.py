@@ -16,6 +16,8 @@ sns.scatterplot(data = Auswertung_final_f_ztr, x = 'Time', y = 'Tank', hue = 'Ma
 plt.xlim(left = 0)
 ax = plt.gca()
 ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+ax.set_ylabel('Tank')
+ax.set_xlabel('Zeit in 8 Stunden Intervallen')
 
 """plt.annotate('Tankreinigung', xy = (), xytext = (),
              arrowprops=dict(facecolor='black', arrowstyle='->'))"""

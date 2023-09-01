@@ -68,7 +68,6 @@ class LP:
         self.p_tilde = anzahl_zeitpunkte_tankfuellung
         self.p = anzahl_zeitpunkte_reinigung
 
-
         self.__check_vars()
         self.__init_model()
 
@@ -440,6 +439,7 @@ class LP:
                 for t in range(0, self.T):
                     exp += self.u_ztr[z, t, r]
                 self.model.addConstr(exp <= 5, f"C25_{z}_{r}")
+
 
     """def __add_constraint22(self):
         for t in range(0, self.T):

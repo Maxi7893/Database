@@ -35,10 +35,13 @@ fig, ax1 = plt.subplots()
 sns.lineplot(data = Auswertung_final, x='Time', y='value', ax = ax1, label = plot_label)
 plt.xlim(left = 0)
 ax1.yaxis.set_major_locator(plt.MaxNLocator(integer = True))
-
+ax1.set_ylabel('Tankfüllstand in kg')
+ax1.set_xlabel('Zeit in 8 Stunden Intervallen')
 ax2 = ax1.twinx()
 
 sns.barplot(data = Auswertung_Nachfrage, x = Auswertung_Nachfrage.iloc[:, 0], y = Auswertung_Nachfrage.iloc[:, 1], ax = ax2, lw = 0, palette = ['orange' for x in Auswertung_Nachfrage.iloc[:, 1]])
+ax2.set_ylabel('Auftrag Nachfrage in kg')
+
 ax1.legend()
 ax2.legend()
 
