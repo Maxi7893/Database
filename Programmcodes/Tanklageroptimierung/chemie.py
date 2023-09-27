@@ -17,7 +17,13 @@ def run_lp():
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
         kosten_tankreinigung= 6000, # 48 Stunden mit einem Stundensatz von 125€/h
         kosten_bahnkesselwagen= 750, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks
-        kosten_gebinde_personal=500000, #Daten werden durch die Simulation bestimmt! #125
+        # Auffüllen des Tanks Sandra Seebald bzgl. längere Standkosten fragen!
+        # Materialende 0000 Kosten beinhalten Kosten des Einkaufs, Handling etc.
+        # Materialende 8889/8888 Kosten beinhalten jetzt Abpackungen
+        # Kosten Bahnkesselwagen schieben etc.
+        # Kosten bei Gebinde für das Handling ist nicht drin!
+        kosten_gebinde_personal=500000,  # Daten werden durch die Simulation bestimmt! #125€/h # halbe Stunde
+        # Platzkosten IBC -> Im Werkslager: Pascal Fliegner (Was würde ein Standplatz kosten!)
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
         kosten_bahnkesselwagen_r=data.kosten_bahnkesselwagen_r,  # gesamte Kosten für BKW
