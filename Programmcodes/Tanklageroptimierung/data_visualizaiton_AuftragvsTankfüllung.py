@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import seaborn.objects as so
 
-Tankvisualisierung = 10
+Tankvisualisierung = 7
 Rohstoffvisualisierung = 0
 
 Auswertung_final_f_ztr = pd.read_excel(
