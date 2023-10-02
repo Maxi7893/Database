@@ -163,11 +163,39 @@ Stueli['Al'] = Stueli['Al'].astype(float)
 Stueli['Komponentenmng.'] = Stueli['Komponentenmng.'] * Stueli['Negativ']  # Negative Mengen sind jetzt kein String mehr
 Stueli.drop(columns='Negativ', inplace=True)  # Die erstelte Spalte wieder entfernt
 # Stueli['Rohstoff'] = (Stueli['Komponentenmng.'] > 0) & (Stueli['Me2'].str.contains('KG'))
-indexNames = Stueli[(Stueli['Me2'].str.contains(
-    'ST'))].index  # Hier wird die Indexnummer gespeichert, welche alle der Einheit Stück angehören
-# indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
 FS = pd.DataFrame(Stueli)  # Es wird ein neues DataFrame iniziert
-FS.drop(indexNames, inplace=True)  # Es werden alle Abfälle und Stückmengen entfernt
+
+
+
+#Ggf. hier alle Materialnummern die mit 7 oder 9 starten und ST besitzen entfernt (Gebinde)
+
+FS['Test1'] = FS['E-Material'].str[0]
+indexNames = FS[((FS['Test1'].str.contains("7")) | (FS['Test1'].str.contains("9")) ) & (FS['Me2'].str.contains('ST'))].index
+FS.drop(indexNames, inplace=True)
+
+FilterBegriffe = pd.DataFrame(data={'Begriffe': ['EIM','CLIP', 'PLO','BAG', 'Kabel', 'CLS', 'CGF', 'Chemie-Etiketten', 'BMF', 'GMP', 'TCS', 'EZI','Packmittel', 'PACKMITTEL', 'IBC', 'ibc','Filter','FILTER','Ring','RING','UCON', 'Fass', 'FASS', 'ABF', 'Argon', 'Big Bag', 'Tro', 'Schüttgut', 'SCHÜTT', 'SA PE', 'Safe Seal', 'Safe', 'DSA']}) #Alle Zeilen mit diesem Inhalt werden gelöscht!
+Filter = 0
+LaengeFilter = len(FilterBegriffe)
+while Filter < LaengeFilter:
+    indexNames = FS[(FS['Kurztext2'].str.contains(FilterBegriffe['Begriffe'][Filter])) & (FS['Me2'].str.contains('ST'))].index
+    FS.drop(indexNames, inplace=True)
+    del(indexNames)
+    Filter = Filter+1
+
+indexName = FS[(FS['E-Material'].str.contains(" "))].index
+FS.drop(indexName, inplace=True)
+#Hier sind alle Gebinde entfernt!
+
+
+'''
+#indexNames = Stueli[(Stueli['Me2'].str.contains('ST'))].index  # Hier wird die Indexnummer gespeichert, welche alle der Einheit Stück angehören
+# indexNames =  Stueli[(Stueli['Komponentenmng.'] < 0) | (Stueli['Me2'].str.contains('ST'))].index #Hier wird die Indexnummer gespeichert, welche alle Mengen negativ sind oder der Einheit Stück angehören
+#FS.drop(indexNames, inplace=True)  # Es werden alle Stückmengen entfernt
+
+
+'''
+
+
 FS.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Stücklisten.xlsx')
 # Hier wird die Häufigkeit ermittelt
@@ -762,7 +790,8 @@ DatenSim.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
 #Materialmapping
-Materials = DatenSim
+Materials = pd.DataFrame(DatenSim)
+print(Materials)
 Materials.drop_duplicates(subset=['E-Material'], inplace=True) # Hier Duplikate entfernen
 Materials.reset_index(inplace=True)
 Rohsto = pd.DataFrame(Materials)
@@ -828,3 +857,6 @@ Material = pd.merge(Materials, Materials2, how='outer', sort=False)
 Material.drop_duplicates(subset=['E-Material'], inplace=True)
 Material.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
+
+# Hier werden noch die Kleingebinde in der Range von 1-10kg rausgesucht!
+
