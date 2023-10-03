@@ -194,8 +194,6 @@ FS.drop(indexName, inplace=True)
 
 
 '''
-
-
 FS.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Stücklisten.xlsx')
 # Hier wird die Häufigkeit ermittelt
@@ -778,14 +776,35 @@ RohstoffeAktuell.to_excel(
 TanklagerZukunft.reset_index(drop=False, inplace=True)
 RohstoffeZukunft.reset_index(drop=False, inplace=True)
 DatenSim = pd.merge(TanklagerZukunft, RohstoffeZukunft, how='outer')
+
+
+#DatenSim.set_index(['Auftragsnummer'], inplace=True)
+#DatenSim.sort_values(by='Auftragsnummer', inplace=True)
+#DatenSim.sort_values(by='Start', inplace=True)
+
+
+DatenSim['Verpackungsmaterial'].fillna(value= '7.92701.9053', inplace=True) #Hier werden alle leeren Gebindezellen aufgeüllt!
+DatenSim.loc[(DatenSim['Verpackungsmaterial'] == '7.92701.9053') & (DatenSim['Me2'].str.contains('ST')), 'Verpackungsmaterial'] = '0.00000.0000'
+DatenSim.loc[DatenSim['Verpackungsmaterial'] == '7.92443.9090', 'Verpackungsmaterial'] = '7.92443.9150'
+DatenSim.loc[(DatenSim['Gebindegröße LOME'] == 0) & (DatenSim['Me2'].str.contains('KG')), 'Preis pro Gebinde'] = 250.26
+DatenSim.loc[(DatenSim['Gebindegröße LOME'] == 0) & (DatenSim['Me2'].str.contains('KG')), 'Gebindegröße LOME'] = 800
+DatenSim['Benötigte Einheiten'] = np.ceil(abs(DatenSim['Komponentenmng.']) / DatenSim['Gebindegröße LOME'])
+
+Laufzahl = 0
+Laenge = len(DatenSim)
+
+while Laufzahl < Laenge:
+    Einheit = DatenSim['Me2'][Laufzahl]
+    Komponentenmenge = DatenSim['Komponentenmng.'][Laufzahl]
+    if 'ST' in Einheit:
+        DatenSim['Benötigte Einheiten'][Laufzahl] = np.ceil(Komponentenmenge)
+    Laufzahl = Laufzahl + 1
+
 DatenSim.set_index(['Auftragsnummer'], inplace=True)
 DatenSim.sort_values(by='Auftragsnummer', inplace=True)
 DatenSim.sort_values(by='Start', inplace=True)
-DatenSim['Verpackungsmaterial'].fillna(value= '7.92701.9053', inplace=True) #Hier werden alle leeren Gebindezellen aufgeüllt!
-DatenSim.loc[DatenSim['Verpackungsmaterial'] == '7.92443.9090', 'Verpackungsmaterial'] = '7.92443.9150'
-DatenSim.loc[DatenSim['Gebindegröße LOME'] == 0, 'Preis pro Gebinde'] = 250.26
-DatenSim.loc[DatenSim['Gebindegröße LOME'] == 0, 'Gebindegröße LOME'] = 800
-DatenSim['Benötigte Einheiten'] = np.ceil(abs(DatenSim['Komponentenmng.']) / DatenSim['Gebindegröße LOME'])
+
+#DatenSim.loc[DatenSim['Me2'].str.contains('ST'),'Benötigte Einheiten'] = DatenSim['Komponentenmng.']
 DatenSim.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
