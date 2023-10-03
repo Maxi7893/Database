@@ -184,6 +184,7 @@ while Filter < LaengeFilter:
 
 indexName = FS[(FS['E-Material'].str.contains(" "))].index
 FS.drop(indexName, inplace=True)
+FS.drop(columns='Test1', inplace=True)
 #Hier sind alle Gebinde entfernt!
 
 
@@ -792,7 +793,6 @@ DatenSim['Benötigte Einheiten'] = np.ceil(abs(DatenSim['Komponentenmng.']) / Da
 
 Laufzahl = 0
 Laenge = len(DatenSim)
-
 while Laufzahl < Laenge:
     Einheit = DatenSim['Me2'][Laufzahl]
     Komponentenmenge = DatenSim['Komponentenmng.'][Laufzahl]
@@ -803,8 +803,6 @@ while Laufzahl < Laenge:
 DatenSim.set_index(['Auftragsnummer'], inplace=True)
 DatenSim.sort_values(by='Auftragsnummer', inplace=True)
 DatenSim.sort_values(by='Start', inplace=True)
-
-#DatenSim.loc[DatenSim['Me2'].str.contains('ST'),'Benötigte Einheiten'] = DatenSim['Komponentenmng.']
 DatenSim.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
@@ -878,4 +876,9 @@ Material.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
 
 # Hier werden noch die Kleingebinde in der Range von 1-10kg rausgesucht!
-
+Kleingebinde = pd.DataFrame(DatenSim)
+Kleingebinde.loc[(Kleingebinde['Komponentenmng.'] > 1) & (Kleingebinde['Komponentenmng.'] < 10)  , 'Auslese'] = True
+Kleingebinde = Kleingebinde[Kleingebinde.Auslese == True]
+Kleingebinde.drop(Kleingebinde.columns[[10,11,12,13,14,15,16,17,18,19,20,21,22,23]], axis=1, inplace=True)
+Kleingebinde.to_excel(
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Kleingebinde.xlsx')
