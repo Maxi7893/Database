@@ -687,7 +687,7 @@ while i < Länge:
     if i < Länge:
         Materialnummer = Tanklagermaterialien['Artikelnummer'][i]
 
-print(BenötigtenRohstoffeTanklager)
+
 
 Länge = len(TanklagermaterialienAkt)
 i = 0
@@ -787,8 +787,8 @@ DatenSim = pd.merge(TanklagerZukunft, RohstoffeZukunft, how='outer')
 DatenSim['Verpackungsmaterial'].fillna(value= '7.92701.9053', inplace=True) #Hier werden alle leeren Gebindezellen aufgeüllt!
 DatenSim.loc[(DatenSim['Verpackungsmaterial'] == '7.92701.9053') & (DatenSim['Me2'].str.contains('ST')), 'Verpackungsmaterial'] = '0.00000.0000'
 DatenSim.loc[DatenSim['Verpackungsmaterial'] == '7.92443.9090', 'Verpackungsmaterial'] = '7.92443.9150'
-DatenSim.loc[(DatenSim['Gebindegröße LOME'] == 0) & (DatenSim['Me2'].str.contains('KG')), 'Preis pro Gebinde'] = 250.26
-DatenSim.loc[(DatenSim['Gebindegröße LOME'] == 0) & (DatenSim['Me2'].str.contains('KG')), 'Gebindegröße LOME'] = 800
+DatenSim.loc[(DatenSim['Gebindegröße LOME'] == 0) & ((DatenSim['Me2'].str.contains('KG')) | (DatenSim['Me2'].str.contains('L'))), 'Preis pro Gebinde'] = 250.26
+DatenSim.loc[(DatenSim['Gebindegröße LOME'] == 0) & ((DatenSim['Me2'].str.contains('KG')) | (DatenSim['Me2'].str.contains('L'))), 'Gebindegröße LOME'] = 800
 DatenSim['Benötigte Einheiten'] = np.ceil(abs(DatenSim['Komponentenmng.']) / DatenSim['Gebindegröße LOME'])
 
 Laufzahl = 0
@@ -803,12 +803,12 @@ while Laufzahl < Laenge:
 DatenSim.set_index(['Auftragsnummer'], inplace=True)
 DatenSim.sort_values(by='Auftragsnummer', inplace=True)
 DatenSim.sort_values(by='Start', inplace=True)
+print(DatenSim.dtypes)
 DatenSim.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Rohstoffverbrauch_Gesamt (Sim).xlsx')
 
 #Materialmapping
 Materials = pd.DataFrame(DatenSim)
-print(Materials)
 Materials.drop_duplicates(subset=['E-Material'], inplace=True) # Hier Duplikate entfernen
 Materials.reset_index(inplace=True)
 Rohsto = pd.DataFrame(Materials)
@@ -876,9 +876,9 @@ Material.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
 
 # Hier werden noch die Kleingebinde in der Range von 1-10kg rausgesucht!
-Kleingebinde = pd.DataFrame(DatenSim)
-Kleingebinde.loc[(Kleingebinde['Komponentenmng.'] > 1) & (Kleingebinde['Komponentenmng.'] < 10)  , 'Auslese'] = True
-Kleingebinde = Kleingebinde[Kleingebinde.Auslese == True]
-Kleingebinde.drop(Kleingebinde.columns[[10,11,12,13,14,15,16,17,18,19,20,21,22,23]], axis=1, inplace=True)
-Kleingebinde.to_excel(
-    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Kleingebinde.xlsx')
+#Kleingebinde = pd.DataFrame(DatenSim)
+#Kleingebinde.loc[(Kleingebinde['Komponentenmng.'] > 1) & (Kleingebinde['Komponentenmng.'] < 10)  , 'Auslese'] = True
+#Kleingebinde = Kleingebinde[Kleingebinde.Auslese == True]
+###Kleingebinde.drop(Kleingebinde.columns[[10,11,12,13,14,15,16,17,18,19,20,21,22,23]], axis=1, inplace=True)
+##Kleingebinde.to_excel(
+###   r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Kleingebinde.xlsx')
