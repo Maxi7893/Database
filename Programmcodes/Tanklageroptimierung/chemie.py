@@ -3,7 +3,7 @@ import time
 
 from Tanklageroptimierung.data_reader import DataReader
 from Tanklageroptimierung.data_evaluation import DataEvaluation
-from lp_patrick import LP
+from lp_2023_10_09 import LP
 
 def run_lp():
     raster_zeitschritte = 8  # Summiere immer 8h Zeitfenster auf
@@ -35,7 +35,7 @@ def run_lp():
         anzahl_rohstoffe=data.anzahl_rohstoffe,
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
-    ).run(time_limit=3000) # Zeitlimit in Minuten! 7000
+    ).run(time_limit=5000) # Zeitlimit in Minuten! 7000
     DataEvaluation(raster_zeitschritte)
     print(" ")
     print("Data analysis completed!")
