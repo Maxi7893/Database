@@ -22,8 +22,8 @@ def run_lp():
         # Materialende 8889/8888 Kosten beinhalten jetzt Abpackungen
         # Kosten Bahnkesselwagen schieben etc.
         # Kosten bei Gebinde für das Handling ist nicht drin!
-        kosten_gebinde_personal=500000,  # Daten werden durch die Simulation bestimmt! #125€/h # halbe Stunde
-        # Platzkosten IBC -> Im Werkslager: Pascal Fliegner (Was würde ein Standplatz kosten!)
+        kosten_gebinde_personal= 32.50,  # Daten werden durch die Simulation bestimmt! #125€/h # 10 Minuten
+        # Platzkosten IBC -> Im Werkslager: 20 € pro Monat
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
         kosten_bahnkesselwagen_r=data.kosten_bahnkesselwagen_r,  # gesamte Kosten für BKW
