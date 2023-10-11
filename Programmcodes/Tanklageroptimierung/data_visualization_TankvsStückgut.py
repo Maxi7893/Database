@@ -3,8 +3,10 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+#Welcher Rohstoff soll visualisiert werden
 Rohstoffvisualisierung = 0
 
+#Laden der Daten
 Auswertung_final_e_zr = pd.read_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\e_zr.xlsx', header = 0)
 Auswertung_final_u_ztr = pd.read_excel(
@@ -13,6 +15,7 @@ Auswertung_final_u_ztr = pd.read_excel(
 Auswertung_final_u_ztr = Auswertung_final_u_ztr[Auswertung_final_u_ztr['Material'] == Rohstoffvisualisierung]
 Auswertung_final_e_zr = Auswertung_final_e_zr[Auswertung_final_e_zr['Material'] == Rohstoffvisualisierung]
 
+#Datenaufbereitung und Datenvisualisierung
 Stuckgutbenutzung = Auswertung_final_e_zr['value'].sum()
 Tankbenutzung = Auswertung_final_u_ztr['value'].sum()
 
