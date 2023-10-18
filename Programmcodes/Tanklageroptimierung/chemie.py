@@ -22,7 +22,7 @@ def run_lp():
         # Materialende 8889/8888 Kosten beinhalten jetzt Abpackungen
         # Kosten Bahnkesselwagen schieben etc.
         # Kosten bei Gebinde für das Handling ist nicht drin!
-        kosten_gebinde_personal= 32.50,  # Daten werden durch die Simulation bestimmt! #125€/h # 10 Minuten
+        kosten_gebinde_personal= 32.50, # Daten werden durch die Simulation bestimmt! #125€/h # 10 Minuten
         # Platzkosten IBC -> Im Werkslager: 20 € pro Monat
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,

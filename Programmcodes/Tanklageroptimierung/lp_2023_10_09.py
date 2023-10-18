@@ -12,7 +12,7 @@ class LP:
                  reinigungskosten_rohstoffgebinde_r: np.ndarray,
                  kosten_tankreinigung: int,
                  kosten_bahnkesselwagen: int,
-                 kosten_gebinde_personal: int,
+                 kosten_gebinde_personal: float,
                  kapazitaet_bahnkesselwagen_r: np.ndarray,
                  auftraege_zr: np.ndarray,
                  kosten_bahnkesselwagen_r: np.ndarray,
@@ -65,8 +65,20 @@ class LP:
         self.Z = anzahl_zeitpunkte
         self.T = anzahl_tanks
         self.R = anzahl_rohstoffe
-        self.p_tilde = anzahl_zeitpunkte_tankfuellung
+        self.p_tilde = anzahl_zeitpunkte_tankfuellung #wird nicht benutzt, kann aber bei Bedarf noch benutzt werden
         self.p = anzahl_zeitpunkte_reinigung
+
+        for a in range(0, anzahl_rohstoffe):
+            for i in range(0, anzahl_tanks):
+                if i<=250:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 10] = 0
+                elif i<=500:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 11] = 0
+                else:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 15] = 0
 
         self.__check_vars()
         self.__init_model()
@@ -80,14 +92,14 @@ class LP:
         self.y_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
         self.u_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
         self.l_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
-        self.x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
+        self.x_tilde_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object) #wird nicht benutzt, könnte rausgenommen werden
         self.f_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
         self.v_ztr = np.ndarray(shape=[self.Z, self.T, self.R], dtype=object)
         self.s_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
         self.e_zr = np.ndarray(shape=[self.Z, self.R], dtype=object)
-        self.lambda_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
-        self.alpha_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
-        self.beta_zt = np.ndarray(shape=[self.Z, self.T], dtype=object)
+        self.lambda_zt = np.ndarray(shape=[self.Z, self.T], dtype=object) #wird nicht benutzt, könnte später rausgenommen werden
+        self.alpha_zt = np.ndarray(shape=[self.Z, self.T], dtype=object) #wird nicht benutzt, könnte später rausgenommen werden
+        self.beta_zt = np.ndarray(shape=[self.Z, self.T], dtype=object) #wird nicht benutzt, könnte später rausgenommen werden
 
         # set up variables, objective and constraints
         print("Adding variables")
@@ -128,12 +140,13 @@ class LP:
         self.__add_constraint16()
         print("Adding constraint 17")
         self.__add_constraint17()
+        """     
         print("Adding constraint 18")
         self.__add_constraint18()
         print("Adding constraint 19")
         self.__add_constraint19()
         print("Adding constraint 20")
-        self.__add_constraint20()
+        self.__add_constraint20()"""
 
 
     # region Variables
@@ -202,9 +215,6 @@ class LP:
 
     # region Objective
     def __set_objective(self):
-        """
-        (26)
-        """
         exp = LinExpr()
         # Kosten für die Reinigung
         for z in range(0, self.Z):
@@ -231,7 +241,7 @@ class LP:
     # region Constraints
     def __add_constraint1(self):
         """
-        (1)
+        (1) - Rohstoffmenge im Tank ist auf die Kapazität des Tanks begrenzt
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -240,7 +250,8 @@ class LP:
 
     def __add_constraint2(self):
         """
-        (2)
+        (2) Der aktuelle Tankfüllstand berechnet sich aus dem vorherigem Füllstand minus dem Verbrauch plus dem Anteil,
+         wenn aufgefüllt wird
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -254,7 +265,7 @@ class LP:
 
     def __add_constraint3(self):
         """
-        (3)
+        (3) - Es kann nur ein Bahnkesselwagen mit einem Rohstoff kommen
         """
         for z in range(1, self.Z):
             for r in range(0, self.R):
@@ -266,7 +277,9 @@ class LP:
 
     def __add_constraint4(self):
         """
-        (4)
+        (4) - Reinigungsdauer der Tanks wird sichergestellt: sobald sich zu einem Zeitpunkt auf eine Reinigung
+         festgelegt wurde, muss auch in den folgenden Zeitpunkten gereinigt werden bis die vorgegebene
+         Reinigungsdauer beendet ist
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -279,7 +292,7 @@ class LP:
 
     def __add_constraint5(self):
         """
-        (5)
+        (5) - Bahnkesselwagen kann nur zum Tank kommen, wenn die Rohstoffe in Tank und Bahnkesselwagen übereinstimmen
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -288,7 +301,7 @@ class LP:
 
     def __add_constraint6(self):
         """
-        (6)
+        (6) - Gebinde und Bahnkesselwagen werden nicht zusammen verwendet
         """
         for z in range(1, self.Z):
             for r in range(0, self.R):
@@ -296,7 +309,7 @@ class LP:
 
     def __add_constraint7(self):
         """
-        (7)
+        (7) - Wenn ein Tank gereinigt wird, kann er nicht für Rohstoffaufbewahrung benutzt werden
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -306,7 +319,7 @@ class LP:
 
     def __add_constraint8(self):
         """
-        (8)
+        (8) - Für einen Rohstoff kann nicht gleichzeitig der Tank und Stückgut verwendet werden
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -316,7 +329,7 @@ class LP:
 
     def __add_constraint9(self):
         """
-        (9)
+        (9) - Tankwagen nur mit einem Rohstoff pro Zeitintervall
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
@@ -327,7 +340,7 @@ class LP:
 
     def __add_constraint10(self):
         """
-        (10)
+        (10) - Bahnkesselwagen kann nur mit einem Rohstoff gleichzeitig kommen
         """
         for z in range(1, self.Z):
             exp = LinExpr()
@@ -337,7 +350,7 @@ class LP:
 
     def __add_constraint11(self):
         """
-        (11)
+        (11)- Anzahl an Gebinden berechnet sich aus Auftragsmenge und Behälterkapazität, wenn Stückgut verwendet wird
         """
         for z in range(1, self.Z):
             for r in range(0, self.R):
@@ -346,7 +359,7 @@ class LP:
 
     def __add_constraint12(self):
         """
-        (12)
+        (12) - Es muss immer genug Rohstoff vorhanden sein, um die Auftragsmenge zu bedienen
         """
         for z in range(1, self.Z):
             for r in range(0, self.R):
@@ -359,82 +372,54 @@ class LP:
 
     def __add_constraint13(self):
         """
-        (13)
-        """
-        for z in range(1, self.Z):
-            for t in range(0, self.T):
-                self.model.addConstr(self.alpha_zt[z, t] ==
-                                     max_(self.lambda_zt[z - 1, t], self.y_zt[z - 1, t]), f"C13_{z}_{t}")
-
-    def __add_constraint14(self):
-        """
-        (14)
-        """
-        for z in range(1, self.Z):
-            for t in range(0, self.T):
-                exp = LinExpr()
-                for r in range(0, self.R):
-                    exp += self.u_ztr[z - 1, t, r]
-                self.model.addConstr(self.beta_zt[z, t] == self.alpha_zt[z, t] - exp, f"C14_{z}_{t}")
-
-    def __add_constraint15(self):
-        """
-        (15)
-        """
-        for z in range(1, self.Z):
-            for t in range(0, self.T):
-                for r in range(0, self.R):
-                    self.model.addConstr(self.lambda_zt[z, t] == max_(self.beta_zt[z, t], 0), f"C15_{z}_{t}")
-
-
-    def __add_constraint16(self):
-        """
-        (16)
+        (13) - Wenn ein Rohstoff zu einem Zeitpunkt im Tank ist, dann wird der Tank auch für den Rohstoff benutzt
         """
         for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr(self.u_ztr[z, t, r] >= self.f_ztr[z, t, r] / 1000000, f"C16_{z}_{t}_{r}")
+                    self.model.addConstr(self.u_ztr[z, t, r] >= self.f_ztr[z, t, r] / 1000000, f"C13_{z}_{t}_{r}")
 
-    def __add_constraint17(self):
+    def __add_constraint14(self):
         """
-        (17)
+        (14) - Nachdem ein Rohstoff im Tank war, muss gereinigt werden, bevor ein neuer Rohstoff in den Tank kann
         """
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr((self.u_ztr[z, t, r]) <= self.u_ztr[z - 1, t, r] + self.y_zt[z - 1, t],
-                                         f"C17_{z}_{t}_{r}")
+                                         f"C14_{z}_{t}_{r}")
 
-    def __add_constraint18(self):
+    def __add_constraint15(self):
         """
-        (18)
+        (15): Anfangsbestand in Tanks wird überschrieben auf Variable, die den Tankfüllstand angibt
         """
         for t in range(0, self.T):
             for r in range(0, self.R):
-                self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr[t][r], f"C18_{t}_{r}")
+                self.model.addConstr(self.f_ztr[0, t, r] == self.f_0tr[t][r], f"C15_{t}_{r}")
 
-    def __add_constraint19(self):
+
+    def __add_constraint16(self):
         """
-        (19)
+        (16) - optional: Ein Rohstoff kann in maximal 5 (kann aber auch beliebig verändert werden) verschiedenen
+        Tanks gleichzeitig sein
         """
         for z in range(0, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
                     exp += self.u_ztr[z, t, r]
-                self.model.addConstr(exp <= 5, f"C19_{z}_{r}")
+                self.model.addConstr(exp <= 5, f"C16_{z}_{r}")
 
-    def __add_constraint20(self):
+    def __add_constraint17(self):
         """
-        (20)
+        (17) - optional: Es sollen alle Tanks benutzt oder gerade gereinigt werden
         """
         for z in range(0, self.Z):
             exp = LinExpr()
             for r in range(0, self.R):
                 for t in range(0, self.T):
                     exp += self.u_ztr[z, t, r] + self.y_zt[z, t]
-            self.model.addConstr(exp == self.T, f"C20_{z}")
+            self.model.addConstr(exp == self.T, f"C17_{z}")
 
 
     def save_results(self):

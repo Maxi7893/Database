@@ -58,19 +58,17 @@ class LP:
         self.d = kosten_gebinde_personal
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
-        for i in range(1, 815):
-            if i<=250:
-                self.a_zr[i, 0] = 200
-                self.a_zr[i, 1] = 200
-                self.a_zr[i, 2] = 0
-            elif i<=500:
-                self.a_zr[i, 0] = 200
-                self.a_zr[i, 1] = 0
-                self.a_zr[i, 2] = 200
-            else:
-                self.a_zr[i, 0] = 0
-                self.a_zr[i, 1] = 200
-                self.a_zr[i, 2] = 200
+        for a in range(0,anzahl_rohstoffe):
+            for i in range(1, 815):
+                if i<=250:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 10] = 0
+                elif i<=500:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 11] = 0
+                else:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 15] = 0
         self.g_r = kosten_bahnkesselwagen_r
         self.k_tr = maximale_fuellmengen_tr
         self.k_hat_r = gebindegroessen_r
@@ -472,6 +470,32 @@ class LP:
         self.x_tilde_ztr[0, 1, 1] = 0
         self.x_tilde_ztr[0, 0, 2] = 0
         self.x_tilde_ztr[0, 1, 2] = 1"""
+
+    """def __add_constraint13(self):
+        """
+        """
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                self.model.addConstr(self.alpha_zt[z, t] ==
+                                     max_(self.lambda_zt[z - 1, t], self.y_zt[z - 1, t]), f"C13_{z}_{t}")
+
+    def __add_constraint14(self):
+        """
+        """
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                exp = LinExpr()
+                for r in range(0, self.R):
+                    exp += self.u_ztr[z - 1, t, r]
+                self.model.addConstr(self.beta_zt[z, t] == self.alpha_zt[z, t] - exp, f"C14_{z}_{t}")
+
+    def __add_constraint15(self):
+        """
+        """
+        for z in range(1, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
+                    self.model.addConstr(self.lambda_zt[z, t] == max_(self.beta_zt[z, t], 0), f"C15_{z}_{t}")"""
 
 
     def save_results(self):
