@@ -16,7 +16,9 @@ def run_lp():
         abfallkosten_r=data.abfallkosten_r,  # pro KG
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
         kosten_tankreinigung= 6000, # 48 Stunden mit einem Stundensatz von 125€/h
-        kosten_bahnkesselwagen= 750, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks
+        kosten_bahnkesselwagen= 1125, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks
+        # Standkosten betragen ca. 45€/Tag
+        # Durchschnittliche Standzeit eines BKW 25 Tage
         # Auffüllen des Tanks Sandra Seebald bzgl. längere Standkosten fragen!
         # Materialende 0000 Kosten beinhalten Kosten des Einkaufs, Handling etc.
         # Materialende 8889/8888 Kosten beinhalten jetzt Abpackungen
@@ -35,7 +37,7 @@ def run_lp():
         anzahl_rohstoffe=data.anzahl_rohstoffe,
         anzahl_zeitpunkte_tankfuellung=int(8 / raster_zeitschritte),
         anzahl_zeitpunkte_reinigung=int(24 / raster_zeitschritte),
-    ).run(time_limit=5000) # Zeitlimit in Minuten! 7000
+    ).run(time_limit=1000) # Zeitlimit in Minuten! 7000
     DataEvaluation(raster_zeitschritte)
     print(" ")
     print("Data analysis completed!")

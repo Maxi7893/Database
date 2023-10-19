@@ -58,6 +58,17 @@ class LP:
         self.d = kosten_gebinde_personal
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
+        for a in range(0, anzahl_rohstoffe):
+            for i in range(1, 815):
+                if i <= 250:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 2] = 0
+                elif i <= 500:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 11] = 0
+                else:
+                    self.a_zr[i, a] = 200
+                    self.a_zr[i, 7] = 0
         self.g_r = kosten_bahnkesselwagen_r
         self.k_tr = maximale_fuellmengen_tr
         self.k_hat_r = gebindegroessen_r
@@ -67,19 +78,6 @@ class LP:
         self.R = anzahl_rohstoffe
         self.p_tilde = anzahl_zeitpunkte_tankfuellung #wird nicht benutzt, kann aber bei Bedarf noch benutzt werden
         self.p = anzahl_zeitpunkte_reinigung
-
-        for a in range(0, anzahl_rohstoffe):
-            for i in range(0, anzahl_tanks):
-                if i<=250:
-                    self.a_zr[i, a] = 200
-                    self.a_zr[i, 10] = 0
-                elif i<=500:
-                    self.a_zr[i, a] = 200
-                    self.a_zr[i, 11] = 0
-                else:
-                    self.a_zr[i, a] = 200
-                    self.a_zr[i, 15] = 0
-
         self.__check_vars()
         self.__init_model()
 
@@ -138,8 +136,8 @@ class LP:
         self.__add_constraint15()
         print("Adding constraint 16")
         self.__add_constraint16()
-        print("Adding constraint 17")
-        self.__add_constraint17()
+        #print("Adding constraint 17")
+        #self.__add_constraint17()
         """     
         print("Adding constraint 18")
         self.__add_constraint18()
@@ -414,7 +412,7 @@ class LP:
         """
         (17) - optional: Es sollen alle Tanks benutzt oder gerade gereinigt werden
         """
-        for z in range(0, self.Z):
+        for z in range(1, self.Z):
             exp = LinExpr()
             for r in range(0, self.R):
                 for t in range(0, self.T):
