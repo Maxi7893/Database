@@ -22,7 +22,6 @@ class DataEvaluation:
         self.l = self.__read_l()
         self.s = self.__read_s()
         self.f = self.__read_f()
-        self.a = self.__read_a()
         self.__write_excel()
 
     def __read_solution(self) -> pd.DataFrame:
@@ -121,12 +120,6 @@ class DataEvaluation:
         #s = pd.merge(s, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
         #s.drop(columns=['type', 'r', 'Time'], inplace=True)
         return s
-
-    def __read_a(self) -> pd.DataFrame:
-        a =
-
-        return a
-
 
     def __write_excel(self):
         self.e.to_excel(

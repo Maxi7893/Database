@@ -8,15 +8,13 @@ from lp_2023_10_09 import LP
 def run_lp():
     raster_zeitschritte = 8  # Summiere immer 8h Zeitfenster auf
     data = DataReader(raster_zeitschritte)
-    #dataevaluation = DataEvaluation(raster_zeitschritte)
-    #print(" ")
     print("Data analysis completed!")
     LP(
         rohstoffkosten_r=data.rohstoffkosten_r,  # pro KG
         abfallkosten_r=data.abfallkosten_r,  # pro KG
         reinigungskosten_rohstoffgebinde_r=data.reinigungskosten_rohstoffgebinde_r,
-        kosten_tankreinigung= 6, # 48 Stunden mit einem Stundensatz von 125€/h 6000
-        kosten_bahnkesselwagen= 12, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks 1125
+        kosten_tankreinigung= 6000, # 48 Stunden mit einem Stundensatz von 125€/h 6000
+        kosten_bahnkesselwagen= 1125, # 6 Stunden mit einem Stundensatz von 125€/h #Auffüllen des Tanks 1125
         # Standkosten betragen ca. 45€/Tag
         # Durchschnittliche Standzeit eines BKW 25 Tage
         # Auffüllen des Tanks Sandra Seebald bzgl. längere Standkosten fragen!
@@ -24,7 +22,7 @@ def run_lp():
         # Materialende 8889/8888 Kosten beinhalten jetzt Abpackungen
         # Kosten Bahnkesselwagen schieben etc.
         # Kosten bei Gebinde für das Handling ist nicht drin!
-        kosten_gebinde_personal= 1000, # Daten werden durch die Simulation bestimmt! #125€/h # 10 Minuten #32.50
+        kosten_gebinde_personal= 32.5, # Daten werden durch die Simulation bestimmt! #125€/h # 10 Minuten #32.50
         # Platzkosten IBC -> Im Werkslager: 20 € pro Monat
         kapazitaet_bahnkesselwagen_r=data.kapazitaet_bahnkesselwagen_r,
         auftraege_zr=data.auftraege_zr,
