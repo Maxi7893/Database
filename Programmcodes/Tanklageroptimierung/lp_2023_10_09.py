@@ -60,14 +60,17 @@ class LP:
         self.a_zr = auftraege_zr
         for a in range(0, anzahl_rohstoffe):
             for i in range(1, 815):
+                self.a_zr[i, a] = 0
+        for a in [2, 3, 5, 7, 11]:
+            for i in range(1, 815):
                 if i <= 250:
-                    self.a_zr[i, a] = 200
+                    self.a_zr[i, a] = 1000
                     self.a_zr[i, 2] = 0
                 elif i <= 500:
-                    self.a_zr[i, a] = 200
+                    self.a_zr[i, a] = 1000
                     self.a_zr[i, 11] = 0
                 else:
-                    self.a_zr[i, a] = 200
+                    self.a_zr[i, a] = 1000
                     self.a_zr[i, 7] = 0
         self.g_r = kosten_bahnkesselwagen_r
         self.k_tr = maximale_fuellmengen_tr
@@ -134,10 +137,10 @@ class LP:
         self.__add_constraint14()
         print("Adding constraint 15")
         self.__add_constraint15()
-        print("Adding constraint 16")
-        self.__add_constraint16()
-        #print("Adding constraint 17")
-        #self.__add_constraint17()
+        #print("Adding constraint 16")
+        #self.__add_constraint16()
+        print("Adding constraint 17")
+        self.__add_constraint17()
         """     
         print("Adding constraint 18")
         self.__add_constraint18()
@@ -257,9 +260,8 @@ class LP:
                     self.model.addConstr(self.f_ztr[z, t, r] == (
                             self.f_ztr[z - 1, t, r]
                             - self.a_zr[z, r] * self.u_ztr[z, t, r]
-                            + self.v_ztr[z, t, r] * self.m_r[r]) * 1/20 #hier und folgend 1/20 für 5% Schritte von v_ztr
-                                         * (1 - self.y_zt[z, t]),
-                                         f"C2_{z}_{t}_{r}")
+                            + self.v_ztr[z, t, r] * self.m_r[r]* 1/20) * (1 - self.y_zt[z, t]), f"C2_{z}_{t}_{r}")
+                                                                    #hier und folgend 1/20 für 5% Schritte von v_ztr
 
     def __add_constraint3(self):
         """
@@ -284,7 +286,6 @@ class LP:
                 exp = LinExpr()
                 for n in range(max(z - self.p, 1), z): #geändert
                     exp += self.y_zt[n, t]
-
                 self.model.addConstr(self.y_zt[z - 1, t] * (exp - self.p) + self.p * self.y_zt[z, t] >= 0,
                                      f"C4_{z}_{t}")
 
@@ -327,9 +328,9 @@ class LP:
 
     def __add_constraint9(self):
         """
-        (9) - Tankwagen nur mit einem Rohstoff pro Zeitintervall
+        (9) - Tank nur mit einem Rohstoff pro Zeitintervall
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z): #geaendert von 1 auf 0
             for t in range(0, self.T):
                 exp = LinExpr()
                 for r in range(0, self.R):
@@ -417,7 +418,7 @@ class LP:
             for r in range(0, self.R):
                 for t in range(0, self.T):
                     exp += self.u_ztr[z, t, r] + self.y_zt[z, t]
-            self.model.addConstr(exp == self.T, f"C17_{z}")
+            self.model.addConstr(exp >= self.T - 1, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
 
 
     def save_results(self):

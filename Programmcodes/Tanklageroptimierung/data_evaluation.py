@@ -22,6 +22,7 @@ class DataEvaluation:
         self.l = self.__read_l()
         self.s = self.__read_s()
         self.f = self.__read_f()
+        self.a = self.__read_a()
         self.__write_excel()
 
     def __read_solution(self) -> pd.DataFrame:
@@ -121,6 +122,11 @@ class DataEvaluation:
         #s.drop(columns=['type', 'r', 'Time'], inplace=True)
         return s
 
+    def __read_a(self) -> pd.DataFrame:
+        a =
+
+        return a
+
 
     def __write_excel(self):
         self.e.to_excel(
@@ -139,7 +145,8 @@ class DataEvaluation:
             r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\l_zr.xlsx')
         self.s.to_excel(
             r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\s_zr.xlsx')
-
+        self.a.to_excel(
+            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\a_zr.xlsx')
         with pd.ExcelWriter(
                 r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\merged_data.xlsx') as writer:
             self.f.to_excel(writer, sheet_name='Füllstände - f_ztr', index=False)
