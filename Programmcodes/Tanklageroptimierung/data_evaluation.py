@@ -22,6 +22,7 @@ class DataEvaluation:
         self.l = self.__read_l()
         self.s = self.__read_s()
         self.f = self.__read_f()
+        self.b = self.__read_b()
         self.__write_excel()
 
     def __read_solution(self) -> pd.DataFrame:
@@ -121,6 +122,18 @@ class DataEvaluation:
         #s.drop(columns=['type', 'r', 'Time'], inplace=True)
         return s
 
+    def __read_b(self) ->pd.DataFrame:
+        b = self.solution[self.solution["type"].str[0] == "u"]
+        b = b.type.str.split(pat=" ", expand=True)
+        b.rename(columns={0: 'type', 1: "value"}, inplace=True)
+        b[['type', 'Time', 'Tank', 'Material']] = b.type.str.split(pat="_", expand=True)
+        b = pd.merge(b, self.rohstoff_mapping, left_on='Material', right_on='r', how="inner")
+        b['Time'] = b['Time'].astype(float)
+        b = pd.merge(b, self.time_mapping, left_on='Time', right_on='Model Time', how="inner")
+        b.drop(columns=['type', 'r', 'Time', 'Material'], inplace=True)
+        b.drop(b.loc[b['value'] == 0].index, inplace=True)
+        return b
+
     def __write_excel(self):
         self.e.to_excel(
             r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\e_zr.xlsx')
@@ -138,8 +151,10 @@ class DataEvaluation:
             r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\l_zr.xlsx')
         self.s.to_excel(
             r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\s_zr.xlsx')
-        self.a.to_excel(
-            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\a_zr.xlsx')
+        #self.a.to_excel(
+        #    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\a_zr.xlsx')
+        self.b.to_excel(
+            r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\b_ztr.xlsx')
         with pd.ExcelWriter(
                 r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Tanklageroptimierung\Auswertung\merged_data.xlsx') as writer:
             self.f.to_excel(writer, sheet_name='Füllstände - f_ztr', index=False)

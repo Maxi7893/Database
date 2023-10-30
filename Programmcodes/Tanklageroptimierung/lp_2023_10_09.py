@@ -58,20 +58,20 @@ class LP:
         self.d = kosten_gebinde_personal
         self.m_r = kapazitaet_bahnkesselwagen_r
         self.a_zr = auftraege_zr
-        for a in range(0, anzahl_rohstoffe):
-            for i in range(1, 815):
-                self.a_zr[i, a] = 0
-        for a in [2, 3, 5, 7, 11]:
-            for i in range(1, 815):
-                if i <= 250:
-                    self.a_zr[i, a] = 1000
-                    self.a_zr[i, 2] = 0
-                elif i <= 500:
-                    self.a_zr[i, a] = 1000
-                    self.a_zr[i, 11] = 0
-                else:
-                    self.a_zr[i, a] = 1000
-                    self.a_zr[i, 7] = 0
+        #for a in range(0, anzahl_rohstoffe):
+        #    for i in range(1, 815):
+        #        self.a_zr[i, a] = 0
+        #for a in [2, 3, 5, 7, 11]:
+       #for i in range(1, 815):
+        #    if i <= 800:
+         #       self.a_zr[i, 2] = 0
+        #            self.a_zr[i, a] = 1000
+        #        elif i <= 500:
+        #            self.a_zr[i, a] = 1000
+        #            self.a_zr[i, 11] = 0
+        #        else:
+        #            self.a_zr[i, a] = 1000
+        #            self.a_zr[i, 7] = 0
         self.g_r = kosten_bahnkesselwagen_r
         self.k_tr = maximale_fuellmengen_tr
         self.k_hat_r = gebindegroessen_r
