@@ -532,7 +532,7 @@ Kürzen = 0  # Anzahl der Nummern die von der Materialnummer enfernt werden
 ## Wenn hier die Test-Datei verwendet wird, dann muss Zeile 505 und 506 wieder eingefügt werden!
 
 Tanklagermaterialien = pd.read_excel(
-    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu_Sz.xlsx')  # Hier ist die zukünftige Tanklagerbelegung
 
 
 TanklagermaterialienAkt = pd.read_excel(
@@ -712,7 +712,7 @@ RohstoffeAktuell = BenötigtenRohstoffeTanklager[BenötigtenRohstoffeTanklager[
 # Hier werden noch jeweils alle Materialnummern der neuen Materialien zusammengefasst.
 # Bspw. für Methyl-THF 821093 und 202781
 SammlungMaterialnummern = pd.read_excel(
-    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx', sheet_name=1)
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager_Neu_Sz.xlsx', sheet_name=1)
 SammlungMaterialnummern['Basisnummer'] = SammlungMaterialnummern['Basisnummer'].astype(str)
 SammlungMaterialnummern['Alternativen'] = SammlungMaterialnummern['Alternativen'].astype(str)
 Länge = len(SammlungMaterialnummern)
