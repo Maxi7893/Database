@@ -9,10 +9,10 @@ Date = '2023-03-25' #Für den Test hier nur ein beispielhafter Tag
 Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
 #Date = date.today()  # Aktueller Tag wird gespeichert
 # NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
-NextDate = Date + timedelta(days=280)
+NextDate = Date + timedelta(days=649) #akteull bis zum 31.12.2024
 # Starttermine Produktionsaufträge G20
 Starttermine = pd.read_excel(
-    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Starttermine G20 - 2023.xlsx')  # Einlesen der Excel Liste für die Produktionstermine
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Starttermine G20 - 2023_01.xlsx')  # Einlesen der Excel Liste für die Produktionstermine
 Starttermine['Gebäude'] = "G20"
 Starttermine['Mat.-Nr.'] = Starttermine['Mat.-Nr.'].str.replace('.', '')  # Punkte aus der Materialnummer entfernen
 if b > 0:
