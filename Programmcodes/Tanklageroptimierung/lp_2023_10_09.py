@@ -12,6 +12,7 @@ class LP:
                  reinigungskosten_rohstoffgebinde_r: np.ndarray,
                  kosten_tankreinigung: int,
                  kosten_bahnkesselwagen: int,
+                 Container_oder_Stationär:int,
                  kosten_gebinde_personal: float,
                  kapazitaet_bahnkesselwagen_r: np.ndarray,
                  auftraege_zr: np.ndarray,
@@ -81,6 +82,7 @@ class LP:
         self.R = anzahl_rohstoffe
         self.p_tilde = anzahl_zeitpunkte_tankfuellung #wird nicht benutzt, kann aber bei Bedarf noch benutzt werden
         self.p = anzahl_zeitpunkte_reinigung
+        self.sigma = Container_oder_Stationär #Wurde hinzugefügt 1 bei Tankcontainern und bspw. 20 bei stationären Tanks
         self.__check_vars()
         self.__init_model()
 
@@ -160,6 +162,8 @@ class LP:
         assert self.d >= 0
         assert self.p_tilde > 0
         assert self.p > 0
+        assert self.sigma > 0 #hinzugefügt
+
 
         assert len(self.gamma_r) == self.R
         assert len(self.gamma_hat_r) == self.R
@@ -206,7 +210,7 @@ class LP:
                     self.v_ztr[z, t, r] = self.model.addVar(vtype=GRB.INTEGER,   ##hier und folgend 1/20 für 5% Schritte von v_ztr --> CONTINUOUS
                                                             name=f"v_{z}_{t}_{r}",
                                                             lb=0,
-                                                            ub=20)
+                                                            ub=self.sigma) #20 wurde in Sigma geändert!
             for r in range(0, self.R):
                 self.l_zr[z, r] = self.model.addVar(vtype=GRB.BINARY, name=f"l_{z}_{r}")
                 self.s_zr[z, r] = self.model.addVar(vtype=GRB.INTEGER, lb=0, name=f"s_{z}_{r}")  # geaendert
@@ -227,7 +231,7 @@ class LP:
             for r in range(0, self.R):
                 exp2 = LinExpr()
                 for t in range(0, self.T):
-                    exp2 += self.v_ztr[z, t, r] * 1/20 #hier und folgend 1/20 für 5% Schritte von v_ztr
+                    exp2 += self.v_ztr[z, t, r] * (1/self.sigma) #hier und folgend 1/20 für 5% Schritte von v_ztr, self.sigma wurde durch 1/20 ersetzt
                 exp += self.l_zr[z, r] * (self.b + exp2 * self.g_r[r])
         # Kosten für Versorgung mit Stückgut
         for z in range(0, self.Z):
@@ -260,7 +264,7 @@ class LP:
                     self.model.addConstr(self.f_ztr[z, t, r] == (
                             self.f_ztr[z - 1, t, r]
                             - self.a_zr[z, r] * self.u_ztr[z, t, r]
-                            + self.v_ztr[z, t, r] * self.m_r[r]* 1/20) * (1 - self.y_zt[z, t]), f"C2_{z}_{t}_{r}")
+                            + self.v_ztr[z, t, r] * self.m_r[r]* (1/self.sigma)) * (1 - self.y_zt[z, t]), f"C2_{z}_{t}_{r}")
                                                                     #hier und folgend 1/20 für 5% Schritte von v_ztr
 
     def __add_constraint3(self):
@@ -271,7 +275,7 @@ class LP:
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
-                    exp += self.v_ztr[z, t, r] * 1/20 #hier und folgend 1/20 für 5% Schritte von v_ztr
+                    exp += self.v_ztr[z, t, r] * (1/self.sigma) #hier und folgend 1/20 für 5% Schritte von v_ztr
 
                     self.model.addConstr(exp <= self.l_zr[z, r], f"C3_{z}_{r}")  # ab hier: geänderrt
 
@@ -296,7 +300,7 @@ class LP:
         for z in range(1, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
-                    self.model.addConstr(self.v_ztr[z, t, r] * 1/20 <= self.u_ztr[z, t, r], f"C5_{z}_{t}_{r}") #1/20 für 5% Schritte von v_ztr
+                    self.model.addConstr(self.v_ztr[z, t, r] * (1/self.sigma) <= self.u_ztr[z, t, r], f"C5_{z}_{t}_{r}") #1/20 für 5% Schritte von v_ztr
 
     def __add_constraint6(self):
         """
