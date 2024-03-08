@@ -469,10 +469,14 @@ Reinigungskosten.drop(columns=['Materialnummer',
                                'Kennzeichen Lose Menge',
                                'Gebindegröße LOME',
                                'Häufigkeit'], inplace=True)
-Abpackergebinde = pd.merge(Abpackergebinde, Reinigungskosten, left_on='Verpackungsmaterial',
-                           right_on='Verpackungsmaterial')
+Reinigungskosten.drop_duplicates(subset=['Verpackungsmaterial'], inplace=True)
+Abpackergebinde.drop_duplicates(subset=['Materialnummer'], inplace=True)  # Hier noch Duplikate entfernen
+
+Abpackergebinde = Abpackergebinde.merge(Reinigungskosten, how='left', on='Verpackungsmaterial')
+
 Abpackergebinde.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Abpackgebinde.xlsx')
+
 AbpackgebindeSim = pd.DataFrame(Abpackergebinde)
 AbpackgebindeSim.drop_duplicates(subset=['Verpackungsmaterial'], inplace=True)  # Hier noch Duplikate entfernen
 AbpackgebindeSim['Test'] = False
@@ -487,6 +491,7 @@ AbpackgebindeSim.dropna(subset=['Verpackungsmaterial'], inplace=True)
 AbpackgebindeSim.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\AbpackgebindeSim.xlsx')
 # Rohstoffe und Gebinde werden in ein DataFrame zusammengefügt
+
 
 BR = pd.merge(BR, Abpackergebinde, left_on='E-Material', right_on='Materialnummer')
 BR.drop(columns=['Materialnummer',
@@ -872,6 +877,29 @@ Materials2 =pd.DataFrame(GebindeProdukte[['E-Material', 'Me2', 'Kurztext2', 'Ver
 Materials2.loc[Materials2['Verpackungsmaterial'] == '7.92443.9550', 'Preis pro Gebinde'] = 250.26
 Material = pd.merge(Materials, Materials2, how='outer', sort=False)
 Material.drop_duplicates(subset=['E-Material'], inplace=True)
+
+IchhabekeineLustmehr = pd.read_excel(
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Dateien\Belegung Tanklager.xlsx')
+
+IchhabekeineLustmehr = IchhabekeineLustmehr[['Artikelnummer', 'Dichte (kg/m³)']]
+IchhabekeineLustmehr['Artikelnummer'] = IchhabekeineLustmehr['Artikelnummer'].astype(str)
+IchhabekeineLustmehr['Dichte (kg/m³)'] = IchhabekeineLustmehr['Dichte (kg/m³)'].astype(float)
+IchhabekeineLustmehr.to_excel(
+    r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Test1.xlsx')
+
+i = 0
+Länge = len(IchhabekeineLustmehr)
+Artikelnummer = IchhabekeineLustmehr['Artikelnummer'][i]
+Dichte = IchhabekeineLustmehr['Dichte (kg/m³)'][i]
+while i<Länge:
+    print(Artikelnummer)
+    Material.loc[(Material['E-Material'].str.contains(Artikelnummer)), 'Dichte (kg/m³)'] = Dichte
+    i=i+1
+    if i < Länge:
+        Artikelnummer = IchhabekeineLustmehr['Artikelnummer'][i]
+        Dichte = IchhabekeineLustmehr['Dichte (kg/m³)'][i]
+print("Test")
+print(Material.dtypes)
 Material.to_excel(
     r'C:\Users\mb-itl-sim\Models\Materialflussanalyse_EL-DOD\Database\Programmcodes\Datenaufbereitung\Simulation\Materials (Sim).xlsx')
 
