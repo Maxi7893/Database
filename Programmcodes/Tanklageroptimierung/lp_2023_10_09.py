@@ -182,7 +182,7 @@ class LP:
         assert len(self.f_0tr[0]) == self.R
 
         for r in range(self.R):
-            assert self.gamma_r[r] > 0
+            assert self.gamma_r[r] >= 0 #geändert, da Rohstoffpreise für Abfälle = 0 sind!
             assert self.gamma_hat_r[r] >= 0
             assert self.c_hat_r[r] >= 0
             assert self.m_r[r] > 0

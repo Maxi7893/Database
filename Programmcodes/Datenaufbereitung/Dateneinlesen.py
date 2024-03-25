@@ -5,7 +5,7 @@ from datetime import date, timedelta
 a = 10  # Länge der Materialnummern
 b = 0  # Anzahl der Ziffern die aus der Materialnummer entfernt werden (Bspw. 7777)
 c = 1  # Wie viele Nachkommastellen bei den Startterminen entfernt werden sollen
-Date = '2023-03-25' #Für den Test hier nur ein beispielhafter Tag
+Date = '2023-02-01' #Für den Test hier nur ein beispielhafter Tag
 Date = pd.to_datetime(Date) #Zeile 9 und 10 können hinterher gelöscht werden und Zeile 11 aktiviert
 #Date = date.today()  # Aktueller Tag wird gespeichert
 # NextDate = Date + timedelta(days=14) #In den nächsten 14 Tagen wird geschaut, was ansteht
