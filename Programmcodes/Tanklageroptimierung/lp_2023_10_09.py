@@ -139,8 +139,8 @@ class LP:
         self.__add_constraint14()
         print("Adding constraint 15")
         self.__add_constraint15()
-        #print("Adding constraint 16")
-        #self.__add_constraint16()
+        print("Adding constraint 16")
+        self.__add_constraint16()
         print("Adding constraint 17")
         self.__add_constraint17()
         """     
@@ -411,7 +411,7 @@ class LP:
                 exp = LinExpr()
                 for t in range(0, self.T):
                     exp += self.u_ztr[z, t, r]
-                self.model.addConstr(exp <= 5, f"C16_{z}_{r}")
+                self.model.addConstr(exp <= 1, f"C16_{z}_{r}")
 
     def __add_constraint17(self):
         """
@@ -419,10 +419,11 @@ class LP:
         """
         for z in range(1, self.Z):
             exp = LinExpr()
-            for r in range(0, self.R):
-                for t in range(0, self.T):
-                    exp += self.u_ztr[z, t, r] + self.y_zt[z, t]
-            self.model.addConstr(exp >= self.T - 1, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
+            for t in range(0, self.T):
+                exp += self.y_zt[z, t]
+                for r in range(0, self.R):
+                    exp += self.u_ztr[z, t, r]
+            self.model.addConstr(exp >= self.T, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
 
 
     def save_results(self):
