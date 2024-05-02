@@ -248,7 +248,7 @@ class LP:
         """
         (1) - Rohstoffmenge im Tank ist auf die Kapazität des Tanks begrenzt
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] <= self.k_tr[t, r], f"C1_{z}_{t}_{r}")
@@ -258,7 +258,7 @@ class LP:
         (2) Der aktuelle Tankfüllstand berechnet sich aus dem vorherigem Füllstand minus dem Verbrauch plus dem Anteil,
          wenn aufgefüllt wird
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.f_ztr[z, t, r] == (
@@ -271,7 +271,7 @@ class LP:
         """
         (3) - Es kann nur ein Bahnkesselwagen mit einem Rohstoff kommen
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -285,7 +285,7 @@ class LP:
          festgelegt wurde, muss auch in den folgenden Zeitpunkten gereinigt werden bis die vorgegebene
          Reinigungsdauer beendet ist
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 exp = LinExpr()
                 for n in range(max(z - self.p, 1), z): #geändert
@@ -297,7 +297,7 @@ class LP:
         """
         (5) - Bahnkesselwagen kann nur zum Tank kommen, wenn die Rohstoffe in Tank und Bahnkesselwagen übereinstimmen
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.v_ztr[z, t, r] * (1/self.sigma) <= self.u_ztr[z, t, r], f"C5_{z}_{t}_{r}") #1/20 für 5% Schritte von v_ztr
@@ -306,7 +306,7 @@ class LP:
         """
         (6) - Gebinde und Bahnkesselwagen werden nicht zusammen verwendet
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for r in range(0, self.R):
                 self.model.addConstr(self.l_zr[z, r] + self.e_zr[z, r] <= 1, f"C6_{z}_{r}")
 
@@ -314,7 +314,7 @@ class LP:
         """
         (7) - Wenn ein Tank gereinigt wird, kann er nicht für Rohstoffaufbewahrung benutzt werden
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.y_zt[z, t] + self.u_ztr[z, t, r] <= 1, f"C7_{z}_{t}_{r}")
@@ -324,7 +324,7 @@ class LP:
         """
         (8) - Für einen Rohstoff kann nicht gleichzeitig der Tank und Stückgut verwendet werden
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr(self.e_zr[z, r] + self.u_ztr[z, t, r] <= 1, f"C8_{z}_{t}_{r}")
@@ -345,7 +345,7 @@ class LP:
         """
         (10) - Bahnkesselwagen kann nur mit einem Rohstoff gleichzeitig kommen
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             exp = LinExpr()
             for r in range(0, self.R):
                 exp += self.l_zr[z, r]
@@ -355,7 +355,7 @@ class LP:
         """
         (11)- Anzahl an Gebinden berechnet sich aus Auftragsmenge und Behälterkapazität, wenn Stückgut verwendet wird
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for r in range(0, self.R):
                 self.model.addConstr(self.s_zr[z, r] >= self.e_zr[z, r] * (self.a_zr[z, r] / self.k_hat_r[r]),
                                      f"C11_{z}_{r}")
@@ -364,7 +364,7 @@ class LP:
         """
         (12) - Es muss immer genug Rohstoff vorhanden sein, um die Auftragsmenge zu bedienen
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for r in range(0, self.R):
                 exp = LinExpr()
                 for t in range(0, self.T):
@@ -386,7 +386,7 @@ class LP:
         """
         (14) - Nachdem ein Rohstoff im Tank war, muss gereinigt werden, bevor ein neuer Rohstoff in den Tank kann
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             for t in range(0, self.T):
                 for r in range(0, self.R):
                     self.model.addConstr((self.u_ztr[z, t, r]) <= self.u_ztr[z - 1, t, r] + self.y_zt[z - 1, t],
@@ -417,13 +417,13 @@ class LP:
         """
         (17) - optional: Es sollen alle Tanks benutzt oder gerade gereinigt werden
         """
-        for z in range(1, self.Z):
+        for z in range(0, self.Z):
             exp = LinExpr()
             for t in range(0, self.T):
                 exp += self.y_zt[z, t]
                 for r in range(0, self.R):
                     exp += self.u_ztr[z, t, r]
-            self.model.addConstr(exp >= self.T, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
+            self.model.addConstr(exp >= self.T+1, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
 
 
     def save_results(self):
@@ -459,13 +459,15 @@ class LP:
         :param time_limit: Time limit in minutes.
         """
         try:
-            self.model.setParam('TimeLimit', 60 * time_limit)
-            self.model.setParam('NonConvex', 2)
+            self.model.setParam('TimeLimit', 60 * time_limit) # vielleicht mal hiermit arbeiten; setze das Timelimit auf eine Woche o.ä.
+            self.model.setParam('NonConvex', 2) # passt
             self.model.optimize()
-            for i in range(self.model.SolCount):
-                self.model.Params.SolutionNumber = i
-                self.model.write(f"{i}.sol")
-            self.save_results()
+            # Hier fehlt die Speicherung der besten Lösung! --> Nein
+
+            for i in range(self.model.SolCount): # passt das so zu machen: wenn man interrupted ist das, als würde ein TimeLimit erreicht, daher okay!
+                self.model.Params.SolutionNumber = i # passt
+                self.model.write(f"{i}.sol") # passt, aber irgendwie sinnlos?
+            self.save_results() # passt
 
         except gp.GurobiError as e:
             # noinspection PyUnresolvedReferences

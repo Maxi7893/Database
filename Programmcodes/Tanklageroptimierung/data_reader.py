@@ -89,7 +89,7 @@ class DataReader:
         return kap_bahnkesselwagen_r.values.flatten(), bahnkesselwagen_kosten_r.values.flatten()
 
     def __read_auftraege(self) -> np.ndarray:
-        date = pd.to_datetime('2023-03-25')  # Für den Test hier nur ein beispielhafter Tag
+        date = pd.to_datetime('2023-02-01')  # Für den Test hier nur ein beispielhafter Tag
         auftraege = self.rohstoffe[["E-Material", 'Komponentenmng.', 'Start']]
         auftraege['Start'] = (auftraege['Start'] - date) / np.timedelta64(1, 'h')
         auftraege = pd.merge(auftraege, self.rohstoff_mapping, how="inner")
