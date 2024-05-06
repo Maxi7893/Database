@@ -143,13 +143,14 @@ class LP:
         self.__add_constraint16()
         print("Adding constraint 17")
         self.__add_constraint17()
-        """     
         print("Adding constraint 18")
         self.__add_constraint18()
+        """
         print("Adding constraint 19")
         self.__add_constraint19()
         print("Adding constraint 20")
-        self.__add_constraint20()"""
+        self.__add_constraint20()
+        """
 
 
     # region Variables
@@ -423,7 +424,16 @@ class LP:
                 exp += self.y_zt[z, t]
                 for r in range(0, self.R):
                     exp += self.u_ztr[z, t, r]
-            self.model.addConstr(exp >= self.T+1, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
+            self.model.addConstr(exp >= self.T, f"C17_{z}") #Nur für die Optimierung, da == self.T nicht wechselt bzw. reinigt!
+
+    def __add_constraint18(self):
+        """
+        (18) - Der Tank muss einen Inhalt haben, wenn dieser verwendet wird
+        """
+        for z in range(0, self.Z):
+            for t in range(0, self.T):
+                for r in range(0, self.R):
+                    self.model.addConstr(self.u_ztr[z, t, r] <= self.f_ztr[z, t, r], f"C13_{z}_{t}_{r}")
 
 
     def save_results(self):

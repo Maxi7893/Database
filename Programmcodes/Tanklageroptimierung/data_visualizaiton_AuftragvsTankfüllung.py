@@ -3,8 +3,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 #Welcher Tank und Rohstoff soll visualisiert werden?
-Tankvisualisierung = 7
-Rohstoffvisualisierung = 0
+Tankvisualisierung = 1
+Rohstoffvisualisierung = 4
 
 #Laden der Daten und Aufbereitung
 Auswertung_final_f_ztr = pd.read_excel(
