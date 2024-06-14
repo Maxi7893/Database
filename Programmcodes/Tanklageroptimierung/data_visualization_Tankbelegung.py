@@ -20,8 +20,8 @@ plt.xlim(left = 0)
 ax = plt.gca()
 ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
 ax.set_ylabel('Tank', fontsize=12)
-ax.set_xlabel('Time in 2 hour intervals', fontsize=12)
-plt.title('Occupancy of the tanks', y = 1.05, fontsize=18)
+ax.set_xlabel('Zeit in 2 Stundenintervallen', fontsize=12)
+plt.title('Tankbelegung', y = 1.05, fontsize=18)
 # Set y-axis limits to adjust spacing
 plt.ylim(-0.5, 1.5)
 

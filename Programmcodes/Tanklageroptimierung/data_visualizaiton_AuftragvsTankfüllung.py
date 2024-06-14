@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #Welcher Tank und Rohstoff soll visualisiert werden?
 Tankvisualisierung = 1
-Rohstoffvisualisierung = 4
+Rohstoffvisualisierung = 5
 
 #Laden der Daten und Aufbereitung
 Auswertung_final_f_ztr = pd.read_excel(
